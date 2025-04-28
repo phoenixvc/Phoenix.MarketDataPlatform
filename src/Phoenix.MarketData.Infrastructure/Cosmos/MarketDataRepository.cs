@@ -6,25 +6,45 @@ namespace Phoenix.MarketData.Infrastructure.Cosmos
     public class MarketDataRepository
     {
         private readonly Container _container;
+        private VersionManager _versionManager;
 
         public MarketDataRepository(CosmosClient cosmosClient, string databaseId, string containerId)
         {
             _container = cosmosClient.GetContainer(databaseId, containerId);
+            _versionManager = new VersionManager(this);
         }
 
-        public async Task SaveAsync<T>(T marketData) where T : IMarketDataObject
+        /// <summary>
+        /// Saves a market data object asynchronously to the configured Cosmos DB container.
+        /// </summary>
+        /// <typeparam name="T">The type of the market data object, implementing IMarketDataObject interface.</typeparam>
+        /// <param name="marketData">The market data object to be saved.</param>
+        /// <param name="saveNextVersion">Boolean indicating whether to save to the next version (latest) of the
+        /// market data object</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        public async Task SaveAsync<T>(T marketData, bool saveNextVersion = true) where T : IMarketDataObject
         {
+            // If saving to the next (latest) version then we need to update the version of the object by retrieving it
+            // via the version manager
+            if (saveNextVersion)
+            {
+                marketData.Version = await _versionManager.GetNextVersionAsync<T>(marketData.DataType, marketData.AssetClass,
+                    marketData.AssetId, marketData.AsOfDate, marketData.DocumentType);
+            }
+            
             await _container.CreateItemAsync(marketData, new PartitionKey(marketData.AssetId));
         }
 
-        public async Task<T?> GetLatestAsync<T>(string assetId, string dataType, string documentType, DateTime timestamp) where T : IMarketDataObject
+        public async Task<T?> GetLatestAsync<T>(string dataType, string assetClass, string assetId, DateOnly asOfDate,
+            string documentType) where T : IMarketDataObject
         {
             var query = new QueryDefinition(
-                    "SELECT TOP 1 * FROM c WHERE c.assetId = @assetId AND c.dataType = @dataType AND c.documentType = @documentType AND c.timestamp = @timestamp ORDER BY c.version DESC")
+                    "SELECT TOP 1 * FROM c WHERE c.assetId = @assetId AND c.assetClass = @assetClass AND c.dataType = @dataType AND c.documentType = @documentType AND c.asOfDate = @asOfDate ORDER BY c.version DESC")
                 .WithParameter("@assetId", assetId)
+                .WithParameter("@assetClass", assetClass)
                 .WithParameter("@dataType", dataType)
                 .WithParameter("@documentType", documentType)
-                .WithParameter("@timestamp", timestamp);
+                .WithParameter("@asOfDate", asOfDate);
 
             using var feedIterator = _container.GetItemQueryIterator<T>(query, requestOptions: new QueryRequestOptions
             {

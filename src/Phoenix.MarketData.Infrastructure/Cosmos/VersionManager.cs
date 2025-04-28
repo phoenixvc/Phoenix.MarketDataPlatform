@@ -11,9 +11,10 @@ namespace Phoenix.MarketData.Infrastructure.Cosmos
             _repository = repository;
         }
 
-        public async Task<string> GetNextVersionAsync(string assetId, string dataType, string documentType, DateTime timestamp)
+        public async Task<string> GetNextVersionAsync<T>(string dataType, string assetClass, string assetId,
+            DateOnly asOfDate, string documentType) where T : IMarketDataObject
         {
-            var latest = await _repository.GetLatestAsync<IMarketDataObject>(assetId, dataType, documentType, timestamp);
+            var latest = await _repository.GetLatestAsync<T>(dataType, assetClass, assetId, asOfDate, documentType);
             if (latest == null || string.IsNullOrWhiteSpace(latest.Version))
                 return "1";
 

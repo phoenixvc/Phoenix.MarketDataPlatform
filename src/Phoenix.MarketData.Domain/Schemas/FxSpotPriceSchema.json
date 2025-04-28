@@ -1,19 +1,60 @@
 ﻿{
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "SpotPrice - FX",
-  "description": "Schema for spot prices for FX",
+  "description": "Schema for spot prices for FX instruments (e.g., currency pairs).",
   "type": "object",
-  "required": ["assetId", "type", "assetClass", "timestamp", "price"],
+  "required": ["assetId", "dataType", "assetClass", "timestamp", "price"],
   "properties": {
-    "id": { "type": "string" },
-    "schemaVersion": { "type": "string" },
-    "version": { "type": "string" },
-    "assetId": { "type": "string" },
-    "assetClass": { "type": "string", "enum": ["fx"] },
-    "dataType": { "type": "string", "enum": ["price"] },
-    "tags": { "type": "array", "items": { "type": "string" } },
-    "documentType": { "type": "string", "enum": ["official", "intraday", "live"] },
-    "timestamp": { "type": "string", "format": "date-time" },
-    "price": { "type": "number" }
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the document, typically composed of dataType, assetClass, assetId, date, documentType, and version."
+    },
+    "schemaVersion": {
+      "type": "string",
+      "description": "Version of the schema this document complies with (e.g., '0.0')."
+    },
+    "version": {
+      "type": "string",
+      "description": "Version number of this specific market data record (used to track multiple saves or corrections)."
+    },
+    "assetId": {
+      "type": "string",
+      "description": "Identifier for the underlying asset or currency pair (e.g., 'EURUSD')."
+    },
+    "assetClass": {
+      "type": "string",
+      "enum": ["fx"],
+      "description": "Specifies the asset class; fixed as 'fx' for foreign exchange instruments."
+    },
+    "dataType": {
+      "type": "string",
+      "enum": ["price"],
+      "description": "Type of market data contained in the document, fixed as 'price' for spot prices."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Array of tags for additional metadata classification or filtering (e.g., ['spot', 'eod'])."
+    },
+    "documentType": {
+      "type": "string",
+      "enum": ["official", "intraday", "live"],
+      "description": "Classification of the data based on timing or source: 'official' (end-of-day), 'intraday' (midday), or 'live' (streaming quote)."
+    },
+    "createTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp representing when the market data was generated or updated, in ISO 8601 format (e.g., '2025-04-27T15:30:00Z')."
+    },
+    "asOfDate": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+      "description": "The market date the price is valid for, in ISO 8601 format ('yyyy-MM-dd')."
+    },
+    "price": {
+      "type": "number",
+      "description": "The spot price of the FX instrument (e.g., 1.0985 for EUR/USD)."
+    }
   }
 }

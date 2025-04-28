@@ -28,25 +28,31 @@ MarketDataPlatform/
 │   │   │   ├── Interfaces/
 │   │   │   │   └── IMarketDataObject.cs
 │   │   │   ├── FxSpotPriceObject.cs
-│   │   │   ├── 
+│   │   │   ├── ...
 │   │   └── Schemas/
 │   │       ├── FxSpotPriceObject.json
-│   │       ├── 
-│   │       ├── 
-│   │       └── 
+│   │       ├── ...
 │   ├── MarketData.Infrastructure/  # CosmosDB / Data Lake clients
+        ├── Cosmos/
+        │   ├── CosmosClientFactory.cs     # Create and manage Cosmos DB client connections cleanly
+        │   ├── MarketDataRepository.cs    # Saving and querying market data objects
+        │   ├── VersionManager.cs          # Managing document versions (initial simple version, later extendable)
+        └── Common/
+            ├── Configuration.cs (later for config handling)
+            └── RetryPolicy.cs (optional retries, etc.)
+│   ├── MarketData.Functions/       # Azure Function Apps for background processing
 │   ├── MarketData.Application/     # Ingestion, Query Handlers
-│   ├── MarketData.Api/              # (Optional) ASP.NET Web API
-│   └── MarketData.Scripts/          # CLI tools: backfill, monitor, archive
+│   ├── MarketData.Functions/       # Azure Function Apps for background processing│   ├── MarketData.Api/              # (Optional) ASP.NET Web API
+│   └── MarketData.Scripts/         # CLI tools: backfill, monitor, archive
 │
-├── tests/                           # Unit and Integration Tests
-├── docs/                            # Documentation
+├── tests/                          # Unit and Integration Tests
+├── docs/                           # Documentation
 │   ├── Architecture.md
 │   ├── UsageFromPython.md
 │   ├── APIContracts.md
 │   └── DeveloperGuide.md
-├── MarketDataPlatform.sln            # Solution File
-└── README.md                         # This file
+├── MarketDataPlatform.sln          # Solution File
+└── README.md                       # This file
 ```
 
 ---

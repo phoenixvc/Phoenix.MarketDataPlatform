@@ -10,14 +10,32 @@ namespace Phoenix.MarketData.Domain.Models
     /// </summary>
     public class FxSpotPriceObject : IMarketDataObject
     {
-        [JsonProperty("id")]
-        public required string Id { get; set; }
-
+        private string? _id; // Backing field for Id
+        private DateTimeOffset? _createTimeStamp; // Backing field for Id
+        private string? _version;
+        
+        [JsonProperty("id")] // Ensures this property is deserialized from JSON
+        public string Id
+        {
+            get => _id ??= CalculateId(); // If not set, calculate it
+            private set => _id = value;  // Can only be set during deserialization
+        }
+        
         [JsonProperty("schemaVersion")]
         public required string SchemaVersion { get; set; }
-
+        
         [JsonProperty("version")]
-        public required string Version { get; set; }
+        public string? Version
+        {
+            get => _version;
+            set
+            {
+                _version = value;
+                
+                // Invalidate the ID if the Version changes
+                _id = CalculateId();
+            }
+        }
 
         [JsonProperty("assetId")]
         public required string AssetId { get; set; }
@@ -34,9 +52,26 @@ namespace Phoenix.MarketData.Domain.Models
         [JsonProperty("documentType")]
         public required string DocumentType { get; set; }
 
-        [JsonProperty("timestamp")]
-        public required DateTime Timestamp { get; set; }
+        [JsonProperty("createTimestamp")]
+        public DateTimeOffset CreatedTimestamp
+        {
+            get => _createTimeStamp ??= DateTimeOffset.UtcNow;
+            private set => _createTimeStamp = value;
+        }
 
+        [JsonProperty("asOfDate")]
+        public required DateOnly AsOfDate { get; set; }
+
+        private string CalculateId()
+        {
+            var id = string.Join("__", new [] {
+                DataType, AssetClass, AssetId, AsOfDate.ToString("yyyyMMdd"), DocumentType});
+            if (Version != null)
+                id += $"__{Version}";
+            
+            return id;
+        }
+        
         // --- Spot-specific Payload ---
         [JsonProperty("price")]
         public required double Price { get; set; }

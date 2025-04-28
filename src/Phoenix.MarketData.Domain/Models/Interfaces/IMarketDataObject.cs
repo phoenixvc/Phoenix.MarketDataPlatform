@@ -6,10 +6,10 @@
     public interface IMarketDataObject
     {
         /// <summary>
-        /// The Id of the data in the format, [dataType].[assetclass]/[asset]/[date]/[documentType]/[version], e.g.,
-        /// price.fx/BTCUSD/20250427/official/1
+        /// The Id of the data in the format, [dataType].[assetclass]__[asset]__[date]__[documentType]__[version], e.g.,
+        /// price.fx__BTCUSD__20250427__official__1. This Id is determined by the method and is not to be set.
         /// </summary>
-        string Id { get; set; }
+        string Id { get; }
 
         /// <summary>
         /// The Schema Version indicates the version of the schema used to describe the structure
@@ -18,7 +18,7 @@
         /// </summary>
         string SchemaVersion { get; set; }
 
-        string Version { get; set; }
+        string? Version { get; set; }
         
         /// <summary>
         /// The unique identifier of the asset, used as the partition key. For example, USDZAR, TSLA (NASDAQ), etc.
@@ -50,9 +50,16 @@
         string DocumentType { get; set; }
 
         /// <summary>
-        /// The timestamp indicating the date and time when the data was generated or last updated,
+        /// The timestamp indicating the date, time and timezone when the data was generated or last updated,
         /// in ISO 8601 format, e.g., "2023-10-19T15:23:00Z".
         /// </summary>
-        DateTime Timestamp { get; set; }
+        DateTimeOffset CreatedTimestamp { get; }
+
+        /// <summary>
+        /// Represents the date to which the market data applies. Typically used to indicate
+        /// the effective date of the data, ensuring it corresponds to the appropriate time
+        /// frame for analysis or usage.
+        /// </summary>
+        DateOnly AsOfDate { get; set; }
     }
 }

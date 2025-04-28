@@ -6,7 +6,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.MarketData.Domain",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.MarketData.Infrastructure", "src\Phoenix.MarketData.Infrastructure\Phoenix.MarketData.Infrastructure.csproj", "{8EBB4567-6F96-45D1-AC9F-F8746C507CA8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.MarketData.Functions", "src\Phoenix.MarketData.Functions\Phoenix.MarketData.Functions.csproj", "{CCCDFECC-9C55-4A2D-8F47-88BFCA73E34F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.MarketData.Functions", "Phoenix.MarketData.Functions\Phoenix.MarketData.Functions.csproj", "{F7BBBD70-BDF3-4ECA-9CA3-E50D43E1431C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -16,7 +16,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{EFA6CAAD-0FC3-4E6E-8FC5-657F965B117C} = {17244A6B-3950-46B7-B204-FAE878E7167C}
 		{8EBB4567-6F96-45D1-AC9F-F8746C507CA8} = {17244A6B-3950-46B7-B204-FAE878E7167C}
-		{CCCDFECC-9C55-4A2D-8F47-88BFCA73E34F} = {17244A6B-3950-46B7-B204-FAE878E7167C}
+		{F7BBBD70-BDF3-4ECA-9CA3-E50D43E1431C} = {17244A6B-3950-46B7-B204-FAE878E7167C}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{EFA6CAAD-0FC3-4E6E-8FC5-657F965B117C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -27,9 +27,9 @@ Global
 		{8EBB4567-6F96-45D1-AC9F-F8746C507CA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8EBB4567-6F96-45D1-AC9F-F8746C507CA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8EBB4567-6F96-45D1-AC9F-F8746C507CA8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CCCDFECC-9C55-4A2D-8F47-88BFCA73E34F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CCCDFECC-9C55-4A2D-8F47-88BFCA73E34F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CCCDFECC-9C55-4A2D-8F47-88BFCA73E34F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CCCDFECC-9C55-4A2D-8F47-88BFCA73E34F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7BBBD70-BDF3-4ECA-9CA3-E50D43E1431C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7BBBD70-BDF3-4ECA-9CA3-E50D43E1431C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7BBBD70-BDF3-4ECA-9CA3-E50D43E1431C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7BBBD70-BDF3-4ECA-9CA3-E50D43E1431C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
