@@ -7,7 +7,7 @@
     {
         /// <summary>
         /// The Id of the data in the format, [dataType].[assetclass]__[asset]__[region]__[date]__[documentType]__[version], e.g.,
-        /// price.spot.fx__BTCUSD__global__20250427__official__1.
+        /// price.spot__fx__BTCUSD__global__20250427__official__1.
         /// </summary>
         string Id { get; }
 
@@ -60,7 +60,7 @@
         /// The timestamp indicating the date, time and timezone when the data was generated or last updated,
         /// in ISO 8601 format, e.g., "2023-10-19T15:23:00Z".
         /// </summary>
-        DateTimeOffset CreatedTimestamp { get; }
+        DateTimeOffset CreateTimestamp { get; }
 
         /// <summary>
         /// Represents the date to which the market data applies. Typically used to indicate

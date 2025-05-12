@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Phoenix.MarketData.Domain;
 using Phoenix.MarketData.Domain.Models;
 using Phoenix.MarketData.Domain.Schemas;
 using Phoenix.MarketData.Infrastructure.Cosmos;
@@ -24,18 +25,18 @@ public class SaveDocumentToDb
     {
         _logger.LogInformation("C# HTTP trigger function processed a request.");
 
-        var doc = new FxSpotPriceObject
+        var doc = new FxSpotPriceData
         {
             SchemaVersion = SchemaVersions.V0,
             AssetId = "BTCUSD",
             AssetClass = "fx",
             DataType = "price.spot",
-            Region = "NY",
+            Region = Regions.NewYork,
             Tags = ["spot"],
             DocumentType = "official",
             AsOfDate = new DateOnly(2025, 4, 20),
-            AsOfTime = new TimeOnly(15, 30, 05),
-            Price = 95710.96
+            AsOfTime = new TimeOnly(15, 30, 5),
+            Price = 95710.96m
         };
         await _repository.SaveAsync(doc);
 

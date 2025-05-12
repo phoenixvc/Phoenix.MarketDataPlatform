@@ -59,7 +59,7 @@
     "asOfTime": {
       "type": "string",
       "pattern": "^[0-9]{2}:[0-9]{2}(:[0-9]{2})?$",
-      "description": "The specific time (HH:mm or HH:mm:ss) associated with the asOfDate, representing the moment the data was recorded. Example: '15:30' or '15:30:45'."
+      "description": "The specific time (HH:mm or HH:mm:ss) associated with the asOfDate, representing the moment the data was recorded. Example: '15:30' or '15:30:45'. This should be interpreted as UTC time."
     },
     "price": {
       "type": "number",
