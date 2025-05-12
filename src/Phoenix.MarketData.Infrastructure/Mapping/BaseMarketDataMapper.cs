@@ -7,6 +7,8 @@ namespace Phoenix.MarketData.Infrastructure.Mapping
     {
         public static BaseMarketDataDto ToDto(BaseMarketData domain)
         {
+            ArgumentNullException.ThrowIfNull(domain);
+            
             return new BaseMarketDataDto
             {
                 Id = domain.Id,
@@ -26,6 +28,9 @@ namespace Phoenix.MarketData.Infrastructure.Mapping
 
         public static void ApplyToDomain(BaseMarketDataDto dto, BaseMarketData domain)
         {
+            ArgumentNullException.ThrowIfNull(dto);
+            ArgumentNullException.ThrowIfNull(domain);
+
             domain.SchemaVersion = dto.SchemaVersion;
             domain.Version = dto.Version;
             domain.AssetId = dto.AssetId;
@@ -35,7 +40,7 @@ namespace Phoenix.MarketData.Infrastructure.Mapping
             domain.DocumentType = dto.DocumentType;
             domain.AsOfDate = dto.AsOfDate;
             domain.AsOfTime = dto.AsOfTime;
-            domain.Tags = dto.Tags;
+            domain.Tags = dto.Tags?.ToList() ?? new List<string>();
             domain.CreateTimestamp = dto.CreateTimestamp;
         }
     }

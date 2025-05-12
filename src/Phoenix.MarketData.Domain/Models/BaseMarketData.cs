@@ -43,7 +43,12 @@ public abstract class BaseMarketData : IMarketDataObject
 
     public required string Region { get; set; }
 
-    public List<string> Tags { get; set; } = new();
+    private List<string> _tags = new();
+    public List<string> Tags 
+    { 
+        get => _tags;
+        set => _tags = value?.ToList() ?? new List<string>();
+    }
 
     public required string DocumentType { get; set; }
 

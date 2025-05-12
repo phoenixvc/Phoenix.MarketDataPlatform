@@ -14,6 +14,11 @@ namespace Phoenix.MarketData.Infrastructure.Cosmos
         public async Task<string> GetNextVersionAsync<T>(string dataType, string assetClass, string assetId,
             string region, DateOnly asOfDate, string documentType) where T : IMarketDataObject
         {
+            if (string.IsNullOrWhiteSpace(region)) 
+            {
+                throw new ArgumentException("Region cannot be null or empty", nameof(region));
+            }
+            
             var latest = await _repository.GetLatestAsync<T>(dataType, assetClass, assetId, region, asOfDate, documentType);
             if (latest == null || string.IsNullOrWhiteSpace(latest.Version))
                 return "1";

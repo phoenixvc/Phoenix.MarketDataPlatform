@@ -27,7 +27,12 @@ public static class SchemaVersions
     /// </summary>
     public static bool IsNewerThan(string version1, string version2)
     {
-        // Implementation for semantic version comparison
-        return false; // Placeholder
+        if (string.IsNullOrEmpty(version1) || string.IsNullOrEmpty(version2))
+            return false;
+        
+        var v1 = Version.Parse(version1);
+        var v2 = Version.Parse(version2);
+        
+        return v1 > v2;
     }
 }

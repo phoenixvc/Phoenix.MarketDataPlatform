@@ -49,6 +49,7 @@ public class BaseMarketDataDto
     
     public void CopyBasePropertiesFrom(BaseMarketDataDto from)
     {
+        ArgumentNullException.ThrowIfNull(from);
         Id = from.Id;
         SchemaVersion = from.SchemaVersion;
         Version = from.Version;
@@ -60,6 +61,6 @@ public class BaseMarketDataDto
         CreateTimestamp = from.CreateTimestamp;
         AsOfDate = from.AsOfDate;
         AsOfTime = from.AsOfTime;
-        Tags = from.Tags;
+        Tags = from.Tags?.ToList() ?? [];
     }
 }
