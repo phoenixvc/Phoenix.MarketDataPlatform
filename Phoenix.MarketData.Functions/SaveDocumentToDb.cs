@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Phoenix.MarketData.Domain.Models;
+using Phoenix.MarketData.Domain.Schemas;
 using Phoenix.MarketData.Infrastructure.Cosmos;
 
 namespace Phoenix.MarketData.Functions;
@@ -25,13 +26,15 @@ public class SaveDocumentToDb
 
         var doc = new FxSpotPriceObject
         {
-            SchemaVersion = "0.0",
+            SchemaVersion = SchemaVersions.V0,
             AssetId = "BTCUSD",
             AssetClass = "fx",
             DataType = "price.spot",
+            Region = "NY",
             Tags = ["spot"],
             DocumentType = "official",
             AsOfDate = new DateOnly(2025, 4, 20),
+            AsOfTime = new TimeOnly(15, 30, 05),
             Price = 95710.96
         };
         await _repository.SaveAsync(doc);

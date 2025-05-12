@@ -29,19 +29,20 @@ namespace Phoenix.MarketData.Infrastructure.Cosmos
             if (saveNextVersion)
             {
                 marketData.Version = await _versionManager.GetNextVersionAsync<T>(marketData.DataType, marketData.AssetClass,
-                    marketData.AssetId, marketData.AsOfDate, marketData.DocumentType);
+                    marketData.AssetId, marketData.Region, marketData.AsOfDate, marketData.DocumentType);
             }
             
             await _container.CreateItemAsync(marketData, new PartitionKey(marketData.AssetId));
         }
 
-        public async Task<T?> GetLatestAsync<T>(string dataType, string assetClass, string assetId, DateOnly asOfDate,
-            string documentType) where T : IMarketDataObject
+        public async Task<T?> GetLatestAsync<T>(string dataType, string assetClass, string assetId, string region,
+            DateOnly asOfDate, string documentType) where T : IMarketDataObject
         {
             var query = new QueryDefinition(
-                    "SELECT TOP 1 * FROM c WHERE c.assetId = @assetId AND c.assetClass = @assetClass AND c.dataType = @dataType AND c.documentType = @documentType AND c.asOfDate = @asOfDate ORDER BY c.version DESC")
+                    "SELECT TOP 1 * FROM c WHERE c.assetId = @assetId AND c.assetClass = @assetClass AND c.region = @region AND c.dataType = @dataType AND c.documentType = @documentType AND c.asOfDate = @asOfDate ORDER BY c.version DESC")
                 .WithParameter("@assetId", assetId)
                 .WithParameter("@assetClass", assetClass)
+                .WithParameter("@region", region)
                 .WithParameter("@dataType", dataType)
                 .WithParameter("@documentType", documentType)
                 .WithParameter("@asOfDate", asOfDate);

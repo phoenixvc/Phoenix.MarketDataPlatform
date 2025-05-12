@@ -6,8 +6,8 @@
     public interface IMarketDataObject
     {
         /// <summary>
-        /// The Id of the data in the format, [dataType].[assetclass]__[asset]__[date]__[documentType]__[version], e.g.,
-        /// price.fx__BTCUSD__20250427__official__1. This Id is determined by the method and is not to be set.
+        /// The Id of the data in the format, [dataType].[assetclass]__[asset]__[region]__[date]__[documentType]__[version], e.g.,
+        /// price.spot.fx__BTCUSD__global__20250427__official__1.
         /// </summary>
         string Id { get; }
 
@@ -38,6 +38,13 @@
         string DataType { get; set; }
 
         /// <summary>
+        /// Specifies the region applicable for the market data. This property identifies the geographical or
+        /// jurisdictional location relevant to the asset or dataset. The value is expected to be set based on the
+        /// context of the market data being represented.
+        /// </summary>
+        string Region { get; set; }
+
+        /// <summary>
         /// A collection of tags associated with the data object, used to provide additional
         /// metadata or categorization for filtering, searching, or context purposes.
         /// </summary>
@@ -61,5 +68,12 @@
         /// frame for analysis or usage.
         /// </summary>
         DateOnly AsOfDate { get; set; }
+
+        /// <summary>
+        /// The specific time of day corresponding to when the market data is relevant.
+        /// This property allows for a more granular representation of data applicability
+        /// in conjunction with the associated AsOfDate.
+        /// </summary>
+        TimeOnly? AsOfTime { get; set; }
     }
 }
