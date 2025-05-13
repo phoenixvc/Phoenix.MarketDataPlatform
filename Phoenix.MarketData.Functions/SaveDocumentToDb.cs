@@ -29,7 +29,7 @@ public class SaveDocumentToDb
         {
             SchemaVersion = SchemaVersions.V0,
             AssetId = "BTCUSD",
-            AssetClass = "fx",
+            AssetClass = AssetClass.Fx,
             DataType = "price.spot",
             Region = Regions.NewYork,
             Tags = ["spot"],
