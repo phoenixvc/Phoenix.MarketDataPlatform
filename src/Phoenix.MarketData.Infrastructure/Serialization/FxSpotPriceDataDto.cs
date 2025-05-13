@@ -2,8 +2,8 @@
 
 namespace Phoenix.MarketData.Infrastructure.Serialization;
 
-public class FxSpotPriceObjectDto : BaseMarketDataDto
+public class FxSpotPriceDataDto : BaseMarketDataDto
 {
     [JsonProperty("price")]
-    public decimal Price { get; set; }
+    public required decimal Price { get; set; }
 }

@@ -67,7 +67,7 @@ namespace Phoenix.MarketData.Infrastructure.Cosmos
             DateOnly asOfDate, string documentType) where T : IMarketDataObject
         {
             var query = new QueryDefinition(
-                    "SELECT TOP 1 * FROM c WHERE c.assetId = @assetId AND c.assetClass = @assetClass AND c.region = @region AND c.dataType = @dataType AND c.documentType = @documentType AND c.asOfDate = @asOfDate ORDER BY CAST(c.version AS int) DESC")
+                    "SELECT TOP 1 * FROM c WHERE c.assetId = @assetId AND c.assetClass = @assetClass AND c.region = @region AND c.dataType = @dataType AND c.documentType = @documentType AND c.asOfDate = @asOfDate ORDER BY c.version DESC")
                 .WithParameter("@assetId", assetId)
                 .WithParameter("@assetClass", assetClass)
                 .WithParameter("@region", region)
@@ -91,7 +91,7 @@ namespace Phoenix.MarketData.Infrastructure.Cosmos
         {
             return domain switch
             {
-                FxSpotPriceData fxSpotData => FxSpotPriceMapper.ToDto(fxSpotData),
+                FxSpotPriceData fxSpotData => FxSpotPriceDataMapper.ToDto(fxSpotData),
                 //Add other mappers...
                 //ForwardPriceData f => ForwardPriceMapper.ToDto(f),
                 //YieldCurveData y => YieldCurveMapper.ToDto(y),

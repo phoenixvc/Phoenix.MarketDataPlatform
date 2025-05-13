@@ -1,5 +1,5 @@
-﻿using System.ComponentModel;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using Phoenix.MarketData.Infrastructure.Serialization.JsonConverters;
 
 namespace Phoenix.MarketData.Infrastructure.Serialization;
 
@@ -16,7 +16,7 @@ public class BaseMarketDataDto
     public string SchemaVersion { get; set; }
 
     [JsonProperty("version")]
-    public string? Version { get; set; }
+    public int? Version { get; set; }
 
     [JsonProperty("assetId")]
     public string AssetId { get; set; }
@@ -40,11 +40,11 @@ public class BaseMarketDataDto
     public DateTimeOffset CreateTimestamp { get; set; }
 
     [JsonProperty("asOfDate")]
-    [JsonConverter(typeof(DateOnlyConverter))]
+    [JsonConverter(typeof(DateOnlyJsonConverter))]
     public DateOnly AsOfDate { get; set; }
     
     [JsonProperty("asOfTime")]
-    [JsonConverter(typeof(TimeOnlyConverter))]
+    [JsonConverter(typeof(TimeOnlyJsonConverter))]
     public TimeOnly? AsOfTime { get; set; }
     
     public void CopyBasePropertiesFrom(BaseMarketDataDto from)

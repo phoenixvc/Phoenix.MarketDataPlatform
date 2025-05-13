@@ -1,14 +1,15 @@
 ﻿using Phoenix.MarketData.Domain.Models;
+using Phoenix.MarketData.Infrastructure.Serialization;
 
 namespace Phoenix.MarketData.Infrastructure.Mapping;
 
-public static class FxSpotPriceMapper
+public static class FxSpotPriceDataMapper
 {
-    public static FxSpotPriceDto ToDto(FxSpotPriceData domain)
+    public static FxSpotPriceDataDto ToDto(FxSpotPriceData domain)
     {
         ArgumentNullException.ThrowIfNull(domain);
         
-        var dto = new FxSpotPriceDto
+        var dto = new FxSpotPriceDataDto
         {
             Price = domain.Price,
         };
@@ -20,13 +21,13 @@ public static class FxSpotPriceMapper
         return dto;
     }
     
-    public static void ApplyToDomain(FxSpotPriceDto dto, FxSpotPriceData domain) 
+    public static void ApplyToDomain(FxSpotPriceDataDto dataDto, FxSpotPriceData domain) 
     {
-        ArgumentNullException.ThrowIfNull(dto);
+        ArgumentNullException.ThrowIfNull(dataDto);
         ArgumentNullException.ThrowIfNull(domain);
 
-        domain.Price = dto.Price;
+        domain.Price = dataDto.Price;
 
-        BaseMarketDataMapper.ApplyToDomain(dto, domain);
+        BaseMarketDataMapper.ApplyToDomain(dataDto, domain);
     }
 }

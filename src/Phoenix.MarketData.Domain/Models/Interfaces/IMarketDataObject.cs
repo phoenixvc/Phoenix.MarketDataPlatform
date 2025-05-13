@@ -18,8 +18,12 @@
         /// </summary>
         string SchemaVersion { get; set; }
 
-        string? Version { get; set; }
-        
+        /// <summary>
+        /// Represents the version of a market data object. This property is used to track
+        /// incremental updates or changes to the data over time.
+        /// </summary>
+        int? Version { get; set; }
+
         /// <summary>
         /// The unique identifier of the asset, used as the partition key. For example, USDZAR, TSLA (NASDAQ), etc.
         /// </summary>

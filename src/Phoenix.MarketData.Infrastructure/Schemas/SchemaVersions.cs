@@ -1,4 +1,4 @@
-﻿namespace Phoenix.MarketData.Domain.Schemas;
+﻿namespace Phoenix.MarketData.Infrastructure.Schemas;
 
 /// <summary>
 /// Provides schema versioning information and supported schema versions
@@ -6,7 +6,11 @@
 /// </summary>
 public static class SchemaVersions
 {
+    /// <summary>
+    /// Initial schema version (SemVer: Major.Minor.Patch)
+    /// </summary>
     public const string V0 = "0.0.0";
+
     // Ready for future versions
     // public const string V1 = "1.0.0";
 
@@ -29,10 +33,28 @@ public static class SchemaVersions
     {
         if (string.IsNullOrEmpty(version1) || string.IsNullOrEmpty(version2))
             return false;
+
+        try
+        {
+            var v1 = Version.Parse(version1);
+            var v2 = Version.Parse(version2);
         
-        var v1 = Version.Parse(version1);
-        var v2 = Version.Parse(version2);
-        
-        return v1 > v2;
+            return v1 > v2;
+        }
+        catch (FormatException)
+        {
+            throw new FormatException("Could not parse version string when trying to compare versions.");
+        }
+    }
+
+    /// <summary>
+    /// Returns the latest supported schema version.
+    /// </summary>
+    /// <returns>The latest supported schema version.</returns>
+    public static string GetLatestVersion()
+    {
+        return Supported.Count > 0 
+            ? Supported.OrderBy(Version.Parse).Last() 
+            : string.Empty;
     }
 }

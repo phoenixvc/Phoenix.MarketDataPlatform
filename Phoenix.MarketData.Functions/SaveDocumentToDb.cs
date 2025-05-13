@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Phoenix.MarketData.Domain;
 using Phoenix.MarketData.Domain.Models;
-using Phoenix.MarketData.Domain.Schemas;
 using Phoenix.MarketData.Infrastructure.Cosmos;
+using Phoenix.MarketData.Infrastructure.Schemas;
 
 namespace Phoenix.MarketData.Functions;
 

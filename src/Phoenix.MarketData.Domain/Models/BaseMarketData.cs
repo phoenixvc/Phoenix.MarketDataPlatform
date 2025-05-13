@@ -10,7 +10,7 @@ public abstract class BaseMarketData : IMarketDataObject
 {
     private string? _id; // Backing field for Id
     private DateTimeOffset? _createTimeStamp; // Backing field for CreatedTimestamp
-    private string? _version;
+    private int? _version;
 
     public string Id
     {
@@ -20,7 +20,7 @@ public abstract class BaseMarketData : IMarketDataObject
 
     public required string SchemaVersion { get; set; }
 
-    public string? Version
+    public int? Version
     {
         get => _version;
         set
