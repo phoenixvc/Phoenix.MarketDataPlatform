@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace Phoenix.MarketData.Infrastructure.Serialization.JsonConverters;
 
@@ -30,6 +29,19 @@ public class TimeOnlyJsonConverter : JsonConverter<TimeOnly>
     {
         // Deserialize the string back to TimeOnly
         var str = reader.Value?.ToString();
-        return TimeOnly.ParseExact(str!, Format, CultureInfo.InvariantCulture);
+        
+        // Handle null or empty strings
+        if (string.IsNullOrEmpty(str))
+        {
+            throw new JsonSerializationException("Cannot convert null or empty string to TimeOnly.");
+        }
+        
+        // Use TryParse to handle invalid formats
+        if (TimeOnly.TryParse(str, System.Globalization.CultureInfo.InvariantCulture, out var result))
+        {
+            return result;
+        }
+        
+        throw new JsonSerializationException($"Cannot convert '{str}' to TimeOnly.");
     }
 }
