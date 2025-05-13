@@ -4,24 +4,25 @@ using Phoenix.MarketData.Infrastructure.Serialization;
 
 namespace Phoenix.MarketData.Infrastructure.Mapping;
 
-public static class FxSpotPriceDataMapper
+public static class CryptoOrdinalSpotPriceDataMapper
 {
-    public static FxSpotPriceDataDto ToDto(FxSpotPriceData domain)
+    public static CryptoOrdinalSpotPriceDataDto ToDto(CryptoOrdinalSpotPriceData domain)
     {
         ArgumentNullException.ThrowIfNull(domain);
         
-        var dto = new FxSpotPriceDataDto(domain.Id, domain.SchemaVersion, domain.Version,
+        var dto = new CryptoOrdinalSpotPriceDataDto(domain.Id, domain.SchemaVersion, domain.Version,
             domain.AssetId, domain.AssetClass, domain.DataType, domain.Region, domain.DocumentType,
-            domain.CreateTimestamp, domain.AsOfDate, domain.AsOfTime, domain.Tags, domain.Price, domain.Side);
+            domain.CreateTimestamp, domain.AsOfDate, domain.AsOfTime, domain.Tags, domain.Price, domain.Side,
+            domain.CollectionName, domain.ParentInscriptionId, domain.InscriptionId, domain.InscriptionNumber);
 
         return dto;
     }
     
-    public static FxSpotPriceData ToDomain(FxSpotPriceDataDto dto) 
+    public static CryptoOrdinalSpotPriceData ToDomain(CryptoOrdinalSpotPriceDataDto dto) 
     {
         ArgumentNullException.ThrowIfNull(dto);
 
-        var domain = new FxSpotPriceData
+        var domain = new CryptoOrdinalSpotPriceData
         {
             SchemaVersion = dto.SchemaVersion,
             Version = dto.Version,
@@ -41,7 +42,11 @@ public static class FxSpotPriceDataMapper
                 PriceSideDto.Bid => PriceSide.Bid,
                 PriceSideDto.Ask => PriceSide.Ask,
                 _ => PriceSide.Mid,
-            }
+            },
+            CollectionName = dto.CollectionName,
+            ParentInscriptionId = dto.ParentInscriptionId,
+            InscriptionId = dto.InscriptionId,
+            InscriptionNumber = dto.InscriptionNumber,
         };
 
         return domain;

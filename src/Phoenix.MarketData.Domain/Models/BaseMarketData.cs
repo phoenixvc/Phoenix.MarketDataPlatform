@@ -6,7 +6,7 @@ namespace Phoenix.MarketData.Domain.Models;
 /// Represents the base implementation of a market data object, providing core properties
 /// and functionality for identifying and managing market data records.
 /// </summary>
-public abstract class BaseMarketData : IMarketDataObject
+public abstract class BaseMarketData : IMarketData
 {
     private string? _id; // Backing field for Id
     private DateTimeOffset? _createTimeStamp; // Backing field for CreateTimestamp

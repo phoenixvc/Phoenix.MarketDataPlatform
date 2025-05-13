@@ -6,7 +6,18 @@
     /// </summary>
     public class FxSpotPriceData : BaseMarketData
     {
-        // --- Spot-specific Payload ---
+        /// <summary>
+        /// Gets or sets the price value for the foreign exchange (FX) spot data.
+        /// The property represents the numerical value of the FX spot price, which is
+        /// crucial for determining trading rates and market conditions.
+        /// </summary>
         public required decimal Price { get; set; }
+
+        /// <summary>
+        /// Gets or sets the price side for the foreign exchange (FX) spot data.
+        /// The property represents whether the price corresponds to the "Mid", "Bid", or "Ask" value,
+        /// which defines the specific market context of the FX spot price.
+        /// </summary>
+        public PriceSide Side { get; set; } = PriceSide.Mid;
     }
 }
