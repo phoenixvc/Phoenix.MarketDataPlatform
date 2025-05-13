@@ -12,7 +12,7 @@ namespace Phoenix.MarketData.Functions;
 public class SaveDocumentToDb
 {
     private readonly ILogger<SaveDocumentToDb> _logger;
-    private MarketDataRepository _repository;
+    private readonly MarketDataRepository _repository;
 
     public SaveDocumentToDb(ILogger<SaveDocumentToDb> logger, MarketDataRepository repository)
     {

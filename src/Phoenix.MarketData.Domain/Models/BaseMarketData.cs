@@ -68,7 +68,7 @@ public abstract class BaseMarketData : IMarketDataObject
         if (string.IsNullOrEmpty(DataType) || string.IsNullOrEmpty(AssetClass) || string.IsNullOrEmpty(AssetId) || 
             string.IsNullOrEmpty(Region) || string.IsNullOrEmpty(DocumentType))
         {
-            throw new InvalidOperationException("Cannot calculate ID: one or more required properties are null or empty.");
+            return string.Empty;
         }
         
         var id = string.Join("__", new[] {
