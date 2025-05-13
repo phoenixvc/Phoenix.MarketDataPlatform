@@ -8,22 +8,10 @@ namespace Phoenix.MarketData.Infrastructure.Mapping
         public static BaseMarketDataDto ToDto(BaseMarketData domain)
         {
             ArgumentNullException.ThrowIfNull(domain);
-            
-            return new BaseMarketDataDto
-            {
-                Id = domain.Id,
-                SchemaVersion = domain.SchemaVersion,
-                Version = domain.Version,
-                AssetId = domain.AssetId,
-                AssetClass = domain.AssetClass,
-                DataType = domain.DataType,
-                Region = domain.Region,
-                DocumentType = domain.DocumentType,
-                CreateTimestamp = domain.CreateTimestamp,
-                AsOfDate = domain.AsOfDate,
-                AsOfTime = domain.AsOfTime,
-                Tags = domain.Tags
-            };
+
+            return new BaseMarketDataDto(domain.Id, domain.SchemaVersion, domain.Version,
+                domain.AssetId, domain.AssetClass, domain.DataType, domain.Region, domain.DocumentType,
+                domain.CreateTimestamp, domain.AsOfDate, domain.AsOfTime, domain.Tags);
         }
 
         public static void ApplyToDomain(BaseMarketDataDto dto, BaseMarketData domain)

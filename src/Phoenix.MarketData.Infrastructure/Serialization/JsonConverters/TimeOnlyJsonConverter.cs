@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Globalization;
+using Newtonsoft.Json;
 
 namespace Phoenix.MarketData.Infrastructure.Serialization.JsonConverters;
 
@@ -29,6 +30,6 @@ public class TimeOnlyJsonConverter : JsonConverter<TimeOnly>
     {
         // Deserialize the string back to TimeOnly
         var str = reader.Value?.ToString();
-        return TimeOnly.Parse(str!);
+        return TimeOnly.ParseExact(str!, Format, CultureInfo.InvariantCulture);
     }
 }

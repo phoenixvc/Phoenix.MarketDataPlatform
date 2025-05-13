@@ -9,7 +9,7 @@ namespace Phoenix.MarketData.Domain.Models;
 public abstract class BaseMarketData : IMarketDataObject
 {
     private string? _id; // Backing field for Id
-    private DateTimeOffset? _createTimeStamp; // Backing field for CreatedTimestamp
+    private DateTimeOffset? _createTimeStamp; // Backing field for CreateTimestamp
     private int? _version;
 
     public string Id
@@ -64,6 +64,13 @@ public abstract class BaseMarketData : IMarketDataObject
 
     private string CalculateId()
     {
+        // Validate required properties
+        if (string.IsNullOrEmpty(DataType) || string.IsNullOrEmpty(AssetClass) || string.IsNullOrEmpty(AssetId) || 
+            string.IsNullOrEmpty(Region) || string.IsNullOrEmpty(DocumentType))
+        {
+            throw new InvalidOperationException("Cannot calculate ID: one or more required properties are null or empty.");
+        }
+        
         var id = string.Join("__", new[] {
             DataType, AssetClass, AssetId, Region, AsOfDate.ToString("yyyyMMdd"), DocumentType});
         if (Version != null)

@@ -9,14 +9,9 @@ public static class FxSpotPriceDataMapper
     {
         ArgumentNullException.ThrowIfNull(domain);
         
-        var dto = new FxSpotPriceDataDto
-        {
-            Price = domain.Price,
-        };
-
-        // Apply base properties
-        var baseDto = BaseMarketDataMapper.ToDto(domain);
-        dto.CopyBasePropertiesFrom(baseDto);
+        var dto = new FxSpotPriceDataDto(domain.Id, domain.SchemaVersion, domain.Version,
+            domain.AssetId, domain.AssetClass, domain.DataType, domain.Region, domain.DocumentType,
+            domain.CreateTimestamp, domain.AsOfDate, domain.AsOfTime, domain.Tags, domain.Price);
 
         return dto;
     }

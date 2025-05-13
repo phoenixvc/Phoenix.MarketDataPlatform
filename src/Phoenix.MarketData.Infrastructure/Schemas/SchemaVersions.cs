@@ -53,8 +53,16 @@ public static class SchemaVersions
     /// <returns>The latest supported schema version.</returns>
     public static string GetLatestVersion()
     {
-        return Supported.Count > 0 
-            ? Supported.OrderBy(Version.Parse).Last() 
-            : string.Empty;
+        try
+        {
+            return Supported.Count > 0 
+                ? Supported.OrderBy(Version.Parse).Last() 
+                : string.Empty;
+        }
+        catch (FormatException ex)
+        {
+            // Log the error and return a fallback version or rethrow with better context
+            throw new FormatException("Invalid version format found in supported versions.", ex);
+        }
     }
 }

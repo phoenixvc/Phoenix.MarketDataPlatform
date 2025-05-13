@@ -47,20 +47,21 @@ public class BaseMarketDataDto
     [JsonConverter(typeof(TimeOnlyJsonConverter))]
     public TimeOnly? AsOfTime { get; set; }
     
-    public void CopyBasePropertiesFrom(BaseMarketDataDto from)
+    public BaseMarketDataDto(string id, string schemaVersion, int? version, string assetId, string assetClass, 
+        string dataType, string region, string documentType, DateTimeOffset createTimeStamp, DateOnly asOfDate,
+        TimeOnly? asOfTime, List<string> tags)
     {
-        ArgumentNullException.ThrowIfNull(from);
-        Id = from.Id;
-        SchemaVersion = from.SchemaVersion;
-        Version = from.Version;
-        AssetId = from.AssetId;
-        AssetClass = from.AssetClass;
-        DataType = from.DataType;
-        Region = from.Region;
-        DocumentType = from.DocumentType;
-        CreateTimestamp = from.CreateTimestamp;
-        AsOfDate = from.AsOfDate;
-        AsOfTime = from.AsOfTime;
-        Tags = from.Tags?.ToList() ?? [];
+        Id = id;
+        SchemaVersion = schemaVersion;
+        Version = version;
+        AssetId = assetId;
+        AssetClass = assetClass;
+        DataType = dataType;
+        Region = region;
+        DocumentType = documentType;
+        CreateTimestamp = createTimeStamp;
+        AsOfDate = asOfDate;
+        AsOfTime = asOfTime;
+        Tags = tags ?? [];
     }
 }
