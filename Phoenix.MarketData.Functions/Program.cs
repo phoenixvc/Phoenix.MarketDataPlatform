@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Phoenix.MarketData.Infrastructure.Cosmos;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Phoenix.MarketData.Infrastructure.Serialization.JsonConverters;
 
 var builder = FunctionsApplication.CreateBuilder(args);
 
@@ -29,6 +31,14 @@ builder.Services
             }
         });
     });
+
+JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+{
+    Converters =
+    [
+        new TimeOnlyJsonConverter(), new DateOnlyJsonConverter()
+    ]
+};
 
 // Add configuration from appsettings.json and environment variables
 builder.Configuration

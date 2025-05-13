@@ -11,17 +11,19 @@ namespace Phoenix.MarketData.Infrastructure.Cosmos
             _repository = repository;
         }
 
-        public async Task<string> GetNextVersionAsync<T>(string dataType, string assetClass, string assetId,
-            DateOnly asOfDate, string documentType) where T : IMarketDataObject
+        public async Task<int> GetNextVersionAsync<T>(string dataType, string assetClass, string assetId,
+            string region, DateOnly asOfDate, string documentType) where T : IMarketDataObject
         {
-            var latest = await _repository.GetLatestAsync<T>(dataType, assetClass, assetId, asOfDate, documentType);
-            if (latest == null || string.IsNullOrWhiteSpace(latest.Version))
-                return "1";
+            if (string.IsNullOrWhiteSpace(region)) 
+            {
+                throw new ArgumentException("Region cannot be null or empty", nameof(region));
+            }
+            
+            var latest = await _repository.GetLatestAsync<T>(dataType, assetClass, assetId, region, asOfDate, documentType);
+            if (latest == null || latest.Version == null)
+                return 1;
 
-            if (int.TryParse(latest.Version, out var latestVersion))
-                return (latestVersion + 1).ToString();
-
-            throw new Exception($"Invalid version format on existing document for {assetId}.");
+            return latest.Version.Value + 1;
         }
     }
 }

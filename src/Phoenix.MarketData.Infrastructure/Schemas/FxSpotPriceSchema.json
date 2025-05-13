@@ -3,7 +3,7 @@
   "title": "SpotPrice - FX",
   "description": "Schema for spot prices for FX instruments (e.g., currency pairs).",
   "type": "object",
-  "required": ["assetId", "dataType", "assetClass", "timestamp", "price"],
+  "required": ["assetId", "dataType", "assetClass", "asOfDate", "price"],
   "properties": {
     "id": {
       "type": "string",
@@ -41,6 +41,10 @@
       "enum": ["official", "intraday", "live"],
       "description": "Classification of the data based on timing or source: 'official' (end-of-day), 'intraday' (midday), or 'live' (streaming quote)."
     },
+    "region": {
+      "type": "string",
+      "description": "Region or market to which the market data applies (e.g., 'EMEA', 'APAC', 'Americas')."
+    },
     "createTimestamp": {
       "type": "string",
       "format": "date-time",
@@ -51,6 +55,11 @@
       "format": "date",
       "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
       "description": "The market date the price is valid for, in ISO 8601 format ('yyyy-MM-dd')."
+    },
+    "asOfTime": {
+      "type": "string",
+      "pattern": "^[0-9]{2}:[0-9]{2}(:[0-9]{2})?$",
+      "description": "The specific time (HH:mm or HH:mm:ss) associated with the asOfDate, representing the moment the data was recorded. Example: '15:30' or '15:30:45'. This should be interpreted as UTC time."
     },
     "price": {
       "type": "number",
