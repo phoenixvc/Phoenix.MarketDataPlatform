@@ -97,6 +97,10 @@ public class MarketDataRepositoryTests
         var result = await _repository.SaveMarketDataAsync(_marketData);
     
         // Assert
+        Assert.NotNull(result);
+        Assert.True(result.IsSuccess);
+        Assert.Null(result.ErrorMessage);
+
         _mockContainer.Verify(c =>
             c.UpsertItemAsync(
                 It.Is<FxSpotPriceData>(m => m.Id == _marketData.Id),
