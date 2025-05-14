@@ -197,6 +197,9 @@ namespace Phoenix.MarketData.Infrastructure.Cosmos
                 if (feedIterator == null || !feedIterator.HasMoreResults) 
                     return new LoadMarketDataResult<T>{ Success = false, Message = "Market data not found."};
                 var response = await feedIterator.ReadNextAsync();
+                var item = response.FirstOrDefault();
+                if (item == null)
+                    return new LoadMarketDataResult<T>{ Success = false, Message = "Market data query returned null."};
                 return new LoadMarketDataResult<T> { Success = true, Result = response.FirstOrDefault() };
             }
             catch (CosmosException cosmosEx)

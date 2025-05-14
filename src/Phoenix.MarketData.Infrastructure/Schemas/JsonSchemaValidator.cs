@@ -9,8 +9,20 @@ public class JsonSchemaValidator
 
     public JsonSchemaValidator(string schemaFilePath)
     {
-        var schemaJson = File.ReadAllText(schemaFilePath);
-        _schema = JsonSchema.FromText(schemaJson);
+        ArgumentNullException.ThrowIfNull(schemaFilePath);
+        try
+        {
+            var schemaJson = File.ReadAllText(schemaFilePath);
+            _schema = JsonSchema.FromText(schemaJson);
+        }
+        catch (IOException ex)
+        {
+            throw new InvalidOperationException($"Failed to read schema file: {schemaFilePath}", ex);
+        }
+        catch (JsonException ex)
+        {
+            throw new InvalidOperationException($"Failed to parse schema JSON from file: {schemaFilePath}", ex);
+        }
     }
 
     public ValidationResult Validate(string jsonPayload)
