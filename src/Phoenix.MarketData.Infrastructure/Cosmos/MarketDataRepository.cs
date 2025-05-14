@@ -33,7 +33,7 @@ namespace Phoenix.MarketData.Infrastructure.Cosmos
         /// <param name="saveNextVersion">Boolean indicating whether to save to the next version (latest) of the
         /// market data object</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        public async Task<SaveMarketDataResult> SaveAsync<T>(T marketData, bool saveNextVersion = true) where T : IMarketData
+        public async Task<SaveMarketDataResult> SaveMarketDataAsync<T>(T marketData, bool saveNextVersion = true) where T : IMarketData
         {
             const int maxRetries = 3;
 
@@ -190,7 +190,8 @@ namespace Phoenix.MarketData.Infrastructure.Cosmos
                     MaxItemCount = 1
                 });
 
-                if (!feedIterator.HasMoreResults) return new LoadMarketDataResult<T>{ Success = false, Message = "Market data not found."};
+                if (feedIterator == null || !feedIterator.HasMoreResults) 
+                    return new LoadMarketDataResult<T>{ Success = false, Message = "Market data not found."};
                 var response = await feedIterator.ReadNextAsync();
                 return new LoadMarketDataResult<T> { Success = true, Result = response.FirstOrDefault() };
             }

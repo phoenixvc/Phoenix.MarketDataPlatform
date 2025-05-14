@@ -3,10 +3,9 @@ POST localhost:7006/api/SaveDocumentToDb?datatype=price.spot&assetClass=fx&schem
 Content-Type: application/json
 
 {
-    "price": 1.11,
-    "id": "price.spot__fx__EURUSD__ny__2025-05-14__official",
+    "price": 1.09,
     "schemaVersion": "1.0.0",
-    "assetId": "EURUSD",
+    "assetId": "eurusd",
     "assetClass": "fx",
     "dataType": "price.spot",
     "region": "ny",
@@ -14,8 +13,7 @@ Content-Type: application/json
         "spot"
     ],
     "documentType": "official",
-    "createTimestamp": "2025-05-13T00:09:12.4071054+00:00",
-    "asOfDate": "2025-05-14",
+    "asOfDate": "2025-05-13",
     "asOfTime": "15:30:05"
 }
 
@@ -24,8 +22,7 @@ POST localhost:7006/api/SaveDocumentToDb?datatype=price.ordinals.spot&assetClass
 Content-Type: application/json
 
 {
-  "price": 1.11,
-  "id": "price.ordinals.spot__crypto__quantum_cats_1__global__2025-05-14__official",
+  "price": 1.13,
   "schemaVersion": "1.0.0",
   "assetId": "quantum_cats_1",
   "assetClass": "crypto",
@@ -35,8 +32,7 @@ Content-Type: application/json
     "spot"
   ],
   "documentType": "official",
-  "createTimestamp": "2025-05-13T00:09:12.4071054+00:00",
-  "asOfDate": "2025-05-14",
+  "asOfDate": "2025-05-13",
   "inscriptionNumber": 77777,
   "inscriptionId": "12345",
   "parentInscriptionId": "1234",

@@ -64,8 +64,9 @@ public class SaveDocumentToDb
                 _logger.LogError(ex, $"Error deserializing request body for fx spot price. {ex.Message}");
                 return new BadRequestObjectResult("Invalid request body.");
             }
-            
-            var result = await _repository.SaveAsync(FxSpotPriceDataMapper.ToDomain(requestData));
+
+            var data = FxSpotPriceDataMapper.ToDomain(requestData);
+            var result = await _repository.SaveMarketDataAsync(data);
             return ProcessActionResult(result);
         }
 
@@ -92,7 +93,7 @@ public class SaveDocumentToDb
                 return new BadRequestObjectResult("Invalid request body.");
             }
             
-            var result = await _repository.SaveAsync(CryptoOrdinalSpotPriceDataMapper.ToDomain(requestData));
+            var result = await _repository.SaveMarketDataAsync(CryptoOrdinalSpotPriceDataMapper.ToDomain(requestData));
             return ProcessActionResult(result);
         }
         else
@@ -101,16 +102,21 @@ public class SaveDocumentToDb
         }
     }
 
-    private static IActionResult ProcessActionResult(SaveMarketDataResult result)
+    private IActionResult ProcessActionResult(SaveMarketDataResult result)
     {
         if (result.Success)
-            return new OkObjectResult(result.Message != string.Empty
+        {
+            var msg = result.Message != string.Empty
                 ? result.Message
-                : $"Document saved successfully to {result.Id}.");
+                : $"Document saved successfully to {result.Id}.";
+            _logger.LogInformation(msg);
+            return new OkObjectResult(msg);
+        }
             
         var message = result.Message != string.Empty ? result.Message : $"Error saving document to {result.Id}.";
         if (result.Exception != null)
             message += $" Exception: {result.Exception.Message}";
+        _logger.LogError(message);
         return new BadRequestObjectResult(message);
     }
 }
