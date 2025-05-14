@@ -98,8 +98,8 @@ public class MarketDataRepositoryTests
     
         // Assert
         Assert.NotNull(result);
-        Assert.True(result.IsSuccess);
-        Assert.Null(result.ErrorMessage);
+        Assert.True(result.Success);
+        Assert.Null(result.Exception);
 
         _mockContainer.Verify(c =>
             c.UpsertItemAsync(
