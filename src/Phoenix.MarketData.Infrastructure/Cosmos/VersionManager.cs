@@ -19,7 +19,7 @@ namespace Phoenix.MarketData.Infrastructure.Cosmos
                 throw new ArgumentException("Region cannot be null or empty", nameof(region));
             }
             
-            var latest = await _repository.GetLatestAsync<T>(dataType, assetClass, assetId, region, asOfDate, documentType);
+            var latest = await _repository.GetMarketDataByLatestVersionAsync<T>(dataType, assetClass, assetId, region, asOfDate, documentType);
             if (latest.Result == null || latest.Result.Version == null)
                 return 1;
 

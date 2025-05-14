@@ -2,7 +2,9 @@
 using Microsoft.Azure.Cosmos;
 using Phoenix.MarketData.Domain.Models;
 using Phoenix.MarketData.Domain.Models.Interfaces;
+using Phoenix.MarketData.Infrastructure.Cosmos;
 using Phoenix.MarketData.Infrastructure.Mapping;
+using Phoenix.MarketData.Infrastructure.Schemas;
 
 namespace Phoenix.MarketData.Infrastructure.Cosmos
 {
@@ -14,6 +16,12 @@ namespace Phoenix.MarketData.Infrastructure.Cosmos
         public MarketDataRepository(CosmosClient cosmosClient, string databaseId, string containerId)
         {
             _container = cosmosClient.GetContainer(databaseId, containerId);
+            _versionManager = new VersionManager(this);
+        }
+
+        public MarketDataRepository(Container container)
+        {
+            _container = container;
             _versionManager = new VersionManager(this);
         }
 
@@ -105,8 +113,21 @@ namespace Phoenix.MarketData.Infrastructure.Cosmos
 
             return new SaveMarketDataResult { Success = false, Message = "Failed to save market data after multiple retries due to version conflict." };
         }
-        
-        public async Task<LoadMarketDataResult<T>> GetLatestAsync<T>(string dataType, string assetClass, string assetId, string region,
+
+        /// <summary>
+        /// Retrieves the latest version of a market data object asynchronously based on the specified criteria.
+        /// </summary>
+        /// <typeparam name="T">The type of the market data object, implementing the IMarketData interface.</typeparam>
+        /// <param name="dataType">The type of the market data (e.g., pricing, analytics, etc.).</param>
+        /// <param name="assetClass">The class of the asset (e.g., equity, fixed income, etc.).</param>
+        /// <param name="assetId">The unique identifier for the asset.</param>
+        /// <param name="region">The region associated with the market data.</param>
+        /// <param name="asOfDate">The "as of" date representing the date to filter the market data.</param>
+        /// <param name="documentType">The type of document associated with the market data.</param>
+        /// <returns>A task representing the asynchronous operation, containing the result of the query with
+        /// the latest version of the market data object.</returns>
+        public async Task<LoadMarketDataResult<T>> GetMarketDataByLatestVersionAsync<T>(string dataType, string assetClass,
+            string assetId, string region,
             DateOnly asOfDate, string documentType) where T : IMarketData
         {
             var query = new QueryDefinition(
@@ -118,10 +139,23 @@ namespace Phoenix.MarketData.Infrastructure.Cosmos
                 .WithParameter("@documentType", documentType)
                 .WithParameter("@asOfDate", asOfDate);
 
-            return await ExecuteQuery<T>(assetId, query);
+            return await ExecuteMarketDataFetchQuery<T>(assetId, query);
         }
-        
-        public async Task<LoadMarketDataResult<T>> GetAsync<T>(string dataType, string assetClass, string assetId, string region,
+
+        /// <summary>
+        /// Retrieves a specific version of the market data object asynchronously from the configured Cosmos DB container.
+        /// </summary>
+        /// <typeparam name="T">The type of the market data object, implementing the IMarketData interface.</typeparam>
+        /// <param name="dataType">The type of the market data (e.g., price, reference data).</param>
+        /// <param name="assetClass">The class of the asset (e.g., equity, fixed income).</param>
+        /// <param name="assetId">The unique identifier of the asset.</param>
+        /// <param name="region">The region associated with the market data.</param>
+        /// <param name="asOfDate">The "as of" date for which the market data is valid.</param>
+        /// <param name="documentType">The type of the document (e.g., metadata, analytics).</param>
+        /// <param name="version">The specific version number of the market data to retrieve.</param>
+        /// <returns>A task that represents the asynchronous operation, containing the result of the market data retrieval.</returns>
+        public async Task<LoadMarketDataResult<T>> GetMarketDataBySpecifiedVersionAsync<T>(string dataType, string assetClass,
+            string assetId, string region,
             DateOnly asOfDate, string documentType, int version) where T : IMarketData
         {
             var query = new QueryDefinition(
@@ -134,10 +168,18 @@ namespace Phoenix.MarketData.Infrastructure.Cosmos
                 .WithParameter("@asOfDate", asOfDate)
                 .WithParameter("@version", version);
 
-            return await ExecuteQuery<T>(assetId, query);
+            return await ExecuteMarketDataFetchQuery<T>(assetId, query);
         }
 
-        private async Task<LoadMarketDataResult<T>> ExecuteQuery<T>(string assetId, QueryDefinition query) where T : IMarketData
+        /// <summary>
+        /// Executes a query to fetch market data from the Cosmos DB container.
+        /// </summary>
+        /// <typeparam name="T">The type of the market data object, implementing IMarketData interface.</typeparam>
+        /// <param name="assetId">The unique identifier for the asset partition to retrieve data from.</param>
+        /// <param name="query">The Cosmos DB query definition specifying the criteria to fetch market data.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a LoadMarketDataResult object indicating the success of the operation and the fetched market data.</returns>
+        public async Task<LoadMarketDataResult<T>> ExecuteMarketDataFetchQuery<T>(string assetId, QueryDefinition query)
+            where T : IMarketData
         {
             try
             {
@@ -207,25 +249,58 @@ namespace Phoenix.MarketData.Infrastructure.Cosmos
 
     public class SaveMarketDataResult
     {
-        public required bool Success { get; set; }
+        public required bool Success { get; init; }
 
-        public string? Id { get; set; } = string.Empty;
+        public string? Id { get; init; } = string.Empty;
         
-        public int? Version { get; set; } = null;
+        public int? Version { get; init; }
 
-        public Exception? Exception { get; set; } = null;
+        public Exception? Exception { get; init; }
         
-        public string? Message { get; set; } = string.Empty;
+        public string? Message { get; init; } = string.Empty;
     }
 
     public class LoadMarketDataResult<T> where T : IMarketData
     {
-        public required bool Success { get; set; }
+        public required bool Success { get; init; }
 
-        public T? Result { get; set; } = default;
+        public T? Result { get; init; }
         
-        public Exception? Exception { get; set; } = null;
+        public Exception? Exception { get; init; }
         
-        public string? Message { get; set; } = string.Empty;
+        public string? Message { get; init; } = string.Empty;
+    }
+}
+
+public static class MarketDataRepositoryExtensions
+{
+    /// <summary>
+    /// Retrieves the most recent document (by asOfDate) of a specific type for the provided asset and region
+    /// by querying the configured Cosmos DB container. The document is determined based on the
+    /// latest as-of date and version number.
+    /// </summary>
+    /// <typeparam name="T">The type of the market data object, implementing IMarketData interface.</typeparam>
+    /// <param name="repository">The repository instance used to fetch the document.</param>
+    /// <param name="dataType">The data type of the document to retrieve.</param>
+    /// <param name="assetClass">The asset class associated with the document.</param>
+    /// <param name="assetId">The unique identifier of the asset associated with the document.</param>
+    /// <param name="region">The region associated with the document.</param>
+    /// <param name="documentType">The type of document to retrieve.</param>
+    /// <returns>A task representing the asynchronous operation, returning the result
+    /// that contains the document or an error if the operation was unsuccessful.</returns>
+    public static async Task<LoadMarketDataResult<T>> GetMarketDataByMostRecentDate<T>(this MarketDataRepository repository,
+        string dataType, string assetClass, string assetId, string region, string documentType)
+        where T : IMarketData
+    {
+        var query = new QueryDefinition(
+                "SELECT TOP 1 * FROM c WHERE c.assetId = @assetId AND c.assetClass = @assetClass AND c.region = @region AND c.dataType = @dataType AND c.documentType = @documentType ORDER BY c.asOfDate DESC, c.version DESC")
+            .WithParameter("@assetId", assetId)
+            .WithParameter("@assetClass", assetClass)
+            .WithParameter("@region", region)
+            .WithParameter("@dataType", dataType)
+            .WithParameter("@documentType", documentType);
+        
+        var result = await repository.ExecuteMarketDataFetchQuery<T>(assetId, query);
+        return result;
     }
 }

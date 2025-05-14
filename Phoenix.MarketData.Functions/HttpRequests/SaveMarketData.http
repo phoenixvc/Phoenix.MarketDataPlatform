@@ -1,0 +1,22 @@
+﻿### Save fx spot market data to cosmos db example
+POST localhost:7006/api/SaveDocumentToDb?datatype=price.spot&assetClass=fx&schemaversion=1.0.0
+Content-Type: application/json
+
+{
+    "price": 1.10,
+    "id": "price.spot__fx__eurusd__ny__2025-05-14__official__1",
+    "schemaVersion": "1.0.0",
+    "assetId": "eurusd",
+    "assetClass": "fx",
+    "dataType": "price.spot",
+    "region": "ny",
+    "tags": [
+        "spot"
+    ],
+    "documentType": "official",
+    "createTimestamp": "2025-05-13T00:09:12.4071054+00:00",
+    "asOfDate": "2025-05-14",
+    "asOfTime": "15:30:05"
+}
+###
+

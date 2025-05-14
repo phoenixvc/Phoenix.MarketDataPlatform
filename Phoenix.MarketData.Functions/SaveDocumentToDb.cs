@@ -2,9 +2,9 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Phoenix.MarketData.Domain.Models;
 using Phoenix.MarketData.Infrastructure.Cosmos;
 using Phoenix.MarketData.Infrastructure.Mapping;
+using Phoenix.MarketData.Infrastructure.Schemas;
 using Phoenix.MarketData.Infrastructure.Serialization;
 
 namespace Phoenix.MarketData.Functions;
@@ -27,19 +27,28 @@ public class SaveDocumentToDb
 
         var dataType = req.Query["datatype"];
         var assetClass = req.Query["assetclass"];
+        var schemaVersion = req.Query["schemaversion"];
 
-        if (string.IsNullOrWhiteSpace(dataType) || string.IsNullOrWhiteSpace(assetClass))
+        if (string.IsNullOrWhiteSpace(dataType) || string.IsNullOrWhiteSpace(assetClass) || string.IsNullOrEmpty("schemaversion"))
         {
-            return new BadRequestObjectResult("Please provide both 'datatype' and 'assetclass' as query parameters.");
+            return new BadRequestObjectResult("Please provide 'datatype', 'assetclass' and 'schema' as query parameters.");
         }
 
-        if (dataType == "price.spot" && assetClass == "fx")
+        if (dataType == "price.spot" && assetClass == "fx" && !string.IsNullOrEmpty(schemaVersion))
         {
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             FxSpotPriceDataDto? requestData;
             
             try
             {
+                // validate
+                var validated = JsonSchemaValidatorRegistry.Validator.Validate(dataType!, assetClass!, schemaVersion!, requestBody, out var errorMessage);
+                if (!validated)
+                {
+                    _logger.LogError("Error validating request body for fx spot price against schema.");
+                    return new BadRequestObjectResult(errorMessage);
+                }
+                
                 requestData = System.Text.Json.JsonSerializer.Deserialize<FxSpotPriceDataDto>(requestBody, new System.Text.Json.JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
@@ -59,7 +68,8 @@ public class SaveDocumentToDb
             var result = await _repository.SaveAsync(FxSpotPriceDataMapper.ToDomain(requestData));
             return ProcessActionResult(result);
         }
-        else if (dataType == "price.ordinal.spot" && assetClass == "crypto")
+
+        if (dataType == "price.ordinals.spot" && assetClass == "crypto" && schemaVersion != string.Empty)
         {
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             CryptoOrdinalSpotPriceDataDto? requestData;

@@ -1,9 +1,9 @@
 ﻿{
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "SpotPrice - FX",
-  "description": "Schema for spot prices for FX instruments (e.g., currency pairs).",
+  "title": "OrdinalPrice - Crypto",
+  "description": "Schema for spot prices for ordinal assets (e.g., quantum cats).",
   "type": "object",
-  "required": ["assetId", "dataType", "assetClass", "asOfDate", "price"],
+  "required": ["assetId", "dataType", "assetClass", "asOfDate", "price", "collectionName", "parentInscriptionId", "inscriptionId", "inscriptionNumber"],
   "properties": {
     "id": {
       "type": "string",
@@ -29,7 +29,7 @@
     "dataType": {
       "type": "string",
       "enum": ["price"],
-      "description": "Type of market data contained in the document, fixed as 'price' for spot prices."
+      "description": "Type of market data contained in the document, fixed as 'price.ordinals.spot' for spot prices."
     },
     "tags": {
       "type": "array",
@@ -68,7 +68,23 @@
     "side": {
       "type": "string",
       "pattern": "^(bid|mid|ask)$",
-      "description": "The side of the price quote, e.g., mid, bid, or ask"
+      "description": "The side of the price quote, e.g., mid, bid, or ask."
+    },
+    "collectionName": {
+      "type": "string",
+      "description": "The name of the collection, used for internal identification."
+    },
+    "parentInscriptionId": {
+      "type": "string",
+      "description": "The inscription id of the parent (collection)."
+    },
+    "inscriptionId": {
+      "type": "string",
+      "description": "The inscription id of the asset."
+    },
+    "inscriptionNumber": {
+      "type": "number",
+      "description": "The inscription number of the asset."
     }
   }
 }
