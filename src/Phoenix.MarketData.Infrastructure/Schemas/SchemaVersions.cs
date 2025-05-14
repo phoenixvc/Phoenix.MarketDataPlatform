@@ -9,17 +9,17 @@ public static class SchemaVersions
     /// <summary>
     /// Initial schema version (SemVer: Major.Minor.Patch)
     /// </summary>
-    public const string V0 = "0.0.0";
+    public const string V1 = "1.0.0";
 
     // Ready for future versions
-    // public const string V1 = "1.0.0";
+    // public const string V2 = "2.0.0";
 
     /// <summary>
     /// Represents the collection of schema versions supported within the Phoenix MarketData domain.
     /// This set of versions is used to validate and check compatibility for schema versioning in
     /// operations and data handling.
     /// </summary>
-    public static readonly HashSet<string> Supported = [V0];
+    public static readonly HashSet<string> Supported = [V1];
     
     /// <summary>
     /// Checks if a schema version is supported

@@ -6,19 +6,32 @@ namespace Phoenix.MarketData.Domain.Models;
 /// Represents the base implementation of a market data object, providing core properties
 /// and functionality for identifying and managing market data records.
 /// </summary>
-public abstract class BaseMarketData : IMarketDataObject
+public abstract class BaseMarketData : IMarketData
 {
     private string? _id; // Backing field for Id
     private DateTimeOffset? _createTimeStamp; // Backing field for CreateTimestamp
     private int? _version;
+    private string _schemaVersion = string.Empty;
+    private string _assetId = string.Empty;
+    private string _assetClass = string.Empty;
+    private string _dataType = string.Empty;
+    private string _region = string.Empty;
+    private string _documentType = string.Empty;
+    private DateOnly _asOfDate;
 
-    public string Id
+    public string Id => _id ??= CalculateId(); // If not set, calculate it
+
+    public required string SchemaVersion
     {
-        get => _id ??= CalculateId(); // If not set, calculate it
-        private set => _id = value;  // Can only be set during deserialization
+        get => _schemaVersion;
+        set
+        {
+            if (_schemaVersion == value)
+                return;
+            
+            _schemaVersion = value.ToLowerInvariant();
+        }
     }
-
-    public required string SchemaVersion { get; set; }
 
     public int? Version
     {
@@ -34,15 +47,85 @@ public abstract class BaseMarketData : IMarketDataObject
             _id = CalculateId();
         }
     }
+    
+    public required string AssetId 
+    { 
+        get => _assetId; 
+        set
+        {
+            if (_assetId != value)
+            {
+                _assetId = value.ToLowerInvariant();
+                _id = CalculateId();
+            }
+        }
+    }
 
-    public required string AssetId { get; set; }
+    public required string AssetClass 
+    { 
+        get => _assetClass; 
+        set
+        {
+            if (_assetClass != value)
+            {
+                _assetClass = value.ToLowerInvariant();
+                _id = CalculateId();
+            }
+        }
+    }
 
-    public required string AssetClass { get; set; }
+    public required string DataType 
+    { 
+        get => _dataType; 
+        set
+        {
+            if (_dataType != value)
+            {
+                _dataType = value.ToLowerInvariant();
+                _id = CalculateId();
+            }
+        }
+    }
 
-    public required string DataType { get; set; }
+    public required string Region 
+    { 
+        get => _region; 
+        set
+        {
+            if (_region != value)
+            {
+                _region = value.ToLowerInvariant();
+                _id = CalculateId();
+            }
+        }
+    }
+    
+    public required string DocumentType 
+    { 
+        get => _documentType; 
+        set
+        {
+            if (_documentType != value)
+            {
+                _documentType = value.ToLowerInvariant();
+                _id = CalculateId();
+            }
+        }
+    }
 
-    public required string Region { get; set; }
-
+    public required DateOnly AsOfDate 
+    { 
+        get => _asOfDate; 
+        set
+        {
+            if (_asOfDate != value)
+            {
+                _asOfDate = value;
+                _id = CalculateId();
+            }
+        }
+    }
+    
     private List<string> _tags = new();
     public List<string> Tags 
     { 
@@ -50,32 +133,32 @@ public abstract class BaseMarketData : IMarketDataObject
         set => _tags = value?.ToList() ?? new List<string>();
     }
 
-    public required string DocumentType { get; set; }
-
     public DateTimeOffset CreateTimestamp
     {
         get => _createTimeStamp ??= DateTimeOffset.UtcNow;
         set => _createTimeStamp = value;
     }
-
-    public required DateOnly AsOfDate { get; set; }
     
     public TimeOnly? AsOfTime { get; set; }
 
     private string CalculateId()
     {
         // Validate required properties
-        if (string.IsNullOrEmpty(DataType) || string.IsNullOrEmpty(AssetClass) || string.IsNullOrEmpty(AssetId) || 
-            string.IsNullOrEmpty(Region) || string.IsNullOrEmpty(DocumentType))
+        if (string.IsNullOrEmpty(DataType) 
+            || string.IsNullOrEmpty(AssetClass) 
+            || string.IsNullOrEmpty(AssetId) 
+            || string.IsNullOrEmpty(Region) 
+            || string.IsNullOrEmpty(DocumentType) 
+            || AsOfDate == default)
         {
             return string.Empty;
         }
-        
-        var id = string.Join("__", new[] {
-            DataType, AssetClass, AssetId, Region, AsOfDate.ToString("yyyyMMdd"), DocumentType});
+
+        var id = string.Join("__", new[] { DataType, AssetClass, AssetId, Region, AsOfDate.ToString("yyyy-MM-dd"), DocumentType });
         if (Version != null)
             id += $"__{Version}";
 
+        id = id.ToLowerInvariant();
         return id;
     }
 }

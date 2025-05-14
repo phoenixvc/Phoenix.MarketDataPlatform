@@ -15,7 +15,7 @@ public class BaseMarketDataDto
     [JsonProperty("schemaVersion")]
     public string SchemaVersion { get; set; }
 
-    [JsonProperty("version")]
+    [JsonProperty("version", NullValueHandling = NullValueHandling.Ignore)]
     public int? Version { get; set; }
 
     [JsonProperty("assetId")]
@@ -30,14 +30,14 @@ public class BaseMarketDataDto
     [JsonProperty("region")]
     public string Region { get; set; }
 
-    [JsonProperty("tags")]
+    [JsonProperty("tags", NullValueHandling = NullValueHandling.Ignore)]
     public List<string> Tags { get; set; }
 
     [JsonProperty("documentType")]
     public string DocumentType { get; set; }
 
-    [JsonProperty("createTimestamp")]
-    public DateTimeOffset CreateTimestamp { get; set; }
+    [JsonProperty("createTimestamp", NullValueHandling = NullValueHandling.Ignore)]
+    public DateTimeOffset? CreateTimestamp { get; set; }
 
     [JsonProperty("asOfDate")]
     [JsonConverter(typeof(DateOnlyJsonConverter))]
@@ -46,7 +46,12 @@ public class BaseMarketDataDto
     [JsonProperty("asOfTime")]
     [JsonConverter(typeof(TimeOnlyJsonConverter))]
     public TimeOnly? AsOfTime { get; set; }
+
+    public BaseMarketDataDto()
+    {
+    }
     
+    [JsonConstructor]
     public BaseMarketDataDto(string id, string schemaVersion, int? version, string assetId, string assetClass, 
         string dataType, string region, string documentType, DateTimeOffset createTimeStamp, DateOnly asOfDate,
         TimeOnly? asOfTime, List<string> tags)

@@ -29,7 +29,7 @@ namespace Phoenix.MarketData.Infrastructure.Mapping
             domain.AsOfDate = dto.AsOfDate;
             domain.AsOfTime = dto.AsOfTime;
             domain.Tags = dto.Tags?.ToList() ?? new List<string>();
-            domain.CreateTimestamp = dto.CreateTimestamp;
+            domain.CreateTimestamp = dto.CreateTimestamp ?? DateTime.UtcNow;
         }
     }
 }

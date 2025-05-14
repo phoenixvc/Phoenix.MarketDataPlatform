@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents a market data object with key properties to track asset and versioning information.
     /// </summary>
-    public interface IMarketDataObject
+    public interface IMarketData
     {
         /// <summary>
         /// The Id of the data in the format, [dataType].[assetclass]__[asset]__[region]__[date]__[documentType]__[version], e.g.,
