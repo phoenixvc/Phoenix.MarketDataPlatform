@@ -11,6 +11,7 @@ public abstract class BaseMarketData : IMarketData
     private string? _id; // Backing field for Id
     private DateTimeOffset? _createTimeStamp; // Backing field for CreateTimestamp
     private int? _version;
+    private string _schemaVersion = string.Empty;
     private string _assetId = string.Empty;
     private string _assetClass = string.Empty;
     private string _dataType = string.Empty;
@@ -18,13 +19,19 @@ public abstract class BaseMarketData : IMarketData
     private string _documentType = string.Empty;
     private DateOnly _asOfDate;
 
-    public string Id
-    {
-        get => _id ??= CalculateId(); // If not set, calculate it
-        private set => _id = value;  // Can only be set during deserialization
-    }
+    public string Id => _id ??= CalculateId(); // If not set, calculate it
 
-    public required string SchemaVersion { get; set; }
+    public required string SchemaVersion
+    {
+        get => _schemaVersion;
+        set
+        {
+            if (_schemaVersion == value)
+                return;
+            
+            _schemaVersion = value.ToLowerInvariant();
+        }
+    }
 
     public int? Version
     {
@@ -48,7 +55,7 @@ public abstract class BaseMarketData : IMarketData
         {
             if (_assetId != value)
             {
-                _assetId = value;
+                _assetId = value.ToLowerInvariant();
                 _id = CalculateId();
             }
         }
@@ -61,7 +68,7 @@ public abstract class BaseMarketData : IMarketData
         {
             if (_assetClass != value)
             {
-                _assetClass = value;
+                _assetClass = value.ToLowerInvariant();
                 _id = CalculateId();
             }
         }
@@ -74,7 +81,7 @@ public abstract class BaseMarketData : IMarketData
         {
             if (_dataType != value)
             {
-                _dataType = value;
+                _dataType = value.ToLowerInvariant();
                 _id = CalculateId();
             }
         }
@@ -87,7 +94,7 @@ public abstract class BaseMarketData : IMarketData
         {
             if (_region != value)
             {
-                _region = value;
+                _region = value.ToLowerInvariant();
                 _id = CalculateId();
             }
         }
@@ -100,7 +107,7 @@ public abstract class BaseMarketData : IMarketData
         {
             if (_documentType != value)
             {
-                _documentType = value;
+                _documentType = value.ToLowerInvariant();
                 _id = CalculateId();
             }
         }
@@ -142,12 +149,12 @@ public abstract class BaseMarketData : IMarketData
         {
             return string.Empty;
         }
-        
-        var id = string.Join("__", new[] {
-            DataType, AssetClass, AssetId, Region, AsOfDate.ToString("yyyy-MM-dd"), DocumentType});
+
+        var id = string.Join("__", new[] { DataType, AssetClass, AssetId, Region, AsOfDate.ToString("yyyy-MM-dd"), DocumentType });
         if (Version != null)
             id += $"__{Version}";
 
+        id = id.ToLowerInvariant();
         return id;
     }
 }

@@ -31,7 +31,7 @@ public static class CryptoOrdinalSpotPriceDataMapper
             DataType = dto.DataType,
             Region = dto.Region,
             DocumentType = dto.DocumentType,
-            CreateTimestamp = dto.CreateTimestamp,
+            CreateTimestamp = dto.CreateTimestamp ?? DateTime.UtcNow,
             AsOfDate = dto.AsOfDate,
             AsOfTime = dto.AsOfTime,
             Price = dto.Price,

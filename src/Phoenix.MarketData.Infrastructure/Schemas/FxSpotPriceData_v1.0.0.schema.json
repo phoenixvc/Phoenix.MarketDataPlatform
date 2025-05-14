@@ -28,7 +28,7 @@
     },
     "dataType": {
       "type": "string",
-      "enum": ["price"],
+      "enum": ["price.spot"],
       "description": "Type of market data contained in the document, fixed as 'price.spot' for spot prices."
     },
     "tags": {

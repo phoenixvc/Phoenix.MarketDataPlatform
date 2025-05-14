@@ -8,8 +8,12 @@ public class FxSpotPriceDataDto : BaseMarketDataDto
     [JsonProperty("price")]
     public decimal Price { get; set; }
 
-    [JsonProperty("side")]
-    public PriceSideDto Side { get; set; }
+    [JsonProperty("side", NullValueHandling = NullValueHandling.Ignore)]
+    public PriceSideDto? Side { get; set; }
+
+    public FxSpotPriceDataDto()
+    {
+    }
     
     public FxSpotPriceDataDto(string id, string schemaVersion, int? version, string assetId, string assetClass, 
         string dataType, string region, string documentType, DateTimeOffset createTimeStamp, DateOnly asOfDate,

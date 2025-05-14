@@ -45,8 +45,8 @@ public class SaveDocumentToDb
                 var validated = JsonSchemaValidatorRegistry.Validator.Validate(dataType!, assetClass!, schemaVersion!, requestBody, out var errorMessage);
                 if (!validated)
                 {
-                    _logger.LogError("Error validating request body for fx spot price against schema.");
-                    return new BadRequestObjectResult(errorMessage);
+                    _logger.LogError($"Error validating request body for fx spot price against schema. {errorMessage}");
+                    return new BadRequestObjectResult("Could not validate request body against schema.");
                 }
                 
                 requestData = System.Text.Json.JsonSerializer.Deserialize<FxSpotPriceDataDto>(requestBody, new System.Text.Json.JsonSerializerOptions
@@ -61,7 +61,7 @@ public class SaveDocumentToDb
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deserializing request body for fx spot price.");
+                _logger.LogError(ex, $"Error deserializing request body for fx spot price. {ex.Message}");
                 return new BadRequestObjectResult("Invalid request body.");
             }
             

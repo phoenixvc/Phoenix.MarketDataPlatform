@@ -28,7 +28,7 @@
     },
     "dataType": {
       "type": "string",
-      "enum": ["price"],
+      "enum": ["price.ordinals.spot"],
       "description": "Type of market data contained in the document, fixed as 'price.ordinals.spot' for spot prices."
     },
     "tags": {

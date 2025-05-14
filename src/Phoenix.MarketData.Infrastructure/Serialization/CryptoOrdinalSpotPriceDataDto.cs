@@ -22,6 +22,10 @@ public class CryptoOrdinalSpotPriceDataDto : BaseMarketDataDto
 
     [JsonProperty("collectionName")]
     public string CollectionName { get; set; }
+
+    public CryptoOrdinalSpotPriceDataDto()
+    {
+    }
     
     public CryptoOrdinalSpotPriceDataDto(string id, string schemaVersion, int? version,
         string assetId, string assetClass, string dataType, string region, string documentType,

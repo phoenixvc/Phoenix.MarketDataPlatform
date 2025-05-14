@@ -132,11 +132,11 @@ namespace Phoenix.MarketData.Infrastructure.Cosmos
         {
             var query = new QueryDefinition(
                     "SELECT TOP 1 * FROM c WHERE c.assetId = @assetId AND c.assetClass = @assetClass AND c.region = @region AND c.dataType = @dataType AND c.documentType = @documentType AND c.asOfDate = @asOfDate ORDER BY c.version DESC")
-                .WithParameter("@assetId", assetId)
-                .WithParameter("@assetClass", assetClass)
-                .WithParameter("@region", region)
-                .WithParameter("@dataType", dataType)
-                .WithParameter("@documentType", documentType)
+                .WithParameter("@assetId", assetId.ToLowerInvariant())
+                .WithParameter("@assetClass", assetClass.ToLowerInvariant())
+                .WithParameter("@region", region.ToLowerInvariant())
+                .WithParameter("@dataType", dataType.ToLowerInvariant())
+                .WithParameter("@documentType", documentType.ToLowerInvariant())
                 .WithParameter("@asOfDate", asOfDate);
 
             return await ExecuteMarketDataFetchQuery<T>(assetId, query);
@@ -160,11 +160,11 @@ namespace Phoenix.MarketData.Infrastructure.Cosmos
         {
             var query = new QueryDefinition(
                     "SELECT TOP 1 * FROM c WHERE c.assetId = @assetId AND c.assetClass = @assetClass AND c.region = @region AND c.dataType = @dataType AND c.documentType = @documentType AND c.asOfDate = @asOfDate AND c.version = @version")
-                .WithParameter("@assetId", assetId)
-                .WithParameter("@assetClass", assetClass)
-                .WithParameter("@region", region)
-                .WithParameter("@dataType", dataType)
-                .WithParameter("@documentType", documentType)
+                .WithParameter("@assetId", assetId.ToLowerInvariant())
+                .WithParameter("@assetClass", assetClass.ToLowerInvariant())
+                .WithParameter("@region", region.ToLowerInvariant())
+                .WithParameter("@dataType", dataType.ToLowerInvariant())
+                .WithParameter("@documentType", documentType.ToLowerInvariant())
                 .WithParameter("@asOfDate", asOfDate)
                 .WithParameter("@version", version);
 
