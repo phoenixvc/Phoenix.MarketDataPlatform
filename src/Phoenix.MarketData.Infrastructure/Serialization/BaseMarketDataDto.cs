@@ -51,6 +51,7 @@ public class BaseMarketDataDto
     {
     }
     
+    [JsonConstructor]
     public BaseMarketDataDto(string id, string schemaVersion, int? version, string assetId, string assetClass, 
         string dataType, string region, string documentType, DateTimeOffset createTimeStamp, DateOnly asOfDate,
         TimeOnly? asOfTime, List<string> tags)

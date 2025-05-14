@@ -1,9 +1,12 @@
-﻿### Save fx spot market data to cosmos db example
-POST localhost:7006/api/SaveDocumentToDb?datatype=price.spot&assetClass=fx&schemaversion=1.0.0
+﻿@host = localhost:7006
+
+### Save fx spot market data to cosmos db example
+POST {{host}}/api/SaveDocumentToDb?datatype=price.spot&assetClass=fx&schemaversion=1.0.0
 Content-Type: application/json
 
 {
     "price": 1.09,
+    "side": "mid",
     "schemaVersion": "1.0.0",
     "assetId": "eurusd",
     "assetClass": "fx",
@@ -18,11 +21,13 @@ Content-Type: application/json
 }
 
 ### Save crypto ordinal spot price data to cosmos db example
-POST localhost:7006/api/SaveDocumentToDb?datatype=price.ordinals.spot&assetClass=crypto&schemaversion=1.0.0
+POST {{host}}/api/SaveDocumentToDb?datatype=price.ordinals.spot&assetClass=crypto&schemaversion=1.0.0
 Content-Type: application/json
 
 {
   "price": 1.13,
+  "currency": "btc",
+  "side": "bid",
   "schemaVersion": "1.0.0",
   "assetId": "quantum_cats_1",
   "assetClass": "crypto",

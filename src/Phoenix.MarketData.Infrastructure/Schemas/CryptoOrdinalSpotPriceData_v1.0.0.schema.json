@@ -3,7 +3,6 @@
   "title": "OrdinalPrice - Crypto",
   "description": "Schema for spot prices for ordinal assets (e.g., quantum cats).",
   "type": "object",
-  "required": ["assetId", "dataType", "assetClass", "asOfDate", "price", "collectionName", "parentInscriptionId", "inscriptionId", "inscriptionNumber"],
   "properties": {
     "id": {
       "type": "string",
@@ -23,7 +22,7 @@
     },
     "assetClass": {
       "type": "string",
-      "enum": ["fx"],
+      "enum": ["crypto"],
       "description": "Specifies the asset class; fixed as 'fx' for foreign exchange instruments."
     },
     "dataType": {
@@ -63,7 +62,11 @@
     },
     "price": {
       "type": "number",
-      "description": "The spot price of the FX instrument (e.g., 1.0985 for EUR/USD)."
+      "description": "The spot price of the crypto ordinal (e.g., 0.015 in BTC for a specific ordinal).."
+    },
+    "currency": {
+      "type": "string",
+      "description": "A valid currency string being the numeraire of the price, e.g., BTC, ETH, SOL"
     },
     "side": {
       "type": "string",
@@ -86,5 +89,7 @@
       "type": "number",
       "description": "The inscription number of the asset."
     }
-  }
+  },
+  "required": ["assetId", "dataType", "assetClass", "asOfDate", "price", "currency", "collectionName", "parentInscriptionId", "inscriptionId", "inscriptionNumber"],
+  "additionalProperties": false
 }

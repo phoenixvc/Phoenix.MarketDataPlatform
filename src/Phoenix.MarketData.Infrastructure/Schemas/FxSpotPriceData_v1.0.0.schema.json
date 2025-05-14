@@ -3,7 +3,6 @@
   "title": "SpotPrice - FX",
   "description": "Schema for spot prices for FX instruments (e.g., currency pairs).",
   "type": "object",
-  "required": ["assetId", "dataType", "assetClass", "asOfDate", "price"],
   "properties": {
     "id": {
       "type": "string",
@@ -67,8 +66,10 @@
     },
     "side": {
       "type": "string",
-      "pattern": "^(bid|mid|ask)$",
+      "pattern": "^(?i)(bid|mid|ask)$",
       "description": "The side of the price quote, e.g., mid, bid, or ask"
     }
-  }
+  },
+  "required": ["assetId", "dataType", "assetClass", "asOfDate", "price"],
+  "additionalProperties": false
 }

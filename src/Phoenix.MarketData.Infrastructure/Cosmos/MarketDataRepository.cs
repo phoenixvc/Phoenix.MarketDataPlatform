@@ -4,7 +4,6 @@ using Phoenix.MarketData.Domain.Models;
 using Phoenix.MarketData.Domain.Models.Interfaces;
 using Phoenix.MarketData.Infrastructure.Cosmos;
 using Phoenix.MarketData.Infrastructure.Mapping;
-using Phoenix.MarketData.Infrastructure.Schemas;
 
 namespace Phoenix.MarketData.Infrastructure.Cosmos
 {
@@ -101,7 +100,12 @@ namespace Phoenix.MarketData.Infrastructure.Cosmos
                 {
                     // Another writer inserted the same version before us, try again
                     if (attempt == maxRetries)
-                        throw;
+                        return new SaveMarketDataResult
+                            { 
+                                Success = false,
+                                Message = $"Version conflict after {maxRetries} retries.",
+                                Exception = ex 
+                            };
 
                     await Task.Delay(TimeSpan.FromMilliseconds(50 * attempt)); // simple backoff
                 }
@@ -295,11 +299,11 @@ public static class MarketDataRepositoryExtensions
     {
         var query = new QueryDefinition(
                 "SELECT TOP 1 * FROM c WHERE c.assetId = @assetId AND c.assetClass = @assetClass AND c.region = @region AND c.dataType = @dataType AND c.documentType = @documentType ORDER BY c.asOfDate DESC, c.version DESC")
-            .WithParameter("@assetId", assetId)
-            .WithParameter("@assetClass", assetClass)
-            .WithParameter("@region", region)
-            .WithParameter("@dataType", dataType)
-            .WithParameter("@documentType", documentType);
+            .WithParameter("@assetId", assetId.ToLowerInvariant())
+            .WithParameter("@assetClass", assetClass.ToLowerInvariant())
+            .WithParameter("@region", region.ToLowerInvariant())
+            .WithParameter("@dataType", dataType.ToLowerInvariant())
+            .WithParameter("@documentType", documentType.ToLowerInvariant());
         
         var result = await repository.ExecuteMarketDataFetchQuery<T>(assetId, query);
         return result;

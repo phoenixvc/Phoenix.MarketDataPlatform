@@ -14,7 +14,7 @@ public class JsonSchemaValidatorRegistry
     /// where the key is a string representing the schema name or identifier (),
     /// and the value is a string representing the file path or location of the schema.
     /// </summary>
-    private Dictionary<SchemaKey, string> _validatorPaths = new Dictionary<SchemaKey, string>();
+    private readonly Dictionary<SchemaKey, string> _validatorPaths = new Dictionary<SchemaKey, string>();
     
     protected JsonSchemaValidatorRegistry()
     {
@@ -26,15 +26,22 @@ public class JsonSchemaValidatorRegistry
 
     public bool Validate(string dataType, string assetClass, string schemaVersion, string json, out string errorMsg)
     {
+        errorMsg = "";
+        
         var schemaKey = new SchemaKey(dataType, assetClass, schemaVersion);
         if (!_validatorPaths.TryGetValue(schemaKey, out var path))
         {
             errorMsg = "Could not find validator for schema key: " + schemaKey;
             return false;
         }
-        
+
         var validator = new JsonSchemaValidator(path);
-        return validator.Validate(json, out errorMsg);
+        var result = validator.Validate(json);
+        if (result.IsValid) 
+            return true;
+        
+        errorMsg = result.ErrorMessage;
+        return false;
     }
 }
 

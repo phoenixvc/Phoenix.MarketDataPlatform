@@ -13,22 +13,38 @@ public class JsonSchemaValidator
         _schema = JsonSchema.FromText(schemaJson);
     }
 
-    public bool Validate(string jsonPayload, out string errorMessage)
+    public ValidationResult Validate(string jsonPayload)
     {
         var element = JsonDocument.Parse(jsonPayload).RootElement;
-        var result = _schema.Evaluate(element, new EvaluationOptions { OutputFormat = OutputFormat.Hierarchical });
+        var result = _schema.Evaluate(element, new EvaluationOptions
+        {
+            OutputFormat = OutputFormat.Hierarchical,
+            ValidateAgainstMetaSchema = true
+        });
 
         if (result.IsValid)
-        {
-            errorMessage = null;
-            return true;
-        }
+            return ValidationResult.Success();
 
         // Failed to validate
-        errorMessage = string.Join("; ", result.Details.Select(
+        var errorMessage = string.Join("; ", result.Details.Select(
             e => e.InstanceLocation + ": " + (e.HasErrors
                 ? string.Join("\n", e.Errors?.Select(kvp => kvp.Key.ToString() + " - " + kvp.Value.ToString()) ?? Array.Empty<string>())
                 : "")));
-        return false;
+        return ValidationResult.Failure(errorMessage);
     }
+}
+
+public class ValidationResult
+{
+    public bool IsValid { get; }
+    public string ErrorMessage { get; }
+
+    private ValidationResult(bool isValid, string errorMessage = null)
+    {
+        IsValid = isValid;
+        ErrorMessage = errorMessage;
+    }
+
+    public static ValidationResult Success() => new ValidationResult(true);
+    public static ValidationResult Failure(string errorMessage) => new ValidationResult(false, errorMessage);
 }

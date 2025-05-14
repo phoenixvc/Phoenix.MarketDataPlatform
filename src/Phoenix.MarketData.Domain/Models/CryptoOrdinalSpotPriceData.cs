@@ -6,6 +6,11 @@ public class CryptoOrdinalSpotPriceData : BaseMarketData
     /// Represents the monetary value associated with the crypto ordinal spot price data.
     /// </summary>
     public required decimal Price { get; set; }
+
+    /// <summary>
+    /// Specifies the currency in which the crypto ordinal spot price is denominated.
+    /// </summary>
+    public required string Currency { get; set; }
     
     /// <summary>
     /// The side of the price quote, e.g., mid, bid, or ask.

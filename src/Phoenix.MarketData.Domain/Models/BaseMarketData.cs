@@ -144,8 +144,12 @@ public abstract class BaseMarketData : IMarketData
     private string CalculateId()
     {
         // Validate required properties
-        if (string.IsNullOrEmpty(DataType) || string.IsNullOrEmpty(AssetClass) || string.IsNullOrEmpty(AssetId) || 
-            string.IsNullOrEmpty(Region) || string.IsNullOrEmpty(DocumentType))
+        if (string.IsNullOrEmpty(DataType) 
+            || string.IsNullOrEmpty(AssetClass) 
+            || string.IsNullOrEmpty(AssetId) 
+            || string.IsNullOrEmpty(Region) 
+            || string.IsNullOrEmpty(DocumentType) 
+            || AsOfDate == default)
         {
             return string.Empty;
         }

@@ -15,6 +15,7 @@ public class FxSpotPriceDataDto : BaseMarketDataDto
     {
     }
     
+    [JsonConstructor]
     public FxSpotPriceDataDto(string id, string schemaVersion, int? version, string assetId, string assetClass, 
         string dataType, string region, string documentType, DateTimeOffset createTimeStamp, DateOnly asOfDate,
         TimeOnly? asOfTime, List<string> tags, decimal price, PriceSide side = PriceSide.Mid) : 

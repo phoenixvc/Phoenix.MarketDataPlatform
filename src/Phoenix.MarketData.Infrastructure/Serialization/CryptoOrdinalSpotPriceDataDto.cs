@@ -8,6 +8,9 @@ public class CryptoOrdinalSpotPriceDataDto : BaseMarketDataDto
     [JsonProperty("price")]
     public decimal Price { get; set; }
     
+    [JsonProperty("currency")]
+    public string Currency { get; set; }
+    
     [JsonProperty("side")]
     public PriceSideDto Side { get; set; }
 
@@ -27,11 +30,12 @@ public class CryptoOrdinalSpotPriceDataDto : BaseMarketDataDto
     {
     }
     
+    [JsonConstructor]
     public CryptoOrdinalSpotPriceDataDto(string id, string schemaVersion, int? version,
         string assetId, string assetClass, string dataType, string region, string documentType,
         DateTimeOffset createTimestamp, DateOnly asOfDate, TimeOnly? asOfTime, List<string> tags,
         decimal price, PriceSide? side, string collectionName, string parentInscriptionId,
-        string inscriptionId, int inscriptionNumber) : base(id, schemaVersion, version, assetId, assetClass, dataType,
+        string inscriptionId, int inscriptionNumber, string currency) : base(id, schemaVersion, version, assetId, assetClass, dataType,
         region, documentType, createTimestamp, asOfDate, asOfTime, tags)
     {
         Price = price;
@@ -46,5 +50,6 @@ public class CryptoOrdinalSpotPriceDataDto : BaseMarketDataDto
         ParentInscriptionId = parentInscriptionId;
         InscriptionId = inscriptionId;
         InscriptionNumber = inscriptionNumber;
+        Currency = currency;
     }
 }

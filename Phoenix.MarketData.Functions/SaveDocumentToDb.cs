@@ -75,6 +75,14 @@ public class SaveDocumentToDb
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             CryptoOrdinalSpotPriceDataDto? requestData;
             
+            // validate against schema
+            var validated = JsonSchemaValidatorRegistry.Validator.Validate(dataType!, assetClass!, schemaVersion!, requestBody, out var errorMessage);
+            if (!validated)
+            {
+                _logger.LogError($"Error validating request body for crypto ordinals spot price against schema. {errorMessage}");
+                return new BadRequestObjectResult("Could not validate request body against schema.");
+            }
+            
             try
             {
                 requestData = System.Text.Json.JsonSerializer.Deserialize<CryptoOrdinalSpotPriceDataDto>(requestBody, new System.Text.Json.JsonSerializerOptions
@@ -96,10 +104,8 @@ public class SaveDocumentToDb
             var result = await _repository.SaveMarketDataAsync(CryptoOrdinalSpotPriceDataMapper.ToDomain(requestData));
             return ProcessActionResult(result);
         }
-        else
-        {
-            return new BadRequestObjectResult("Invalid request. Expected 'datatype' and 'assetclass' to be a valid combination.");
-        }
+
+        return new BadRequestObjectResult("Invalid request. Expected 'datatype' and 'assetclass' to be a valid combination.");
     }
 
     private IActionResult ProcessActionResult(SaveMarketDataResult result)
