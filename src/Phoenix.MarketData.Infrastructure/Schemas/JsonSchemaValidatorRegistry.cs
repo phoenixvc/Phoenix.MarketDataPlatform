@@ -18,10 +18,12 @@ public class JsonSchemaValidatorRegistry
     
     protected JsonSchemaValidatorRegistry()
     {
-        _validatorPaths.Add(new SchemaKey("price.spot", "fx", "1.0.0"), 
-            "Schemas/FxSpotPriceData_v1.0.0.schema.json");
-        _validatorPaths.Add(new SchemaKey("price.ordinals.spot", "crypto", "1.0.0"), 
-            "Schemas/CryptoOrdinalSpotPriceData_v1.0.0.schema.json");
+        _validatorPaths.Add(
+            new SchemaKey("price.spot", "fx", "1.0.0"),
+            Path.Combine(AppContext.BaseDirectory, "Schemas", "FxSpotPriceData_v1.0.0.schema.json"));
+        _validatorPaths.Add(
+            new SchemaKey("price.ordinals.spot", "crypto", "1.0.0"),
+            Path.Combine(AppContext.BaseDirectory, "Schemas", "CryptoOrdinalSpotPriceData_v1.0.0.schema.json"));
     }
 
     public bool Validate(string dataType, string assetClass, string schemaVersion, string json, out string errorMsg)
