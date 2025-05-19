@@ -1,3 +1,11 @@
 {
-    "version": "0.2.0"
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Attach to Functions Host",
+            "type": "coreclr",
+            "request": "attach",
+            "processId": "${command:azureFunctions.pickProcess}"
+        }
+    ]
 }
