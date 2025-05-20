@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Json.Schema;
+using Phoenix.MarketData.Core.Validation; // Your ValidationResult location
 
 namespace Phoenix.MarketData.Infrastructure.Schemas;
 
@@ -28,35 +29,36 @@ public class JsonSchemaValidator
     public ValidationResult Validate(string jsonPayload)
     {
         var element = JsonDocument.Parse(jsonPayload).RootElement;
-        var result = _schema.Evaluate(element, new EvaluationOptions
-        {
-            OutputFormat = OutputFormat.Hierarchical,
-            ValidateAgainstMetaSchema = true
-        });
 
-        if (result.IsValid)
+        // NEW: Run validation directly
+        var results = _schema.Validate(element);
+
+        if (results.IsValid)
             return ValidationResult.Success();
 
-        // Failed to validate
-        var errorMessage = string.Join("; ", result.Details.Select(
-            e => e.InstanceLocation + ": " + (e.HasErrors
-                ? string.Join("\n", e.Errors?.Select(kvp => kvp.Key.ToString() + " - " + kvp.Value.ToString()) ?? Array.Empty<string>())
-                : "")));
-        return ValidationResult.Failure(errorMessage);
+        var errors = GetAllMessages(results)
+            .Select(msg => new ValidationError
+            {
+                ErrorMessage = msg,
+                Source = "JsonSchema.Net"
+            })
+            .ToList();
+
+        return ValidationResult.Failure(errors);
     }
-}
 
-public class ValidationResult
-{
-    public bool IsValid { get; }
-    public string ErrorMessage { get; }
-
-    private ValidationResult(bool isValid, string errorMessage = null)
+    private static IEnumerable<string> GetAllMessages(ValidationResults results)
     {
-        IsValid = isValid;
-        ErrorMessage = errorMessage;
-    }
+        if (!string.IsNullOrWhiteSpace(results.Message))
+            yield return results.Message;
 
-    public static ValidationResult Success() => new ValidationResult(true);
-    public static ValidationResult Failure(string errorMessage) => new ValidationResult(false, errorMessage);
+        if (results.NestedResults != null)
+        {
+            foreach (var nested in results.NestedResults)
+            {
+                foreach (var msg in GetAllMessages(nested))
+                    yield return msg;
+            }
+        }
+    }
 }

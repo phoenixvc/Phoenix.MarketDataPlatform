@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Phoenix.MarketData.Domain.Models.Interfaces;
 using Azure.Messaging.EventGrid;
 using System.Text.Json;
+using Phoenix.MarketData.Domain.Events;
 
 namespace Phoenix.MarketData.Infrastructure.Events
 {
@@ -19,9 +20,16 @@ namespace Phoenix.MarketData.Infrastructure.Events
 
         public async Task PublishDataChangedEventAsync<T>(T marketData) where T : IMarketData
         {
-            var eventType = marketData.Version.Value > 1 ? DataChangedEventType : DataCreatedEventType;
-            
+            var eventType =
+                (marketData != null && marketData.Version.GetValueOrDefault() > 1)
+                    ? DataChangedEventType
+                    : DataCreatedEventType;
+
+            if (marketData == null)
+                            throw new ArgumentNullException(nameof(marketData));
+
             var eventData = new BinaryData(JsonSerializer.Serialize(marketData));
+
             var eventGridEvent = new EventGridEvent(
                 subject: $"{marketData.DataType}.{marketData.AssetClass}/{marketData.AssetId}",
                 eventType: eventType,

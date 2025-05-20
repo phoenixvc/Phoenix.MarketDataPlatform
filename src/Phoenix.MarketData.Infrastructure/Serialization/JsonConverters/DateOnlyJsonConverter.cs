@@ -1,31 +1,30 @@
-﻿using System.Globalization;
-using Newtonsoft.Json;
+﻿using System;
+using System.Globalization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Phoenix.MarketData.Infrastructure.Serialization.JsonConverters
 {
     /// <summary>
     /// A custom JSON converter for serializing and deserializing <see cref="DateOnly"/> values.
+    /// Formats as "yyyy-MM-dd".
     /// </summary>
-    /// <remarks>
-    /// This converter handles <see cref="DateOnly"/> types by formatting them as strings
-    /// in the "yyyy-MM-dd" format during serialization and deserialization.
-    /// </remarks>
-    /// <example>
-    /// Use this converter with <see cref="JsonConverterAttribute"/> to convert <see cref="DateOnly"/> properties in JSON.
-    /// </example>
     public class DateOnlyJsonConverter : JsonConverter<DateOnly>
     {
         private const string Format = "yyyy-MM-dd";
 
-        public override void WriteJson(JsonWriter writer, DateOnly value, JsonSerializer serializer)
+        public override DateOnly Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            writer.WriteValue(value.ToString(Format, CultureInfo.InvariantCulture));
+            var str = reader.GetString();
+            if (string.IsNullOrEmpty(str))
+                throw new JsonException("Cannot parse null or empty value as DateOnly.");
+
+            return DateOnly.ParseExact(str, Format, CultureInfo.InvariantCulture);
         }
 
-        public override DateOnly ReadJson(JsonReader reader, Type objectType, DateOnly existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override void Write(Utf8JsonWriter writer, DateOnly value, JsonSerializerOptions options)
         {
-            var str = reader.Value?.ToString();
-            return DateOnly.ParseExact(str!, Format, CultureInfo.InvariantCulture);
+            writer.WriteStringValue(value.ToString(Format, CultureInfo.InvariantCulture));
         }
     }
 }

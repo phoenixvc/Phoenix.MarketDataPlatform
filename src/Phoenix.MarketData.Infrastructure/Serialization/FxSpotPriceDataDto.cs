@@ -1,25 +1,37 @@
-﻿using Newtonsoft.Json;
-using Phoenix.MarketData.Domain;
+﻿using Phoenix.MarketData.Domain;
+using System.Text.Json.Serialization; // <- for System.Text.Json attributes
 
 namespace Phoenix.MarketData.Infrastructure.Serialization;
 
 public class FxSpotPriceDataDto : BaseMarketDataDto
 {
-    [JsonProperty("price")]
+    [JsonPropertyName("price")]
     public decimal Price { get; set; }
 
-    [JsonProperty("side", NullValueHandling = NullValueHandling.Ignore)]
-    public PriceSideDto? Side { get; set; }
+    [JsonPropertyName("side")]
+    public PriceSideDto? Side { get; set; } // nullable, null by default
 
     public FxSpotPriceDataDto()
     {
     }
-    
-    [JsonConstructor]
-    public FxSpotPriceDataDto(string id, string schemaVersion, int? version, string assetId, string assetClass, 
-        string dataType, string region, string documentType, DateTimeOffset createTimeStamp, DateOnly asOfDate,
-        TimeOnly? asOfTime, List<string> tags, decimal price, PriceSide side = PriceSide.Mid) : 
-            base(id, schemaVersion, version, assetId, assetClass, dataType, region, documentType, createTimeStamp, asOfDate, asOfTime, tags)
+
+    [JsonConstructor] // System.Text.Json supports this since .NET 7
+    public FxSpotPriceDataDto(
+        string id,
+        string schemaVersion,
+        int? version,
+        string assetId,
+        string assetClass,
+        string dataType,
+        string region,
+        string documentType,
+        DateTimeOffset createTimeStamp,
+        DateOnly asOfDate,
+        TimeOnly? asOfTime,
+        List<string> tags,
+        decimal price,
+        PriceSide side = PriceSide.Mid
+    ) : base(id, schemaVersion, version, assetId, assetClass, dataType, region, documentType, createTimeStamp, asOfDate, asOfTime, tags)
     {
         Price = price;
         Side = side switch
