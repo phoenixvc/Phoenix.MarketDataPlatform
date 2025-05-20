@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.MarketData.Function
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.MarketData.Core", "src\Phoenix.MarketData.Core\Phoenix.MarketData.Core.csproj", "{F7BBBD70-BDF3-4ECA-9CA3-E50D43E1431C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.MarketData.Application", "src\Phoenix.MarketData.Application\Phoenix.MarketData.Application.csproj", "{F7BBBD70-BDF3-4ECA-9CA3-E50D43E1431C}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{8F1E38D6-FF2A-46A8-AB55-5695F0064F6E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.MarketData.Infrastructure.Tests", "Phoenix.MarketData.Infrastructure.Tests\Phoenix.MarketData.Infrastructure.Tests.csproj", "{D8199FB8-B44D-4305-9458-1F887BDD7BF0}"
