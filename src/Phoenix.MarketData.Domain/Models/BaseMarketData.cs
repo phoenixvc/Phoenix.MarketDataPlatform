@@ -1,15 +1,12 @@
-﻿using Phoenix.MarketData.Domain.Models.Interfaces;
+﻿
+using Phoenix.MarketData.Domain.Models;
 
-namespace Phoenix.MarketData.Domain.Models;
+namespace Phoenix.MarketData.Core.Models;
 
-/// <summary>
-/// Represents the base implementation of a market data object, providing core properties
-/// and functionality for identifying and managing market data records.
-/// </summary>
-public abstract class BaseMarketData : IMarketData
+public abstract class BaseMarketData : IMarketDataEntity
 {
-    private string? _id; // Backing field for Id
-    private DateTimeOffset? _createTimeStamp; // Backing field for CreateTimestamp
+    private string? _id;
+    private DateTimeOffset? _createTimestamp;
     private int? _version;
     private string _schemaVersion = string.Empty;
     private string _assetId = string.Empty;
@@ -19,17 +16,15 @@ public abstract class BaseMarketData : IMarketData
     private string _documentType = string.Empty;
     private DateOnly _asOfDate;
 
-    public string Id => _id ??= CalculateId(); // If not set, calculate it
+    public string Id => _id ??= CalculateId();
 
     public required string SchemaVersion
     {
         get => _schemaVersion;
         set
         {
-            if (_schemaVersion == value)
-                return;
-            
-            _schemaVersion = value.ToLowerInvariant();
+            if (_schemaVersion != value)
+                _schemaVersion = value.ToLowerInvariant();
         }
     }
 
@@ -38,127 +33,128 @@ public abstract class BaseMarketData : IMarketData
         get => _version;
         set
         {
-            if (_version == value)
-                return;
-            
-            _version = value;
-
-            // Invalidate the ID if the Version changes
-            _id = CalculateId();
+            if (_version != value)
+            {
+                _version = value;
+                _id = null; // Invalidate for recalculation
+            }
         }
     }
-    
-    public required string AssetId 
-    { 
-        get => _assetId; 
+
+    public required string AssetId
+    {
+        get => _assetId;
         set
         {
             if (_assetId != value)
             {
                 _assetId = value.ToLowerInvariant();
-                _id = CalculateId();
+                _id = null;
             }
         }
     }
 
-    public required string AssetClass 
-    { 
-        get => _assetClass; 
+    public required string AssetClass
+    {
+        get => _assetClass;
         set
         {
             if (_assetClass != value)
             {
                 _assetClass = value.ToLowerInvariant();
-                _id = CalculateId();
+                _id = null;
             }
         }
     }
 
-    public required string DataType 
-    { 
-        get => _dataType; 
+    public required string DataType
+    {
+        get => _dataType;
         set
         {
             if (_dataType != value)
             {
                 _dataType = value.ToLowerInvariant();
-                _id = CalculateId();
+                _id = null;
             }
         }
     }
 
-    public required string Region 
-    { 
-        get => _region; 
+    public required string Region
+    {
+        get => _region;
         set
         {
             if (_region != value)
             {
                 _region = value.ToLowerInvariant();
-                _id = CalculateId();
+                _id = null;
             }
         }
     }
-    
-    public required string DocumentType 
-    { 
-        get => _documentType; 
+
+    public required string DocumentType
+    {
+        get => _documentType;
         set
         {
             if (_documentType != value)
             {
                 _documentType = value.ToLowerInvariant();
-                _id = CalculateId();
+                _id = null;
             }
         }
     }
 
-    public required DateOnly AsOfDate 
-    { 
-        get => _asOfDate; 
+    public required DateOnly AsOfDate
+    {
+        get => _asOfDate;
         set
         {
             if (_asOfDate != value)
             {
                 _asOfDate = value;
-                _id = CalculateId();
+                _id = null;
             }
         }
     }
-    
+
     private List<string> _tags = new();
-    public List<string> Tags 
-    { 
+    public List<string> Tags
+    {
         get => _tags;
         set => _tags = value?.ToList() ?? new List<string>();
     }
 
     public DateTimeOffset CreateTimestamp
     {
-        get => _createTimeStamp ??= DateTimeOffset.UtcNow;
-        set => _createTimeStamp = value;
+        get => _createTimestamp ??= DateTimeOffset.UtcNow;
+        set => _createTimestamp = value;
     }
-    
+
     public TimeOnly? AsOfTime { get; set; }
 
     private string CalculateId()
     {
         // Validate required properties
-        if (string.IsNullOrEmpty(DataType) 
-            || string.IsNullOrEmpty(AssetClass) 
-            || string.IsNullOrEmpty(AssetId) 
-            || string.IsNullOrEmpty(Region) 
-            || string.IsNullOrEmpty(DocumentType) 
+        if (string.IsNullOrEmpty(DataType)
+            || string.IsNullOrEmpty(AssetClass)
+            || string.IsNullOrEmpty(AssetId)
+            || string.IsNullOrEmpty(Region)
+            || string.IsNullOrEmpty(DocumentType)
             || AsOfDate == default)
         {
             return string.Empty;
         }
 
-        var id = string.Join("__", new[] { DataType, AssetClass, AssetId, Region, AsOfDate.ToString("yyyy-MM-dd"), DocumentType });
+        var id = string.Join("__", new[]
+        {
+            DataType, AssetClass, AssetId, Region, AsOfDate.ToString("yyyy-MM-dd"), DocumentType
+        });
+
         if (Version != null)
             id += $"__{Version}";
 
-        id = id.ToLowerInvariant();
-        return id;
+        return id.ToLowerInvariant();
     }
 }

@@ -1,4 +1,4 @@
-﻿using Phoenix.MarketData.Domain;
+﻿using Phoenix.MarketData.Core;
 using System.Text.Json.Serialization; // <- ADD THIS
 
 namespace Phoenix.MarketData.Infrastructure.Serialization;
@@ -6,29 +6,19 @@ namespace Phoenix.MarketData.Infrastructure.Serialization;
 public class CryptoOrdinalSpotPriceDataDto : BaseMarketDataDto
 {
     [JsonPropertyName("price")]
-    public required decimal Price { get; set; }
-
+    public decimal Price { get; set; }
     [JsonPropertyName("currency")]
-    public required string Currency { get; set; }
-
+    public string Currency { get; set; } = string.Empty;
     [JsonPropertyName("side")]
-    public required PriceSideDto Side { get; set; }
-
+    public PriceSideDto Side { get; set; } = PriceSideDto.Mid;
     [JsonPropertyName("inscriptionNumber")]
-    public required int InscriptionNumber { get; set; }
-
+    public int InscriptionNumber { get; set; }
     [JsonPropertyName("inscriptionId")]
-    public required string InscriptionId { get; set; }
-
+    public string InscriptionId { get; set; } = string.Empty;
     [JsonPropertyName("parentInscriptionId")]
-    public required string ParentInscriptionId { get; set; }
-
+    public string ParentInscriptionId { get; set; } = string.Empty;
     [JsonPropertyName("collectionName")]
-    public required string CollectionName { get; set; }
-
-    public CryptoOrdinalSpotPriceDataDto()
-    {
-    }
+    public string CollectionName { get; set; } = string.Empty;
 
     [JsonConstructor]
     public CryptoOrdinalSpotPriceDataDto(
@@ -50,8 +40,8 @@ public class CryptoOrdinalSpotPriceDataDto : BaseMarketDataDto
         string parentInscriptionId,
         string inscriptionId,
         int inscriptionNumber,
-        string currency)
-        : base(id, schemaVersion, version, assetId, assetClass, dataType, region, documentType, createTimestamp, asOfDate, asOfTime, tags)
+        string currency
+    ) : base(id, schemaVersion, version, assetId, assetClass, dataType, region, documentType, createTimestamp, asOfDate, asOfTime, tags)
     {
         Price = price;
         Side = side switch
@@ -60,7 +50,7 @@ public class CryptoOrdinalSpotPriceDataDto : BaseMarketDataDto
             PriceSide.Bid => PriceSideDto.Bid,
             PriceSide.Ask => PriceSideDto.Ask,
             null => PriceSideDto.Mid,
-            _ => throw new ArgumentOutOfRangeException(nameof(side), $"Unexpected side value: {side}")
+            _ => throw new ArgumentOutOfRangeException(nameof(side))
         };
         CollectionName = collectionName;
         ParentInscriptionId = parentInscriptionId;

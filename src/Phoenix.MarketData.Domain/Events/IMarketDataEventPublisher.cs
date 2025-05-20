@@ -1,10 +1,10 @@
 using System.Threading.Tasks;
-using Phoenix.MarketData.Domain.Models.Interfaces;
+using Phoenix.MarketData.Domain.Models;
 
-namespace Phoenix.MarketData.Domain.Events
+namespace Phoenix.MarketData.Core.Events
 {
     public interface IMarketDataEventPublisher
     {
-        Task PublishDataChangedEventAsync<T>(T marketData) where T : IMarketData;
+        Task PublishDataChangedEventAsync<T>(T marketData) where T : IMarketDataEntity;
     }
 }

@@ -1,4 +1,4 @@
-﻿using Phoenix.MarketData.Domain;
+﻿using Phoenix.MarketData.Core;
 using System.Text.Json.Serialization; // <- for System.Text.Json attributes
 
 namespace Phoenix.MarketData.Infrastructure.Serialization;
@@ -10,10 +10,6 @@ public class FxSpotPriceDataDto : BaseMarketDataDto
 
     [JsonPropertyName("side")]
     public PriceSideDto? Side { get; set; } // nullable, null by default
-
-    public FxSpotPriceDataDto()
-    {
-    }
 
     [JsonConstructor] // System.Text.Json supports this since .NET 7
     public FxSpotPriceDataDto(

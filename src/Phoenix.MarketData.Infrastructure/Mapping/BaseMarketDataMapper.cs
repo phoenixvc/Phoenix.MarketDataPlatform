@@ -1,4 +1,4 @@
-﻿using Phoenix.MarketData.Domain.Models;
+﻿using Phoenix.MarketData.Core.Models;
 using Phoenix.MarketData.Infrastructure.Serialization;
 
 namespace Phoenix.MarketData.Infrastructure.Mapping

@@ -7,9 +7,9 @@ using Azure;
 using Azure.Messaging;
 using Azure.Messaging.EventGrid;
 using Microsoft.Extensions.Logging;
+using Phoenix.MarketData.Core.Configuration;
 using Phoenix.MarketData.Core.Events;
-using Phoenix.MarketData.Domain.Configuration;
-using Phoenix.MarketData.Infrastructure.Configuration;
+using Phoenix.MarketData.Domain.Models;
 
 namespace Phoenix.MarketData.Infrastructure.Events
 {
@@ -18,14 +18,14 @@ namespace Phoenix.MarketData.Infrastructure.Events
         private readonly EventGridPublisherClient _client;
         private readonly ILogger<EventGridPublisher> _logger;
 
-        // Private constructor: forces use of factory method.
-        private EventGridPublisher(EventGridPublisherClient client, ILogger<EventGridPublisher> logger)
+        // Constructor for direct DI usage
+        public EventGridPublisher(EventGridPublisherClient client, ILogger<EventGridPublisher> logger)
         {
-            _client = client;
-            _logger = logger;
+            _client = client ?? throw new ArgumentNullException(nameof(client));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        // The proper async factory.
+        // Async factory for secret-based construction
         public static async Task<EventGridPublisher> CreateAsync(
             IMarketDataSecretProvider secretProvider,
             ILogger<EventGridPublisher> logger)
@@ -36,8 +36,11 @@ namespace Phoenix.MarketData.Infrastructure.Events
             return new EventGridPublisher(client, logger);
         }
 
+        // Generic event publish (CloudEvent, batch-safe)
         public async Task PublishAsync<T>(T eventData, string? topic = null) where T : class
         {
+            if (eventData == null) throw new ArgumentNullException(nameof(eventData));
+
             try
             {
                 var eventType = typeof(T).Name;
@@ -48,8 +51,8 @@ namespace Phoenix.MarketData.Infrastructure.Events
                     topic,
                     eventType,
                     data,
-                    "application/json",          // <-- This is correct
-                    CloudEventDataFormat.Json    // <-- Optional, makes intent clear
+                    "application/json",
+                    CloudEventDataFormat.Json
                 )
                 {
                     Id = Guid.NewGuid().ToString(),
@@ -66,6 +69,7 @@ namespace Phoenix.MarketData.Infrastructure.Events
             }
         }
 
+        // Batch publish
         public async Task PublishManyAsync<T>(IEnumerable<T> events, string? topic = null) where T : class
         {
             var eventsList = events.ToList();
@@ -81,14 +85,13 @@ namespace Phoenix.MarketData.Infrastructure.Events
                         topic,
                         eventType,
                         BinaryData.FromString(JsonSerializer.Serialize(e)),
-                        "application/json",                                 
-                        CloudEventDataFormat.Json                           
+                        "application/json",
+                        CloudEventDataFormat.Json
                     )
                 {
                     Id = Guid.NewGuid().ToString(),
                     Time = DateTimeOffset.UtcNow
-                })
-                    .ToList();
+                }).ToList();
 
                 await _client.SendEventsAsync(cloudEvents);
                 _logger.LogInformation("Published {Count} events of type {EventType} to {Topic}",
@@ -101,10 +104,31 @@ namespace Phoenix.MarketData.Infrastructure.Events
             }
         }
 
+        // Market data changed/created "legacy" style event for IMarketData, with subject & event type logic
+        public async Task PublishMarketDataEventAsync<T>(T marketData) where T : IMarketDataEntity
+        {
+            if (marketData == null)
+                throw new ArgumentNullException(nameof(marketData));
 
+            var eventType = (marketData.Version.GetValueOrDefault() > 1)
+                ? "Phoenix.MarketData.DataChanged"
+                : "Phoenix.MarketData.DataCreated";
+
+            var eventData = new BinaryData(JsonSerializer.Serialize(marketData));
+            var eventGridEvent = new EventGridEvent(
+                subject: $"{marketData.DataType}.{marketData.AssetClass}/{marketData.AssetId}",
+                eventType: eventType,
+                dataVersion: marketData.SchemaVersion,
+                data: eventData
+            );
+
+            await _client.SendEventAsync(eventGridEvent);
+            _logger.LogInformation("Published EventGridEvent {EventType} for {Subject}", eventType, eventGridEvent.Subject);
+        }
+
+        // Helper: PascalCase to kebab-case for topic derivation
         private static string DeriveTopicFromEventType(string eventType)
         {
-            // Simple PascalCase to kebab-case conversion
             return string.Concat(eventType.Select((x, i) => i > 0 && char.IsUpper(x) ? "-" + x.ToString().ToLower() : x.ToString().ToLower()));
         }
     }

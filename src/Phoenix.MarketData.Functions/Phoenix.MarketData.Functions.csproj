@@ -17,6 +17,9 @@
         <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="2.0.0" />
         <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore" Version="2.0.0"/>
         <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.0.0"/>
+        <PackageReference Include="Microsoft.Azure.EventGrid" Version="3.2.1" />
+        <PackageReference Include="System.Text.Json" Version="9.0.5" />
+        <!-- Comment removed for clarity -->
     </ItemGroup>
     <ItemGroup>
         <None Update="host.json">
@@ -31,6 +34,6 @@
         <Using Include="System.Threading.ExecutionContext" Alias="ExecutionContext"/>
     </ItemGroup>
     <ItemGroup>
-      <ProjectReference Include="..\src\Phoenix.MarketData.Infrastructure\Phoenix.MarketData.Infrastructure.csproj" />
+      <ProjectReference Include="..\Phoenix.MarketData.Infrastructure\Phoenix.MarketData.Infrastructure.csproj" />
     </ItemGroup>
 </Project>

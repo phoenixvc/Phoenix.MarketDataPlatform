@@ -24,7 +24,12 @@ namespace Phoenix.MarketData.Core.Validation
 
         public override string ToString()
             => IsValid ? "Valid" : string.Join("; ", Errors.Select(e => e.ToString()));
+
+
+        /// <summary>
+        /// Returns a flat string of all error messages (not just the "ToString" of each error).
+        /// </summary>
+        public string ErrorMessage
+            => string.Join("; ", Errors.Select(e => e.ErrorMessage));
     }
-
-
 }

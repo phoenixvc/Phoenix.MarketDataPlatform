@@ -1,5 +1,5 @@
-﻿using Phoenix.MarketData.Domain;
-using Phoenix.MarketData.Domain.Models;
+﻿using Phoenix.MarketData.Core;
+using Phoenix.MarketData.Core.Models;
 using Phoenix.MarketData.Infrastructure.Serialization;
 
 namespace Phoenix.MarketData.Infrastructure.Mapping;
@@ -19,11 +19,28 @@ public static class CryptoOrdinalSpotPriceDataMapper
     public static CryptoOrdinalSpotPriceDataDto ToDto(CryptoOrdinalSpotPriceData domain)
     {
         ArgumentNullException.ThrowIfNull(domain);
-        
-        var dto = new CryptoOrdinalSpotPriceDataDto(domain.Id, domain.SchemaVersion, domain.Version,
-            domain.AssetId, domain.AssetClass, domain.DataType, domain.Region, domain.DocumentType,
-            domain.CreateTimestamp, domain.AsOfDate, domain.AsOfTime, domain.Tags, domain.Price, domain.Side,
-            domain.CollectionName, domain.ParentInscriptionId, domain.InscriptionId, domain.InscriptionNumber, domain.Currency);
+
+var dto = new CryptoOrdinalSpotPriceDataDto(
+    id: domain.Id,
+    schemaVersion: domain.SchemaVersion,
+    version: domain.Version,
+    assetId: domain.AssetId,
+    assetClass: domain.AssetClass,
+    dataType: domain.DataType,
+    region: domain.Region,
+    documentType: domain.DocumentType,
+    createTimestamp: domain.CreateTimestamp,
+    asOfDate: domain.AsOfDate,
+    asOfTime: domain.AsOfTime,
+    tags: domain.Tags,
+    price: domain.Price,
+    side: domain.Side,
+    collectionName: domain.CollectionName,
+    parentInscriptionId: domain.ParentInscriptionId,
+    inscriptionId: domain.InscriptionId,
+    inscriptionNumber: domain.InscriptionNumber,
+    currency: domain.Currency
+);
 
         return dto;
     }

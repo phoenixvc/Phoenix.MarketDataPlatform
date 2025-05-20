@@ -1,20 +1,32 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Phoenix.MarketData.Domain.Events;
-using Phoenix.MarketData.Domain.Models.Interfaces;
-using Phoenix.MarketData.Domain.Repositories;
+using Phoenix.MarketData.Core.Events;
+using Phoenix.MarketData.Core.Validation;
+using Phoenix.MarketData.Domain.Models;
+using Phoenix.MarketData.Infrastructure.Repositories;
 
 namespace Phoenix.MarketData.Application.Services
 {
-    public class MarketDataService : IMarketDataService
+    public interface IMarketDataService<T> where T : IMarketDataEntity
     {
-        private readonly IMarketDataRepository _repository;
+        Task<string> PublishMarketDataAsync(T marketData);
+        Task<T?> GetLatestMarketDataAsync(
+            string dataType, string assetClass, string assetId, string region,
+            DateOnly asOfDate, string documentType);
+        Task<IEnumerable<T>> QueryMarketDataAsync(
+            string dataType, string assetClass, string? assetId = null,
+            DateTime? fromDate = null, DateTime? toDate = null);
+    }
+
+    public class MarketDataService<T> : IMarketDataService<T> where T : class, IMarketDataEntity
+    {
+        private readonly CosmosRepository<T> _repository;
         private readonly IMarketDataEventPublisher _eventPublisher;
         private readonly IMarketDataValidator _validator;
 
         public MarketDataService(
-            IMarketDataRepository repository,
+            CosmosRepository<T> repository,
             IMarketDataEventPublisher eventPublisher,
             IMarketDataValidator validator)
         {
@@ -23,37 +35,30 @@ namespace Phoenix.MarketData.Application.Services
             _validator = validator ?? throw new ArgumentNullException(nameof(validator));
         }
 
-        // Push model - data is pushed to the system
-        public async Task<string> PublishMarketDataAsync<T>(T marketData) where T : IMarketData
+        public async Task<string> PublishMarketDataAsync(T marketData)
         {
-            // Validate the data
+            if (marketData == null)
+                throw new ArgumentNullException(nameof(marketData));
             _validator.ValidateMarketData(marketData);
-            
-            // Save to repository
-            var id = await _repository.SaveMarketDataAsync(marketData);
-            
-            // Publish event
+            var id = await _repository.AddAsync(marketData);
             await _eventPublisher.PublishDataChangedEventAsync(marketData);
-            
-            return id;
+            return id is IEntity entity ? entity.Id : string.Empty;
         }
 
-        // Pull model - data is retrieved from the system
-        public async Task<T?> GetLatestMarketDataAsync<T>(
+        public async Task<T?> GetLatestMarketDataAsync(
             string dataType, string assetClass, string assetId, string region,
-            DateOnly asOfDate, string documentType) where T : IMarketData
+            DateOnly asOfDate, string documentType)
         {
-            var result = await _repository.GetMarketDataByLatestVersionAsync<T>(
+            var result = await _repository.GetLatestMarketDataAsync(
                 dataType, assetClass, assetId, region, asOfDate, documentType);
-                
-            return result.Result;
+            return result;
         }
-        
-        public async Task<IEnumerable<T>> QueryMarketDataAsync<T>(
+
+        public async Task<IEnumerable<T>> QueryMarketDataAsync(
             string dataType, string assetClass, string? assetId = null,
-            DateTime? fromDate = null, DateTime? toDate = null) where T : IMarketData
+            DateTime? fromDate = null, DateTime? toDate = null)
         {
-            return await _repository.QueryMarketDataAsync<T>(
+            return await _repository.QueryByRangeAsync(
                 dataType, assetClass, assetId, fromDate, toDate);
         }
     }

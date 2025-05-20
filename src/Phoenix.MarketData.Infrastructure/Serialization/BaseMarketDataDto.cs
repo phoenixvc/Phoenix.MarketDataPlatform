@@ -3,10 +3,6 @@ using Phoenix.MarketData.Infrastructure.Serialization.JsonConverters;
 
 namespace Phoenix.MarketData.Infrastructure.Serialization;
 
-/// <summary>
-/// Represents the base implementation of a market data object, providing core properties
-/// and functionality for identifying and managing market data records.
-/// </summary>
 public class BaseMarketDataDto
 {
     [JsonPropertyName("id")]
@@ -47,13 +43,7 @@ public class BaseMarketDataDto
     [JsonConverter(typeof(TimeOnlyJsonConverter))]
     public TimeOnly? AsOfTime { get; set; }
 
-    public BaseMarketDataDto()
-    {
-    }
-
-#if NET7_0_OR_GREATER
     [JsonConstructor]
-#endif
     public BaseMarketDataDto(
         string id,
         string schemaVersion,
