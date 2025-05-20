@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- Core abstractions typically need minimal dependencies -->
+        <PackageReference Include="MediatR" Version="12.5.0" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+        <PackageReference Include="System.Text.Json" Version="9.0.5" />
+        <PackageReference Include="FluentValidation" Version="11.9.0" />
+        <PackageReference Include="JsonSchema.Net" Version="3.1.0" />
+    </ItemGroup>
+
+</Project>
