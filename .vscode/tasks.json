@@ -107,16 +107,17 @@
 		},
 		{
       "label": "Generate Coverage Report",
+      "detail": "Runs tests with coverage and generates an HTML report",
       "type": "shell",
-      "command": "${workspaceFolder}/tests/Phoenix.MarketData.Infrastructure.Tests/Generate-CoverageReport.ps1",
+      "command": "cd tests/Phoenix.MarketData.Infrastructure.Tests && ${workspaceFolder}/tests/Phoenix.MarketData.Infrastructure.Tests/Generate-CoverageReport.ps1",
       "windows": {
-        "command": "powershell.exe -ExecutionPolicy Bypass -File \"${workspaceFolder}\\tests\\Phoenix.MarketData.Infrastructure.Tests\\Generate-CoverageReport.ps1\""
+        "command": "cd tests/Phoenix.MarketData.Infrastructure.Tests && powershell -ExecutionPolicy Bypass -File .\\Generate-CoverageReport.ps1"
       },
       "linux": {
-        "command": "${workspaceFolder}/tests/Phoenix.MarketData.Infrastructure.Tests/generate-coverage-report.sh"
+        "command": "cd tests/Phoenix.MarketData.Infrastructure.Tests && ./generate-coverage-report.sh"
       },
       "osx": {
-        "command": "${workspaceFolder}/tests/Phoenix.MarketData.Infrastructure.Tests/generate-coverage-report.sh"
+        "command": "cd tests/Phoenix.MarketData.Infrastructure.Tests && ./generate-coverage-report.sh"
       },
       "group": {
         "kind": "test",
@@ -124,7 +125,7 @@
       },
       "presentation": {
         "reveal": "always",
-        "panel": "new"
+        "panel": "dedicated"
       }
     }
   ]

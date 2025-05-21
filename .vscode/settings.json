@@ -6,6 +6,7 @@
         "eurusd",
         "globaltool",
         "Intraday",
+        "irongut",
         "Mediat",
         "opencover",
         "reportgenerator",
@@ -13,6 +14,7 @@
         "Rethrowing",
         "runsettings",
         "schemaversion",
+        "spotprice",
         "targetdir",
         "volatilities",
         "xunit"
