@@ -8,10 +8,16 @@
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
         <LangVersion>13</LangVersion>
+        <VSTestResultsDirectory>$(MSBuildProjectDirectory)/TestResults</VSTestResultsDirectory>
+        <RunSettingsFilePath>$(MSBuildProjectDirectory)/coverage.runsettings</RunSettingsFilePath>
+        <CollectCoverage>true</CollectCoverage>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="coverlet.collector" Version="6.0.0"/>
+        <PackageReference Include="coverlet.collector" Version="6.0.0">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
         <PackageReference Include="Moq" Version="4.20.72" />
         <PackageReference Include="xunit" Version="2.5.3"/>
@@ -37,4 +43,11 @@
       <ProjectReference Include="..\..\src\Phoenix.MarketData.Application\Phoenix.MarketData.Application.csproj" />
     </ItemGroup>
 
+    <!-- Add custom target for running tests and generating reports -->
+    <Target Name="GenerateCoverageReport" AfterTargets="VSTest" Condition="'$(GenerateReport)' == 'true'">
+        <Message Text="Generating coverage report..." Importance="high" />
+        <Exec Command="dotnet tool install -g dotnet-reportgenerator-globaltool" IgnoreExitCode="true" />
+        <Exec Command="reportgenerator &quot;-reports:$(VSTestResultsDirectory)/**/coverage.cobertura.xml&quot; &quot;-targetdir:$(MSBuildProjectDirectory)/CoverageReport&quot; -reporttypes:Html" />
+        <Message Text="Coverage report generated at: $(MSBuildProjectDirectory)/CoverageReport/index.html" Importance="high" />
+    </Target>
 </Project>

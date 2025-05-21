@@ -104,6 +104,28 @@
 			"options": {
 				"cwd": "${workspaceFolder}"
 			}
-		}
-	]
+		},
+		{
+      "label": "Generate Coverage Report",
+      "type": "shell",
+      "command": "${workspaceFolder}/tests/Phoenix.MarketData.Infrastructure.Tests/Generate-CoverageReport.ps1",
+      "windows": {
+        "command": "powershell.exe -ExecutionPolicy Bypass -File \"${workspaceFolder}\\tests\\Phoenix.MarketData.Infrastructure.Tests\\Generate-CoverageReport.ps1\""
+      },
+      "linux": {
+        "command": "${workspaceFolder}/tests/Phoenix.MarketData.Infrastructure.Tests/generate-coverage-report.sh"
+      },
+      "osx": {
+        "command": "${workspaceFolder}/tests/Phoenix.MarketData.Infrastructure.Tests/generate-coverage-report.sh"
+      },
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    }
+  ]
 }

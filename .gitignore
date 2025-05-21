@@ -3,3 +3,10 @@ obj/
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
+
+# Coverage reports
+**/TestResults/
+**/CoverageReport/
+*.cobertura.xml
+*.opencover.xml
+coverage.json
