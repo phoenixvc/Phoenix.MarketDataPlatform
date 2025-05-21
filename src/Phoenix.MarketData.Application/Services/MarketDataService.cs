@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Phoenix.MarketData.Core.Events;
 using Phoenix.MarketData.Core.Validation;
@@ -16,19 +17,20 @@ namespace Phoenix.MarketData.Application.Services
             DateOnly asOfDate, string documentType);
         Task<IEnumerable<T>> QueryMarketDataAsync(
             string dataType, string assetClass, string? assetId = null,
-            DateTime? fromDate = null, DateTime? toDate = null);
+            DateTime? fromDate = null, DateTime? toDate = null,
+            CancellationToken cancellationToken = default);
     }
 
     public class MarketDataService<T> : IMarketDataService<T> where T : class, IMarketDataEntity
     {
         private readonly CosmosRepository<T> _repository;
         private readonly IMarketDataEventPublisher _eventPublisher;
-        private readonly IMarketDataValidator _validator;
+        private readonly IValidator<T> _validator;
 
         public MarketDataService(
             CosmosRepository<T> repository,
             IMarketDataEventPublisher eventPublisher,
-            IMarketDataValidator validator)
+            IValidator<T> validator)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _eventPublisher = eventPublisher ?? throw new ArgumentNullException(nameof(eventPublisher));
@@ -39,12 +41,16 @@ namespace Phoenix.MarketData.Application.Services
         {
             if (marketData == null)
                 throw new ArgumentNullException(nameof(marketData));
-            _validator.ValidateMarketData(marketData);
+            var validationResult = await _validator.ValidateAsync(marketData);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
             var id = await _repository.AddAsync(marketData);
             await _eventPublisher.PublishDataChangedEventAsync(marketData);
             return id is IEntity entity ? entity.Id : string.Empty;
         }
-
         public async Task<T?> GetLatestMarketDataAsync(
             string dataType, string assetClass, string assetId, string region,
             DateOnly asOfDate, string documentType)
@@ -56,10 +62,11 @@ namespace Phoenix.MarketData.Application.Services
 
         public async Task<IEnumerable<T>> QueryMarketDataAsync(
             string dataType, string assetClass, string? assetId = null,
-            DateTime? fromDate = null, DateTime? toDate = null)
+            DateTime? fromDate = null, DateTime? toDate = null,
+            CancellationToken cancellationToken = default)
         {
             return await _repository.QueryByRangeAsync(
                 dataType, assetClass, assetId, fromDate, toDate);
-        }
     }
+}
 }

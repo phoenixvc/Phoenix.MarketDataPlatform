@@ -1,52 +1,50 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Phoenix.MarketData.Core.Validation;
 using Phoenix.MarketData.Domain.Models;
-using Phoenix.MarketData.Application.Services;
+
 namespace Phoenix.MarketData.Application.Services.Decorators
 {
-    /// <summary>
-    /// A decorator for IMarketDataService that adds validation before operations
-    /// </summary>
     public class ValidationMarketDataServiceDecorator<T> : ServiceValidationDecorator<IMarketDataService<T>>, IMarketDataService<T>
-        where T : IMarketDataEntity
+        where T : class, IMarketDataEntity
     {
-        private readonly IValidator<T> _marketDataValidator;
+        private readonly IValidator<T> _validator;
 
-        public ValidationMarketDataServiceDecorator(
-            IMarketDataService<T> marketDataService,
-            IValidator<T> marketDataValidator)
-            : base(marketDataService)
+        public ValidationMarketDataServiceDecorator(IMarketDataService<T> decorated, IValidator<T> validator)
+            : base(decorated)
         {
-            _marketDataValidator = marketDataValidator ?? throw new ArgumentNullException(nameof(marketDataValidator));
+            _validator = validator ?? throw new ArgumentNullException(nameof(validator));
         }
 
         public async Task<string> PublishMarketDataAsync(T marketData)
         {
-            // Validate before publishing
-            await ValidateAsync(marketData, _marketDataValidator);
+            // Validate market data before delegating to decorated service
+            var validationResult = await _validator.ValidateAsync(marketData);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
 
-            // Delegate to the decorated service
             return await DecoratedService.PublishMarketDataAsync(marketData);
         }
 
-        public Task<T?> GetLatestMarketDataAsync(
+        public async Task<T?> GetLatestMarketDataAsync(
             string dataType, string assetClass, string assetId, string region,
             DateOnly asOfDate, string documentType)
         {
             // No validation needed for read operations
-            return DecoratedService.GetLatestMarketDataAsync(
-                dataType, assetClass, assetId, region, asOfDate, documentType);
+            return await DecoratedService.GetLatestMarketDataAsync(dataType, assetClass, assetId, region, asOfDate, documentType);
         }
 
-        public Task<IEnumerable<T>> QueryMarketDataAsync(
+        public async Task<IEnumerable<T>> QueryMarketDataAsync(
             string dataType, string assetClass, string? assetId = null,
-            DateTime? fromDate = null, DateTime? toDate = null)
+            DateTime? fromDate = null, DateTime? toDate = null,
+            CancellationToken cancellationToken = default)
         {
             // No validation needed for read operations
-            return DecoratedService.QueryMarketDataAsync(
-                dataType, assetClass, assetId, fromDate, toDate);
+            return await DecoratedService.QueryMarketDataAsync(dataType, assetClass, assetId, fromDate, toDate, cancellationToken);
         }
     }
 }

@@ -15,15 +15,15 @@ namespace Phoenix.MarketData.Application.Events
     /// </summary>
     public class MarketDataEventSubscriber : IMarketDataEventSubscriber
     {
-        private readonly IMarketDataService<IMarketDataEntity> _marketDataService;
+        private readonly IMarketDataEventProcessor _eventProcessor;
         private readonly ILogger<MarketDataEventSubscriber> _logger;
         private readonly IAsyncPolicy _retryPolicy;
 
         public MarketDataEventSubscriber(
-            IMarketDataService<IMarketDataEntity> marketDataService,
+            IMarketDataEventProcessor eventProcessor,
             ILogger<MarketDataEventSubscriber> logger)
         {
-            _marketDataService = marketDataService ?? throw new ArgumentNullException(nameof(marketDataService));
+            _eventProcessor = eventProcessor ?? throw new ArgumentNullException(nameof(eventProcessor));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             // Configure retry policy with exponential backoff
@@ -54,14 +54,10 @@ namespace Phoenix.MarketData.Application.Events
                 try
                 {
                     // Process event
-                    // Note: Actual implementation would depend on your specific business requirements
                     _logger.LogInformation("Processing market data created event: {EventId}", eventData.Id);
 
-                    // Example: You could store in a cache or notify other systems
-                    // await _marketDataService.ProcessCreatedEventAsync(eventData);
-
-                    // Prevent warning about not awaiting Task
-                    await Task.CompletedTask;
+                    // Call the event processor to handle the event
+                    await _eventProcessor.ProcessCreatedEventAsync(eventData, cancellationToken);
                 }
                 catch (Exception ex) when (!(ex is OperationCanceledException))
                 {
@@ -86,11 +82,8 @@ namespace Phoenix.MarketData.Application.Events
                     // Process event
                     _logger.LogInformation("Processing market data changed event: {EventId}", eventData.Id);
 
-                    // Example: You could update caches or notify downstream systems
-                    // await _marketDataService.ProcessChangedEventAsync(eventData);
-
-                    // Prevent warning about not awaiting Task
-                    await Task.CompletedTask;
+                    // Call the event processor to handle the event
+                    await _eventProcessor.ProcessChangedEventAsync(eventData, cancellationToken);
                 }
                 catch (Exception ex) when (!(ex is OperationCanceledException))
                 {

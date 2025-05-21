@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.MarketData.Applicat
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{8F1E38D6-FF2A-46A8-AB55-5695F0064F6E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.MarketData.Infrastructure.Tests", "Phoenix.MarketData.Infrastructure.Tests\Phoenix.MarketData.Infrastructure.Tests.csproj", "{D8199FB8-B44D-4305-9458-1F887BDD7BF0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.MarketData.Infrastructure.Tests", "tests\Phoenix.MarketData.Infrastructure.Tests\Phoenix.MarketData.Infrastructure.Tests.csproj", "{D8199FB8-B44D-4305-9458-1F887BDD7BF0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

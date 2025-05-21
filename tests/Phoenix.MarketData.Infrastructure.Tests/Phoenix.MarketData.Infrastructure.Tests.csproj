@@ -32,9 +32,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\src\Phoenix.MarketData.Infrastructure\Phoenix.MarketData.Infrastructure.csproj" />
-      <ProjectReference Include="..\src\Phoenix.MarketData.Core\Phoenix.MarketData.Core.csproj" />
-      <ProjectReference Include="..\src\Phoenix.MarketData.Application\Phoenix.MarketData.Application.csproj" />
+      <ProjectReference Include="..\..\src\Phoenix.MarketData.Infrastructure\Phoenix.MarketData.Infrastructure.csproj" />
+      <ProjectReference Include="..\..\src\Phoenix.MarketData.Core\Phoenix.MarketData.Core.csproj" />
+      <ProjectReference Include="..\..\src\Phoenix.MarketData.Application\Phoenix.MarketData.Application.csproj" />
     </ItemGroup>
 
 </Project>
