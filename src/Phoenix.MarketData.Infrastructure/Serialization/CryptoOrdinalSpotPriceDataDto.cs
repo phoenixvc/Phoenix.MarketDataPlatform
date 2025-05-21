@@ -1,5 +1,5 @@
 ﻿using Phoenix.MarketData.Core;
-using System.Text.Json.Serialization; // <- ADD THIS
+using System.Text.Json.Serialization;
 
 namespace Phoenix.MarketData.Infrastructure.Serialization;
 
