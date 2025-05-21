@@ -1,9 +1,21 @@
 {
     "cSpell.words": [
         "assetclass",
+        "buildtransitive",
+        "contentfiles",
         "eurusd",
+        "globaltool",
+        "Intraday",
+        "irongut",
         "Mediat",
+        "opencover",
+        "reportgenerator",
+        "reporttypes",
+        "Rethrowing",
+        "runsettings",
         "schemaversion",
+        "spotprice",
+        "targetdir",
         "volatilities",
         "xunit"
     ],
@@ -11,5 +23,7 @@
     "azureFunctions.projectLanguage": "C#",
     "azureFunctions.projectRuntime": "~4",
     "debug.internalConsoleOptions": "neverOpen",
-    "azureFunctions.preDeployTask": "publish (functions)"
+    "azureFunctions.preDeployTask": "publish (functions)",
+    "dotnet-test-explorer.testProjectPath": "tests/**/*.csproj",
+    "azureFunctions.projectSubpath": "src\\Phoenix.MarketData.Functions"
 }

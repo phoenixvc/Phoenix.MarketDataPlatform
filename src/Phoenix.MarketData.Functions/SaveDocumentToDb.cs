@@ -7,6 +7,9 @@ using Phoenix.MarketData.Infrastructure.Mapping;
 using Phoenix.MarketData.Infrastructure.Schemas;
 using Phoenix.MarketData.Infrastructure.Serialization;
 using Phoenix.MarketData.Domain.Models;
+using System;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace Phoenix.MarketData.Functions;
 
@@ -38,12 +41,12 @@ public class SaveDocumentToDb
         // Validate/dispatch per combination
         if (dataType == "price.spot" && assetClass == "fx")
         {
-            return await HandleDocumentAsync<FxSpotPriceDataDto>(req, dataType, assetClass, schemaVersion, FxSpotPriceDataMapper.ToDomain);
+            return await HandleDocumentAsync<FxSpotPriceDataDto>(req, dataType, assetClass, schemaVersion, FxSpotPriceDataMapper.MapToDomain);
         }
 
         if (dataType == "price.ordinals.spot" && assetClass == "crypto")
         {
-            return await HandleDocumentAsync<CryptoOrdinalSpotPriceDataDto>(req, dataType, assetClass, schemaVersion, CryptoOrdinalSpotPriceDataMapper.ToDomain);
+            return await HandleDocumentAsync<CryptoOrdinalSpotPriceDataDto>(req, dataType, assetClass, schemaVersion, CryptoOrdinalSpotPriceDataMapper.MapToDomain);
         }
 
         return new BadRequestObjectResult("Invalid request. Expected 'datatype' and 'assetclass' to be a valid combination.");

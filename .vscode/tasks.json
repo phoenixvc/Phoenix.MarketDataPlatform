@@ -68,15 +68,65 @@
 			}
 		},
 		{
-			"label": "run (functions)",
 			"type": "func",
 			"dependsOn": "build (functions)",
 			"options": {
-				"cwd": "${workspaceFolder}/src/Phoenix.MarketData.Functions/bin/Debug/net9.0"
+				"cwd": "${workspaceFolder}/src\\Phoenix.MarketData.Functions/bin/Debug/net9.0"
 			},
 			"command": "host start",
 			"isBackground": true,
 			"problemMatcher": "$func-dotnet-watch"
-		}
-	]
+		},
+		{
+			"label": "build (solution)",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"/property:GenerateFullPaths=true",
+				"/consoleloggerparameters:NoSummary"
+			],
+			"type": "process",
+			"problemMatcher": "$msCompile",
+			"options": {
+				"cwd": "${workspaceFolder}"
+			}
+		},
+		{
+			"label": "test",
+			"command": "dotnet",
+			"args": [
+				"test",
+				"/property:GenerateFullPaths=true",
+				"/consoleloggerparameters:NoSummary"
+			],
+			"type": "process",
+			"problemMatcher": "$msCompile",
+			"options": {
+				"cwd": "${workspaceFolder}"
+			}
+		},
+		{
+      "label": "Generate Coverage Report",
+      "detail": "Runs tests with coverage and generates an HTML report",
+      "type": "shell",
+      "command": "cd tests/Phoenix.MarketData.Infrastructure.Tests && ${workspaceFolder}/tests/Phoenix.MarketData.Infrastructure.Tests/Generate-CoverageReport.ps1",
+      "windows": {
+        "command": "cd tests/Phoenix.MarketData.Infrastructure.Tests && powershell -ExecutionPolicy Bypass -File .\\Generate-CoverageReport.ps1"
+      },
+      "linux": {
+        "command": "cd tests/Phoenix.MarketData.Infrastructure.Tests && ./generate-coverage-report.sh"
+      },
+      "osx": {
+        "command": "cd tests/Phoenix.MarketData.Infrastructure.Tests && ./generate-coverage-report.sh"
+      },
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    }
+  ]
 }

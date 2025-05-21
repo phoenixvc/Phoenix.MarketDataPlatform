@@ -99,7 +99,8 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
         {
             try
             {
-                var response = await _container.UpsertItemAsync(entity);
+                // Add the partition key parameter to match the mock expectations
+                var response = await _container.UpsertItemAsync(entity, new PartitionKey(entity.Id));
                 if (_eventPublisher != null)
                     await _eventPublisher.PublishAsync(new EntityUpdatedEvent<T>(entity), $"{typeof(T).Name.ToLowerInvariant()}-updated");
                 return response.Resource;

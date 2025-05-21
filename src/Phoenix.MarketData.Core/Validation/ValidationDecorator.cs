@@ -7,27 +7,48 @@ using MediatR;
 
 namespace Phoenix.MarketData.Core.Validation
 {
-    public class ValidationCommandHandlerDecorator<TRequest> : IRequestHandler<TRequest>
+    /// <summary>
+    /// Generic decorator for adding validation to any service operation
+    /// </summary>
+    /// <typeparam name="TService">Type of service being decorated</typeparam>
+    public class ValidationDecorator<TRequest> : IRequestHandler<TRequest>
         where TRequest : IRequest
     {
-        private readonly IRequestHandler<TRequest> _decorated;
+        private readonly IRequestHandler<TRequest> _decoratedHandler;
         private readonly IValidator<TRequest> _validator;
 
-        public ValidationCommandHandlerDecorator(
-            IRequestHandler<TRequest> decorated,
+        public ValidationDecorator(
+            IRequestHandler<TRequest> decoratedHandler,
             IValidator<TRequest> validator)
         {
-            _decorated = decorated;
+            _decoratedHandler = decoratedHandler ?? throw new System.ArgumentNullException(nameof(decoratedHandler));
             _validator = validator;
         }
 
         public async Task Handle(TRequest request, CancellationToken cancellationToken)
         {
-            var fvResult = await _validator.ValidateAsync(request, cancellationToken);
+            await ValidateAsync(request, _validator, cancellationToken);
+            await _decoratedHandler.Handle(request, cancellationToken);
+        }
 
-            if (!fvResult.IsValid)
+        /// <summary>
+        /// Validates an entity using the provided validator and throws a ValidationException if validation fails
+        /// </summary>
+        /// <typeparam name="TEntity">Type of entity to validate</typeparam>
+        /// <param name="entity">The entity to validate</param>
+        /// <param name="validator">The validator to use</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <returns>A task that completes when validation is done</returns>
+        /// <exception cref="ValidationException">Thrown when validation fails</exception>
+        private async Task ValidateAsync<TEntity>(TEntity entity, IValidator<TEntity> validator, CancellationToken cancellationToken)
+        {
+            if (validator == null)
+                return;
+
+            var validationResult = await validator.ValidateAsync(entity, cancellationToken);
+            if (!validationResult.IsValid)
             {
-                var errors = fvResult.Errors.Select(f => new ValidationError
+                var errors = validationResult.Errors.Select(f => new ValidationError
                 {
                     PropertyName = f.PropertyName,
                     ErrorMessage = f.ErrorMessage,
@@ -37,8 +58,6 @@ namespace Phoenix.MarketData.Core.Validation
 
                 throw new ValidationException(errors);
             }
-
-            await _decorated.Handle(request, cancellationToken);
         }
     }
 }
