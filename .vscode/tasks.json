@@ -68,11 +68,10 @@
 			}
 		},
 		{
-			"label": "run (functions)",
 			"type": "func",
 			"dependsOn": "build (functions)",
 			"options": {
-				"cwd": "${workspaceFolder}/src/Phoenix.MarketData.Functions/bin/Debug/net9.0"
+				"cwd": "${workspaceFolder}/src\\Phoenix.MarketData.Functions/bin/Debug/net9.0"
 			},
 			"command": "host start",
 			"isBackground": true,

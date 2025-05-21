@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "prepare": "husky",
+    "test": "echo \"No tests configured\" && exit 0"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}
