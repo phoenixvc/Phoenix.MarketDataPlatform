@@ -50,7 +50,7 @@ public class CryptoOrdinalSpotPriceDataDto : BaseMarketDataDto
             PriceSide.Bid => PriceSideDto.Bid,
             PriceSide.Ask => PriceSideDto.Ask,
             null => PriceSideDto.Mid,
-            _ => throw new ArgumentOutOfRangeException(nameof(side))
+            _ => throw new ArgumentOutOfRangeException(nameof(side), $"Unexpected price side value: {side}")
         };
         CollectionName = collectionName;
         ParentInscriptionId = parentInscriptionId;

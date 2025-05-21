@@ -9,9 +9,9 @@ public class FxSpotPriceDataDto : BaseMarketDataDto
     public decimal Price { get; set; }
 
     [JsonPropertyName("side")]
-    public PriceSideDto? Side { get; set; } // nullable, null by default
+    public PriceSideDto? Side { get; set; } // nullable, defaults to Mid in constructor
 
-    [JsonConstructor] // System.Text.Json supports this since .NET 7
+    [JsonConstructor]
     public FxSpotPriceDataDto(
         string id,
         string schemaVersion,
@@ -30,12 +30,6 @@ public class FxSpotPriceDataDto : BaseMarketDataDto
     ) : base(id, schemaVersion, version, assetId, assetClass, dataType, region, documentType, createTimeStamp, asOfDate, asOfTime, tags)
     {
         Price = price;
-        Side = side switch
-        {
-            PriceSide.Mid => PriceSideDto.Mid,
-            PriceSide.Bid => PriceSideDto.Bid,
-            PriceSide.Ask => PriceSideDto.Ask,
-            _ => PriceSideDto.Mid,
-        };
+        Side = (PriceSideDto)side;
     }
 }

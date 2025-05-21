@@ -53,7 +53,7 @@ public class BaseMarketDataDto
         string dataType,
         string region,
         string documentType,
-        DateTimeOffset createTimeStamp,
+        DateTimeOffset createTimestamp,
         DateOnly asOfDate,
         TimeOnly? asOfTime,
         List<string>? tags)
@@ -66,7 +66,7 @@ public class BaseMarketDataDto
         DataType = dataType;
         Region = region;
         DocumentType = documentType;
-        CreateTimestamp = createTimeStamp;
+        CreateTimestamp = createTimestamp;
         AsOfDate = asOfDate;
         AsOfTime = asOfTime;
         Tags = tags ?? [];

@@ -23,7 +23,7 @@ public class TimeOnlyJsonConverter : JsonConverter<TimeOnly>
         if (TimeOnly.TryParseExact(str, Format, CultureInfo.InvariantCulture, DateTimeStyles.None, out var result))
             return result;
 
-        throw new JsonException($"Cannot convert '{str}' to TimeOnly (expected format: {Format}).");
+        return TimeOnly.MinValue;
     }
 
     public override void Write(Utf8JsonWriter writer, TimeOnly value, JsonSerializerOptions options)

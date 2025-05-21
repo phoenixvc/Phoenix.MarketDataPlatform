@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Phoenix.MarketData.Core.Models;
 using Phoenix.MarketData.Core.Validation;
-using Phoenix.MarketData.Domain.Models;
+
 namespace Phoenix.MarketData.Infrastructure.Validation
 {
     public class FxSpotPriceDataValidator : IValidator<FxSpotPriceData>

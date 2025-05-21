@@ -10,8 +10,20 @@ using Phoenix.MarketData.Domain.Models;
 
 namespace Phoenix.MarketData.Infrastructure.Repositories
 {
-     // ========== EVENTS ==========
-    public class EntityCreatedEvent<T>
+
+    /// <summary>
+    /// Base interface for all entity lifecycle events
+    /// </summary>
+    public interface IEntityEvent
+    {
+        DateTimeOffset Timestamp { get; }
+    }
+
+    /// <summary>
+    /// Event raised when a new entity is created in the repository.
+    /// </summary>
+    /// <typeparam name="T">The type of the entity that was created</typeparam>
+    public class EntityCreatedEvent<T> : IEntityEvent
     {
         public T Entity { get; }
         public DateTimeOffset Timestamp { get; }
@@ -21,7 +33,12 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
             Timestamp = DateTimeOffset.UtcNow;
         }
     }
-    public class EntityUpdatedEvent<T>
+
+    /// <summary>
+    /// Event raised when an entity is updated in the repository.
+    /// </summary>
+    /// <typeparam name="T">The type of the entity that was updated</typeparam>
+    public class EntityUpdatedEvent<T> : IEntityEvent
     {
         public T Entity { get; }
         public DateTimeOffset Timestamp { get; }
@@ -31,7 +48,11 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
             Timestamp = DateTimeOffset.UtcNow;
         }
     }
-    public class EntityDeletedEvent
+
+    /// <summary>
+    /// Event raised when an entity is deleted from the repository.
+    /// </summary>
+    public class EntityDeletedEvent : IEntityEvent
     {
         public string Id { get; }
         public string EntityType { get; }

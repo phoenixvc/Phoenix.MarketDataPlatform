@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
@@ -16,19 +17,72 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
         private readonly Container _container;
         private readonly ILogger<CosmosRepository<T>> _logger;
         private readonly IEventPublisher? _eventPublisher;
+        private readonly Func<T, string> _partitionKeyResolver;
 
-        public CosmosRepository(Container container, ILogger<CosmosRepository<T>> logger, IEventPublisher? eventPublisher = null)
+        public CosmosRepository(
+            Container container,
+            ILogger<CosmosRepository<T>> logger,
+            IEventPublisher? eventPublisher = null,
+            Func<T, string>? partitionKeyResolver = null)
         {
             _container = container ?? throw new ArgumentNullException(nameof(container));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _eventPublisher = eventPublisher;
+            _partitionKeyResolver = partitionKeyResolver ?? (e => e.AssetId);
+        }
+
+        /// <summary>
+        /// Gets the partition key for a specific entity ID.
+        /// This is a fallback method when we only have the ID but not the full entity.
+        /// </summary>
+        private async Task<PartitionKey> GetPartitionKeyForIdAsync(string id)
+        {
+            try
+            {
+                // Try to find the entity to get its partition key
+                // Use a direct query with SQL to avoid circular dependency with GetByIdAsync
+                var queryDefinition = new QueryDefinition(
+                    "SELECT * FROM c WHERE c.id = @id")
+                    .WithParameter("@id", id);
+
+                var iterator = _container.GetItemQueryIterator<T>(queryDefinition);
+                while (iterator.HasMoreResults)
+                {
+                    var response = await iterator.ReadNextAsync();
+                    if (response.Count > 0)
+                    {
+                        return new PartitionKey(_partitionKeyResolver(response.First()));
+                    }
+                }
+
+                // If we can't find the entity, fall back to using the ID
+                // This may fail if the partition key is not the ID
+                _logger.LogWarning("Could not determine partition key for entity with ID {Id}, falling back to ID", id);
+                return new PartitionKey(id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error determining partition key for entity with ID {Id}", id);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Gets the partition key for an entity
+        /// </summary>
+        private PartitionKey GetPartitionKey(T entity)
+        {
+            return new PartitionKey(_partitionKeyResolver(entity));
         }
 
         public async Task<T?> GetByIdAsync(string id)
         {
             try
             {
-                var response = await _container.ReadItemAsync<T>(id, new PartitionKey(id));
+                // We need to determine the partition key for this ID
+                var partitionKey = await GetPartitionKeyForIdAsync(id);
+
+                var response = await _container.ReadItemAsync<T>(id, partitionKey);
                 var entity = response.Resource;
 
                 // Soft delete filter
@@ -79,13 +133,122 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
             }
         }
 
+        /// <summary>
+        /// Gets a paged collection of entities with continuation token support
+        /// </summary>
+        /// <param name="pageSize">Number of items per page</param>
+        /// <param name="continuationToken">Token for continuing a previous query</param>
+        /// <param name="includeSoftDeleted">Whether to include soft-deleted items</param>
+        /// <returns>A tuple containing items and continuation token for the next page</returns>
+        public async Task<(IEnumerable<T> Items, string? ContinuationToken)> GetPagedAsync(
+            int pageSize,
+            string? continuationToken = null,
+            bool includeSoftDeleted = false)
+        {
+            try
+            {
+                // For LINQ queries, we need to use FeedIterator approach
+                var queryOptions = new QueryRequestOptions
+                {
+                    MaxItemCount = pageSize
+                };
+
+                // Create SQL query directly when using continuation tokens
+                string query = "SELECT * FROM c";
+
+                // Execute the query with the continuation token
+                var queryDefinition = new QueryDefinition(query);
+                var feedIterator = _container.GetItemQueryIterator<T>(
+                    queryDefinition,
+                    continuationToken,
+                    queryOptions);
+
+                var results = new List<T>();
+                string? nextContinuationToken = null;
+
+                if (feedIterator.HasMoreResults)
+                {
+                    var response = await feedIterator.ReadNextAsync();
+
+                    // Filter out soft-deleted items if needed
+                    if (typeof(ISoftDeletable).IsAssignableFrom(typeof(T)) && !includeSoftDeleted)
+                    {
+                        results.AddRange(response.Where(e => !(e as ISoftDeletable)!.IsDeleted));
+                    }
+                    else
+                    {
+                        results.AddRange(response);
+                    }
+
+                    // Get continuation token for the next page
+                    nextContinuationToken = response.ContinuationToken;
+                }
+
+                _logger.LogDebug("Retrieved page of {Count} items with continuation token: {HasToken}",
+                    results.Count, nextContinuationToken != null);
+
+                return (results, nextContinuationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving paged entities of type {EntityType}", typeof(T).Name);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Queries entities based on a predicate
+        /// </summary>
+        /// <param name="predicate">The filter predicate</param>
+        /// <param name="includeSoftDeleted">Whether to include soft-deleted items</param>
+        /// <returns>A collection of entities matching the predicate</returns>
+        public async Task<IEnumerable<T>> QueryAsync(
+            Expression<Func<T, bool>> predicate,
+            bool includeSoftDeleted = false)
+        {
+            try
+            {
+                var query = _container.GetItemLinqQueryable<T>()
+                    .Where(predicate);
+
+                var iterator = query.ToFeedIterator();
+                var results = new List<T>();
+
+                while (iterator.HasMoreResults)
+                {
+                    var response = await iterator.ReadNextAsync();
+
+                    // Filter out soft-deleted items if needed
+                    if (typeof(ISoftDeletable).IsAssignableFrom(typeof(T)) && !includeSoftDeleted)
+                    {
+                        results.AddRange(response.Where(e => !(e as ISoftDeletable)!.IsDeleted));
+                    }
+                    else
+                    {
+                        results.AddRange(response);
+                    }
+                }
+
+                _logger.LogDebug("Query returned {Count} results", results.Count);
+                return results;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error querying entities of type {EntityType}", typeof(T).Name);
+                throw;
+            }
+        }
+
         public async Task<T> AddAsync(T entity)
         {
             try
             {
-                var response = await _container.CreateItemAsync(entity);
+                var partitionKey = GetPartitionKey(entity);
+                var response = await _container.CreateItemAsync(entity, partitionKey);
                 if (_eventPublisher != null)
-                    await _eventPublisher.PublishAsync(new EntityCreatedEvent<T>(entity), $"{typeof(T).Name.ToLowerInvariant()}-created");
+                    await _eventPublisher.PublishAsync(
+                        new EntityCreatedEvent<T>(entity),
+                        GetEventTopicName("created"));
                 return response.Resource;
             }
             catch (Exception ex)
@@ -99,10 +262,12 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
         {
             try
             {
-                // Add the partition key parameter to match the mock expectations
-                var response = await _container.UpsertItemAsync(entity, new PartitionKey(entity.Id));
+                var partitionKey = GetPartitionKey(entity);
+                var response = await _container.UpsertItemAsync(entity, partitionKey);
                 if (_eventPublisher != null)
-                    await _eventPublisher.PublishAsync(new EntityUpdatedEvent<T>(entity), $"{typeof(T).Name.ToLowerInvariant()}-updated");
+                    await _eventPublisher.PublishAsync(
+                        new EntityUpdatedEvent<T>(entity),
+                        GetEventTopicName("updated"));
                 return response.Resource;
             }
             catch (Exception ex)
@@ -122,16 +287,23 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
                 ((ISoftDeletable)entity).IsDeleted = true;
                 await UpdateAsync(entity);
                 if (_eventPublisher != null)
-                    await _eventPublisher.PublishAsync(new EntityDeletedEvent(id, typeof(T).Name), $"{typeof(T).Name.ToLowerInvariant()}-deleted");
+                    await _eventPublisher.PublishAsync(
+                        new EntityDeletedEvent(id, typeof(T).Name),
+                        GetEventTopicName("deleted"));
                 return true;
             }
 
             // Hard delete
             try
             {
-                await _container.DeleteItemAsync<T>(id, new PartitionKey(id));
+                // We need to determine the partition key for this ID
+                var partitionKey = await GetPartitionKeyForIdAsync(id);
+
+                await _container.DeleteItemAsync<T>(id, partitionKey);
                 if (_eventPublisher != null)
-                    await _eventPublisher.PublishAsync(new EntityDeletedEvent(id, typeof(T).Name), $"{typeof(T).Name.ToLowerInvariant()}-deleted");
+                    await _eventPublisher.PublishAsync(
+                        new EntityDeletedEvent(id, typeof(T).Name),
+                        GetEventTopicName("deleted"));
                 return true;
             }
             catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
@@ -146,6 +318,16 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
             }
         }
 
+        /// <summary>
+        /// Constructs a standardized event topic name for entity events.
+        /// </summary>
+        /// <param name="eventType">The type of event (e.g., "created", "updated", "deleted")</param>
+        /// <returns>A standardized event topic name</returns>
+        private string GetEventTopicName(string eventType)
+        {
+            return $"{typeof(T).Name.ToLowerInvariant()}-{eventType}";
+        }
+
         public async Task<int> BulkInsertAsync(IEnumerable<T> entities)
         {
             int count = 0;
@@ -154,13 +336,15 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
             {
                 try
                 {
-                    await _container.CreateItemAsync(entity);
+                    var partitionKey = GetPartitionKey(entity);
+                    await _container.CreateItemAsync(entity, partitionKey);
                     count++;
                 }
                 catch (Exception ex)
                 {
                     exceptions.Add(ex);
-                    _logger.LogError(ex, "Bulk insert failed for entity {EntityType}", typeof(T).Name);
+                    _logger.LogError(ex, "Bulk insert failed for entity {EntityType} with ID {Id}: {ErrorMessage}",
+                        typeof(T).Name, entity.Id, ex.Message);
                 }
             }
             if (exceptions.Count > 0)
@@ -172,7 +356,13 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
             string dataType, string assetClass, string assetId, string region,
             DateOnly asOfDate, string documentType)
         {
-            var query = _container.GetItemLinqQueryable<T>()
+            // Use the assetId for the partition key if possible
+            var queryOptions = new QueryRequestOptions
+            {
+                PartitionKey = new PartitionKey(assetId)
+            };
+
+            var query = _container.GetItemLinqQueryable<T>(requestOptions: queryOptions)
                 .Where(e =>
                     e.DataType == dataType &&
                     e.AssetClass == assetClass &&
@@ -201,53 +391,119 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
             return latest is IVersionedMarketDataEntity v ? v.Version + 1 : 1;
         }
 
+        /// <summary>
+        /// Queries entities by date range with optional filtering.
+        /// </summary>
+        /// <param name="dataType">The data type to filter by</param>
+        /// <param name="assetClass">The asset class to filter by</param>
+        /// <param name="assetId">Optional asset ID filter</param>
+        /// <param name="fromDate">Start date for the query range. If null, a default of 30 days ago will be used to avoid full container scans.</param>
+        /// <param name="toDate">End date for the query range. If null, the current date will be used.</param>
+        /// <param name="maxItems">Maximum number of items to return (default: 1000)</param>
+        /// <returns>A collection of entities matching the criteria</returns>
+        /// <remarks>
+        /// IMPORTANT: This method uses date bounds to optimize RU consumption and performance.
+        /// If no dates are provided, it will default to the last 30 days to prevent expensive full container scans.
+        /// </remarks>
         public async Task<IEnumerable<T>> QueryByRangeAsync(
             string dataType,
             string assetClass,
             string? assetId = null,
             DateTime? fromDate = null,
-            DateTime? toDate = null)
+            DateTime? toDate = null,
+            int maxItems = 1000)
         {
-            var queryable = _container.GetItemLinqQueryable<T>(allowSynchronousQueryExecution: false);
-
-            // Cast to IQueryable<IMarketData> if possible
-            // Make sure T implements IMarketData, or adjust as needed.
-            var query = queryable
-                .Where(e =>
-                    (e.DataType == dataType) &&
-                    (e.AssetClass == assetClass) &&
-                    (assetId == null || e.AssetId == assetId) &&
-                    (
-                        (!fromDate.HasValue || e.AsOfDate >= DateOnly.FromDateTime(fromDate.Value)) &&
-                        (!toDate.HasValue || e.AsOfDate <= DateOnly.FromDateTime(toDate.Value))
-                    ));
-
-            var iterator = query.ToFeedIterator();
-            var results = new List<T>();
-            while (iterator.HasMoreResults)
+            try
             {
-                var response = await iterator.ReadNextAsync();
-                results.AddRange(response);
+                // Set default date bounds if not provided to avoid full container scans
+                var effectiveFromDate = fromDate ?? DateTime.UtcNow.AddDays(-30);
+                var effectiveToDate = toDate ?? DateTime.UtcNow;
+
+                // Create query options with max item limit for performance
+                var queryOptions = new QueryRequestOptions
+                {
+                    MaxItemCount = maxItems
+                };
+
+                // Add partition key if assetId is provided (using assetId as partition key)
+                if (!string.IsNullOrEmpty(assetId))
+                {
+                    queryOptions.PartitionKey = new PartitionKey(assetId);
+                }
+
+                var queryable = _container.GetItemLinqQueryable<T>(
+                    allowSynchronousQueryExecution: false,
+                    requestOptions: queryOptions);
+
+                var query = queryable
+                    .Where(e =>
+                        (e.DataType == dataType) &&
+                        (e.AssetClass == assetClass) &&
+                        (assetId == null || e.AssetId == assetId) &&
+                        (e.AsOfDate >= DateOnly.FromDateTime(effectiveFromDate)) &&
+                        (e.AsOfDate <= DateOnly.FromDateTime(effectiveToDate))
+                    );
+
+                _logger.LogDebug("Executing range query: DataType={DataType}, AssetClass={AssetClass}, " +
+                               "AssetId={AssetId}, FromDate={FromDate}, ToDate={ToDate}, MaxItems={MaxItems}",
+                               dataType, assetClass, assetId ?? "any",
+                               effectiveFromDate.ToString("yyyy-MM-dd"),
+                               effectiveToDate.ToString("yyyy-MM-dd"),
+                               maxItems);
+
+                var iterator = query.ToFeedIterator();
+                var results = new List<T>();
+
+                while (iterator.HasMoreResults && results.Count < maxItems)
+                {
+                    var response = await iterator.ReadNextAsync();
+                    results.AddRange(response);
+
+                    if (results.Count >= maxItems)
+                    {
+                        _logger.LogWarning("Query result was truncated at {MaxItems} items. Consider refining your query criteria.",
+                            maxItems);
+                        break;
+                    }
+                }
+
+                _logger.LogDebug("Query returned {Count} results", results.Count);
+                return results;
             }
-            return results;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error executing range query: {ErrorMessage}", ex.Message);
+                throw;
+            }
         }
 
         public async Task<int> CountAsync(Func<IQueryable<T>, IOrderedQueryable<T>>? predicateBuilder = null)
         {
-            var query = _container.GetItemLinqQueryable<T>();
-            if (predicateBuilder != null)
-                query = predicateBuilder(query);
-
-            // Cosmos DB count pattern:
-            var countQuery = query.Select(_ => 1);
-            var iterator = countQuery.ToFeedIterator();
-            int count = 0;
-            while (iterator.HasMoreResults)
+            try
             {
-                var response = await iterator.ReadNextAsync();
-                count += response.Count();
+                var query = _container.GetItemLinqQueryable<T>();
+                if (predicateBuilder != null)
+                {
+                    query = predicateBuilder(query);
+                }
+
+                // Convert to feed iterator and count items across all pages
+                var feedIterator = query.ToFeedIterator();
+                int count = 0;
+
+                while (feedIterator.HasMoreResults)
+                {
+                    var response = await feedIterator.ReadNextAsync();
+                    count += response.Count;
+                }
+
+                return count;
             }
-            return count;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error counting entities of type {EntityType}", typeof(T).Name);
+                throw;
+            }
         }
 
         public async Task<bool> ExistsAsync(string id)
@@ -278,7 +534,8 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
             int count = 0;
             foreach (var entity in toDelete)
             {
-                await _container.DeleteItemAsync<T>(entity.Id, new PartitionKey(entity.Id));
+                var partitionKey = GetPartitionKey(entity);
+                await _container.DeleteItemAsync<T>(entity.Id, partitionKey);
                 count++;
             }
             return count;
