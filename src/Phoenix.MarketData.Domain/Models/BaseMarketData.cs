@@ -16,6 +16,8 @@ public abstract class BaseMarketData : IMarketDataEntity
     private string _documentType = string.Empty;
     private DateOnly _asOfDate;
 
+    private string _displayAssetId = string.Empty;
+    
     public string Id => _id ??= CalculateId();
 
     public required string SchemaVersion
@@ -54,6 +56,16 @@ public abstract class BaseMarketData : IMarketDataEntity
         }
     }
 
+
+    /// <summary>
+    /// Gets or sets the display version of the asset ID with preserved case formatting.
+    /// This is used for UI/reporting but not for ID calculation or matching.
+    /// </summary>
+    public string DisplayAssetId
+    {
+        get => string.IsNullOrEmpty(_displayAssetId) ? _assetId : _displayAssetId;
+        set => _displayAssetId = value;
+    }
     public required string AssetClass
     {
         get => _assetClass;

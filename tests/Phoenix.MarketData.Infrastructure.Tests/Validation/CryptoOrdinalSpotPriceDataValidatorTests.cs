@@ -30,7 +30,6 @@ namespace Phoenix.MarketData.Infrastructure.Tests.Validation
                 InscriptionId = "67890",
                 AsOfDate = DateOnly.FromDateTime(DateTime.Today),
                 Price = 50000.00m
-                // Volume property doesn't exist based on errors
             };
 
             // Act
