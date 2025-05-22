@@ -10,7 +10,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "prepare": "husky",
-    "test": "echo \"No tests configured\" && exit 0",
+    "test": "dotnet test",
     "lint": "prettier --write ."
   },
   "devDependencies": {
