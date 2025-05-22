@@ -4,6 +4,7 @@ using Phoenix.MarketData.Domain.Models;
 using Phoenix.MarketData.Infrastructure.Serialization;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Phoenix.MarketData.Infrastructure.Mapping
 {
@@ -42,12 +43,12 @@ namespace Phoenix.MarketData.Infrastructure.Mapping
         {
             ArgumentNullException.ThrowIfNull(dto);
 
+            // Create domain object with required properties
             var domain = new CryptoOrdinalSpotPriceData
             {
                 SchemaVersion = dto.SchemaVersion,
                 Version = dto.Version,
                 AssetId = dto.AssetId, // This will be auto-normalized to lowercase by the property setter
-                DisplayAssetId = dto.AssetId, // Preserve the original case
                 AssetClass = dto.AssetClass,
                 DataType = dto.DataType,
                 Region = dto.Region,
@@ -56,14 +57,23 @@ namespace Phoenix.MarketData.Infrastructure.Mapping
                 AsOfDate = dto.AsOfDate,
                 AsOfTime = dto.AsOfTime,
                 Price = dto.Price,
-                Tags = dto.Tags?.ToList() ?? new List<string>(),
                 Side = ConvertToDomainSide(dto.Side),
-                CollectionName = dto.CollectionName,
-                ParentInscriptionId = dto.ParentInscriptionId,
-                InscriptionId = dto.InscriptionId,
+                CollectionName = dto.CollectionName ?? string.Empty,
+                ParentInscriptionId = dto.ParentInscriptionId ?? string.Empty,
+                InscriptionId = dto.InscriptionId ?? string.Empty,
                 InscriptionNumber = dto.InscriptionNumber,
-                Currency = dto.Currency
+                Currency = dto.Currency ?? string.Empty
             };
+
+            // Set tags using the SetTags method from BaseMarketData
+            if (dto.Tags != null)
+            {
+                domain.SetTags(dto.Tags);
+            }
+            else
+            {
+                domain.SetTags(new List<string>());
+            }
 
             return domain;
         }

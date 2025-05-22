@@ -17,6 +17,7 @@ using Microsoft.OpenApi.Models;
 using Phoenix.MarketData.Functions.OpenApi;
 
 namespace Phoenix.MarketData.Functions;
+
 public class SaveDocumentToDb
 {
     private readonly ILogger<SaveDocumentToDb> _logger;
@@ -29,23 +30,23 @@ public class SaveDocumentToDb
     }
 
     [Function("SaveDocumentToDb")]
-    [OpenApiOperation(operationId: "SaveDocumentToDb", tags: new[] { "Market Data" }, 
-                     Summary = "Save market data to the database", 
+    [OpenApiOperation(operationId: "SaveDocumentToDb", tags: new[] { "Market Data" },
+                     Summary = "Save market data to the database",
                      Description = "Saves a market data document to the database based on the data type and asset class")]
-    [OpenApiParameter(name: "datatype", In = ParameterLocation.Query, Required = true, Type = typeof(string), 
+    [OpenApiParameter(name: "datatype", In = ParameterLocation.Query, Required = true, Type = typeof(string),
                      Description = "The type of market data (e.g., price.spot, price.ordinals.spot)")]
-    [OpenApiParameter(name: "assetclass", In = ParameterLocation.Query, Required = true, Type = typeof(string), 
+    [OpenApiParameter(name: "assetclass", In = ParameterLocation.Query, Required = true, Type = typeof(string),
                      Description = "The asset class (e.g., fx, crypto)")]
-    [OpenApiParameter(name: "schemaversion", In = ParameterLocation.Query, Required = true, Type = typeof(string), 
+    [OpenApiParameter(name: "schemaversion", In = ParameterLocation.Query, Required = true, Type = typeof(string),
                      Description = "The version of the schema to use for validation")]
-    [OpenApiRequestBody(contentType: "application/json", bodyType: typeof(object), 
-                     Description = "Market data document to save", 
+    [OpenApiRequestBody(contentType: "application/json", bodyType: typeof(object),
+                     Description = "Market data document to save",
                      Example = typeof(FxSpotPriceDataExample))]
-    [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string), 
+    [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string),
                      Description = "Document saved successfully")]
-    [OpenApiResponseWithBody(statusCode: HttpStatusCode.BadRequest, contentType: "application/json", bodyType: typeof(string), 
+    [OpenApiResponseWithBody(statusCode: HttpStatusCode.BadRequest, contentType: "application/json", bodyType: typeof(string),
                      Description = "Bad request, validation error")]
-    [OpenApiResponseWithBody(statusCode: HttpStatusCode.InternalServerError, contentType: "application/json", bodyType: typeof(string), 
+    [OpenApiResponseWithBody(statusCode: HttpStatusCode.InternalServerError, contentType: "application/json", bodyType: typeof(string),
                      Description = "Server error")]
     public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "post", Route = "SaveDocumentToDb")] HttpRequest req)
     {
@@ -108,13 +109,54 @@ public class SaveDocumentToDb
             return new BadRequestObjectResult("Invalid request body.");
         }
 
-        var domainData = toDomainMapper(requestData);
-        var result = await _repository.AddAsync(domainData);
+        // Add error handling around domain mapping
+        IMarketDataEntity domainData;
+        try
+        {
+            domainData = toDomainMapper(requestData);
+
+            if (domainData == null)
+            {
+                _logger.LogError($"Domain mapping returned null for {dataType}/{assetClass}.");
+                return new BadRequestObjectResult("Error processing market data: Mapping failed.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error mapping DTO to domain object for {dataType}/{assetClass}.");
+            return new ObjectResult("Error processing market data: Invalid format.")
+            {
+                StatusCode = (int)HttpStatusCode.BadRequest
+            };
+        }
+
+        // Add error handling around repository save operation
+        IMarketDataEntity result;
+        try
+        {
+            result = await _repository.AddAsync(domainData);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error saving {dataType}/{assetClass} data to repository.");
+
+            // Determine if it's a client error or server error
+            if (ex is ArgumentException || ex is InvalidOperationException)
+            {
+                return new BadRequestObjectResult($"Invalid data: {ex.Message}");
+            }
+
+            return new ObjectResult("Error saving document to database.")
+            {
+                StatusCode = (int)HttpStatusCode.InternalServerError
+            };
+        }
+
         return ProcessActionResult(result);
     }
 
     // Example result handler
-    private IActionResult ProcessActionResult(IMarketDataEntity result)
+    private IActionResult ProcessActionResult(IMarketDataEntity? result)
     {
         if (result != null)
         {

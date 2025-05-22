@@ -1,0 +1,54 @@
+using System;
+using System.Collections.Concurrent;
+using Phoenix.MarketData.Core.Configuration;
+
+namespace Phoenix.MarketData.Infrastructure.Configuration
+{
+    public class MemorySecretCache : ISecretCache
+    {
+        private readonly ConcurrentDictionary<string, CachedSecret> _cache = new();
+
+        public string? GetSecret(string secretName)
+        {
+            if (_cache.TryGetValue(secretName, out var cachedSecret))
+            {
+                return cachedSecret.Value;
+            }
+            return null;
+        }
+
+        public (string? Value, bool IsExpired) GetSecretWithExpiration(string secretName)
+        {
+            if (_cache.TryGetValue(secretName, out var cachedSecret))
+            {
+                bool isExpired = cachedSecret.ExpiresOn <= DateTimeOffset.UtcNow;
+                return (cachedSecret.Value, isExpired);
+            }
+            return (null, true);
+        }
+
+        public void CacheSecret(string secretName, string value)
+        {
+            // Default to 1 hour expiration if not specified
+            CacheSecretWithExpiration(secretName, value, DateTimeOffset.UtcNow.AddHours(1));
+        }
+
+        public void CacheSecretWithExpiration(string secretName, string value, DateTimeOffset expiresOn)
+        {
+            var cachedSecret = new CachedSecret(value, expiresOn);
+            _cache.AddOrUpdate(secretName, cachedSecret, (_, _) => cachedSecret);
+        }
+
+        private class CachedSecret
+        {
+            public CachedSecret(string value, DateTimeOffset expiresOn)
+            {
+                Value = value;
+                ExpiresOn = expiresOn;
+            }
+
+            public string Value { get; }
+            public DateTimeOffset ExpiresOn { get; }
+        }
+    }
+}
