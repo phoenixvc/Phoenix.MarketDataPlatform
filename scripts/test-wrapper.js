@@ -33,10 +33,15 @@ try {
       "CoverageReport",
     );
 
-    // Create directory if it doesn't exist
-    if (!fs.existsSync(reportDir)) {
-      fs.mkdirSync(reportDir, { recursive: true });
+    // Clear existing coverage reports
+    if (fs.existsSync(reportDir)) {
+      console.log("Clearing existing coverage reports...");
+      fs.rmSync(reportDir, { recursive: true, force: true });
     }
+
+    // Create fresh directory
+    console.log("Creating new coverage report directory...");
+    fs.mkdirSync(reportDir, { recursive: true });
 
     execSync(
       `reportgenerator "-reports:tests/**/TestResults/**/coverage.cobertura.xml" "-targetdir:${reportDir}" "-reporttypes:Html"`,
