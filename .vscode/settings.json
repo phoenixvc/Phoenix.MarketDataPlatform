@@ -7,7 +7,7 @@
         "globaltool",
         "Intraday",
         "irongut",
-        "Mediat",
+        "Mediatr",
         "opencover",
         "reportgenerator",
         "reporttypes",
@@ -19,11 +19,11 @@
         "volatilities",
         "xunit"
     ],
-    "azureFunctions.deploySubpath": "src\\Phoenix.MarketData.Functions/bin/Release/net9.0/publish",
+    "azureFunctions.deploySubpath": "src/Phoenix.MarketData.Functions/bin/Release/net9.0/publish",
     "azureFunctions.projectLanguage": "C#",
     "azureFunctions.projectRuntime": "~4",
     "debug.internalConsoleOptions": "neverOpen",
     "azureFunctions.preDeployTask": "publish (functions)",
     "dotnet-test-explorer.testProjectPath": "tests/**/*.csproj",
-    "azureFunctions.projectSubpath": "src\\Phoenix.MarketData.Functions"
+    "azureFunctions.projectSubpath": "src/Phoenix.MarketData.Functions"
 }
