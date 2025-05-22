@@ -1,24 +1,26 @@
 #!/usr/bin/env pwsh
-
-# Ensure ReportGenerator tool is installed
-if (-not (Get-Command reportgenerator -ErrorAction SilentlyContinue)) {
-    Write-Host "Installing ReportGenerator tool..."
-    dotnet tool install -g dotnet-reportgenerator-globaltool
-}
+param(
+    [switch]$RunTestsOnly = $true
+)
 
 # Set working directory to the project directory
 $scriptPath = $MyInvocation.MyCommand.Path
 $projectDir = Split-Path -Parent $scriptPath
 
-# Run the tests with coverage
-Write-Host "Running tests with coverage collection..."
-dotnet test $projectDir
-$testExitCode = $LASTEXITCODE
+# Run the tests with coverage if requested
+if ($RunTestsOnly) {
+    Write-Host "Running tests with coverage collection..."
+    dotnet test $projectDir
+    $testExitCode = $LASTEXITCODE
 
-# Check if tests succeeded before continuing
-if ($testExitCode -ne 0) {
-    Write-Error "Tests failed with exit code $testExitCode. Report generation aborted."
-    exit $testExitCode
+    # Check if tests succeeded before continuing
+    if ($testExitCode -ne 0) {
+        Write-Error "Tests failed with exit code $testExitCode. Report generation aborted."
+        exit $testExitCode
+    }
+}
+else {
+    Write-Host "Skipping tests (already run in post-commit hook)..."
 }
 
 # Generate HTML report
