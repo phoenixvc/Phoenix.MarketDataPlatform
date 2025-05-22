@@ -1,4 +1,4 @@
-﻿namespace Phoenix.MarketData.Core;
+﻿namespace Phoenix.MarketData.Domain.Models;
 
 /// <summary>
 /// Provides predefined constants representing various asset classes for market data classification.

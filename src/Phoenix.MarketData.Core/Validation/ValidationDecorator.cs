@@ -36,8 +36,12 @@ namespace Phoenix.MarketData.Core.Validation
         /// </summary>
         /// <param name="request">The request to handle</param>
         /// <param name="cancellationToken">The cancellation token</param>
+        /// <exception cref="ArgumentNullException">Thrown when request is null</exception>
         public async Task Handle(TRequest request, CancellationToken cancellationToken)
         {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
             await ValidateRequestAsync(request, cancellationToken);
             await _decoratedHandler.Handle(request, cancellationToken);
         }

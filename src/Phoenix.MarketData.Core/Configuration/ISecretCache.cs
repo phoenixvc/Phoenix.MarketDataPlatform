@@ -12,6 +12,7 @@ namespace Phoenix.MarketData.Core.Configuration
         /// <returns>The secret value if found, null otherwise</returns>
         string? GetSecret(string secretName);
 
+        /// <summary>
         /// Caches a secret for future retrieval
         /// </summary>
         /// <param name="secretName">Name of the secret to cache</param>

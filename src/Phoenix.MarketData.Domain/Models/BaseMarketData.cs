@@ -179,14 +179,15 @@ public abstract class BaseMarketData : IMarketDataEntity
             || string.IsNullOrEmpty(AssetId)
             || string.IsNullOrEmpty(Region)
             || string.IsNullOrEmpty(DocumentType)
-            || AsOfDate == default)
+            || AsOfDate == default
+            || string.IsNullOrEmpty(SchemaVersion))
         {
             return string.Empty;
         }
 
         var id = string.Join("__", new[]
         {
-            DataType, AssetClass, AssetId, Region, AsOfDate.ToString("yyyy-MM-dd"), DocumentType
+            DataType, AssetClass, AssetId, Region, AsOfDate.ToString("yyyy-MM-dd"), DocumentType, SchemaVersion
         });
 
         if (Version != null)

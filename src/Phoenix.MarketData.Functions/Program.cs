@@ -14,6 +14,8 @@ using Phoenix.MarketData.Domain.Models;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Abstractions;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Configurations;
 using Microsoft.OpenApi.Models;
+using Phoenix.MarketData.Core.Models;
+using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Enums;
 var host = new HostBuilder()
     .ConfigureFunctionsWorkerDefaults()
     .ConfigureAppConfiguration(builder =>
