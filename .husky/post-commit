@@ -9,8 +9,7 @@ RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 echo "${CYAN}Running post-commit tests...${NC}"
-npm run postcommit
+npm run postcommit || true  # Continue even if tests fail
 
-# Don't exit with error code - post-commit hooks can't stop commits
-# that have already happened
+# Post-commit hooks can't stop commits that have already happened
 exit 0
