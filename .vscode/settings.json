@@ -15,6 +15,7 @@
         "runsettings",
         "schemaversion",
         "spotprice",
+        "Swashbuckle",
         "targetdir",
         "volatilities",
         "xunit"

@@ -1,8 +1,9 @@
 ﻿using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Phoenix.MarketData.Infrastructure.Repositories; // New repo
+using Phoenix.MarketData.Infrastructure.Repositories;
 using Phoenix.MarketData.Infrastructure.Mapping;
 using Phoenix.MarketData.Infrastructure.Schemas;
 using Phoenix.MarketData.Infrastructure.Serialization;
@@ -10,9 +11,12 @@ using Phoenix.MarketData.Domain.Models;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using System.Net;
+using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
+using Microsoft.OpenApi.Models;
+using Phoenix.MarketData.Functions.OpenApi;
 
 namespace Phoenix.MarketData.Functions;
-
 public class SaveDocumentToDb
 {
     private readonly ILogger<SaveDocumentToDb> _logger;
@@ -25,7 +29,25 @@ public class SaveDocumentToDb
     }
 
     [Function("SaveDocumentToDb")]
-    public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequest req)
+    [OpenApiOperation(operationId: "SaveDocumentToDb", tags: new[] { "Market Data" }, 
+                     Summary = "Save market data to the database", 
+                     Description = "Saves a market data document to the database based on the data type and asset class")]
+    [OpenApiParameter(name: "datatype", In = ParameterLocation.Query, Required = true, Type = typeof(string), 
+                     Description = "The type of market data (e.g., price.spot, price.ordinals.spot)")]
+    [OpenApiParameter(name: "assetclass", In = ParameterLocation.Query, Required = true, Type = typeof(string), 
+                     Description = "The asset class (e.g., fx, crypto)")]
+    [OpenApiParameter(name: "schemaversion", In = ParameterLocation.Query, Required = true, Type = typeof(string), 
+                     Description = "The version of the schema to use for validation")]
+    [OpenApiRequestBody(contentType: "application/json", bodyType: typeof(object), 
+                     Description = "Market data document to save", 
+                     Example = typeof(FxSpotPriceDataExample))]
+    [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string), 
+                     Description = "Document saved successfully")]
+    [OpenApiResponseWithBody(statusCode: HttpStatusCode.BadRequest, contentType: "application/json", bodyType: typeof(string), 
+                     Description = "Bad request, validation error")]
+    [OpenApiResponseWithBody(statusCode: HttpStatusCode.InternalServerError, contentType: "application/json", bodyType: typeof(string), 
+                     Description = "Server error")]
+    public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "post", Route = "SaveDocumentToDb")] HttpRequest req)
     {
         _logger.LogInformation("C# HTTP trigger function processed a request.");
 
@@ -91,7 +113,7 @@ public class SaveDocumentToDb
         return ProcessActionResult(result);
     }
 
-    // Example result handler; you may want to adapt if SaveMarketDataResult differs from repo result
+    // Example result handler
     private IActionResult ProcessActionResult(IMarketDataEntity result)
     {
         if (result != null)

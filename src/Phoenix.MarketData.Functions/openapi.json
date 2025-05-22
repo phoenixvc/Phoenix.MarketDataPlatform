@@ -1,0 +1,290 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Phoenix Market Data API",
+    "description": "API for managing and retrieving market data for various asset classes",
+    "contact": {
+      "name": "Phoenix Team"
+    },
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/SaveDocumentToDb": {
+      "post": {
+        "summary": "Save market data to the database",
+        "description": "Saves a market data document to the database based on the data type and asset class",
+        "parameters": [
+          {
+            "name": "datatype",
+            "in": "query",
+            "description": "The type of market data (e.g., price.spot, price.ordinals.spot)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["price.spot", "price.ordinals.spot"]
+            }
+          },
+          {
+            "name": "assetclass",
+            "in": "query",
+            "description": "The asset class (e.g., fx, crypto)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["fx", "crypto"]
+            }
+          },
+          {
+            "name": "schemaversion",
+            "in": "query",
+            "description": "The version of the schema to use for validation",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "1.0.0"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Market data document to save",
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/FxSpotPriceData"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CryptoOrdinalSpotPriceData"
+                  }
+                ]
+              },
+              "examples": {
+                "fxSpot": {
+                  "summary": "FX Spot market data example",
+                  "value": {
+                    "price": 1.09,
+                    "side": "mid",
+                    "schemaVersion": "1.0.0",
+                    "assetId": "eurusd",
+                    "assetClass": "fx",
+                    "dataType": "price.spot",
+                    "region": "ny",
+                    "tags": ["spot"],
+                    "documentType": "official",
+                    "asOfDate": "2025-05-13",
+                    "asOfTime": "15:30:05"
+                  }
+                },
+                "cryptoOrdinalSpot": {
+                  "summary": "Crypto Ordinal Spot price data example",
+                  "value": {
+                    "price": 1.13,
+                    "currency": "btc",
+                    "side": "bid",
+                    "schemaVersion": "1.0.0",
+                    "assetId": "quantum_cats_1",
+                    "assetClass": "crypto",
+                    "dataType": "price.ordinals.spot",
+                    "region": "global",
+                    "tags": ["spot"],
+                    "documentType": "official",
+                    "asOfDate": "2025-05-13",
+                    "inscriptionNumber": 77777,
+                    "inscriptionId": "12345",
+                    "parentInscriptionId": "1234",
+                    "collectionName": "quantum cats"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Document saved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Document saved successfully to price.spot.fx__eurusd__ny__20250513__official__1"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "examples": {
+                  "missingParameters": {
+                    "value": "Please provide 'datatype', 'assetclass' and 'schemaversion' as query parameters."
+                  },
+                  "schemaValidation": {
+                    "value": "Could not validate request body against schema."
+                  },
+                  "invalidDataCombination": {
+                    "value": "Invalid request. Expected 'datatype' and 'assetclass' to be a valid combination."
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Error saving document."
+              }
+            }
+          }
+        },
+        "tags": ["Market Data"]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BaseMarketData": {
+        "type": "object",
+        "properties": {
+          "schemaVersion": {
+            "type": "string",
+            "description": "The version of the schema being used"
+          },
+          "version": {
+            "type": "integer",
+            "nullable": true,
+            "description": "The version of the market data document"
+          },
+          "assetId": {
+            "type": "string",
+            "description": "The unique identifier of the asset"
+          },
+          "assetClass": {
+            "type": "string",
+            "description": "The asset class (fx, crypto, etc.)"
+          },
+          "dataType": {
+            "type": "string",
+            "description": "The type of data being represented"
+          },
+          "region": {
+            "type": "string",
+            "description": "The region applicable for the market data"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags associated with the data for categorization"
+          },
+          "documentType": {
+            "type": "string",
+            "description": "The type of document (official, intraday, etc.)"
+          },
+          "asOfDate": {
+            "type": "string",
+            "format": "date",
+            "description": "The effective date of the data in YYYY-MM-DD format"
+          },
+          "asOfTime": {
+            "type": "string",
+            "format": "time",
+            "nullable": true,
+            "description": "The specific time corresponding to when the market data is relevant in HH:MM:SS format"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "assetId",
+          "assetClass",
+          "dataType",
+          "region",
+          "documentType",
+          "asOfDate"
+        ]
+      },
+      "FxSpotPriceData": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseMarketData"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "price": {
+                "type": "number",
+                "format": "double",
+                "description": "The spot price of the FX pair"
+              },
+              "side": {
+                "type": "string",
+                "enum": ["bid", "ask", "mid"],
+                "description": "The side of the price (bid, ask, or mid)"
+              }
+            },
+            "required": ["price", "side"]
+          }
+        ]
+      },
+      "CryptoOrdinalSpotPriceData": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseMarketData"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "price": {
+                "type": "number",
+                "format": "double",
+                "description": "The spot price of the ordinal"
+              },
+              "currency": {
+                "type": "string",
+                "description": "The currency in which the price is denominated"
+              },
+              "side": {
+                "type": "string",
+                "enum": ["bid", "ask", "mid"],
+                "description": "The side of the price (bid, ask, or mid)"
+              },
+              "inscriptionNumber": {
+                "type": "integer",
+                "description": "The ordinal inscription number"
+              },
+              "inscriptionId": {
+                "type": "string",
+                "description": "The unique transaction+output identifier"
+              },
+              "parentInscriptionId": {
+                "type": "string",
+                "description": "The parent inscription identifier"
+              },
+              "collectionName": {
+                "type": "string",
+                "description": "The name of the collection"
+              }
+            },
+            "required": [
+              "price",
+              "currency",
+              "side",
+              "inscriptionNumber",
+              "inscriptionId"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
