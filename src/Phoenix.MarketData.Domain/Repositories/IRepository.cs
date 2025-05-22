@@ -57,4 +57,3 @@ namespace Phoenix.MarketData.Core.Repositories
             DateTime? toDate = null);
     }
 }
-}
