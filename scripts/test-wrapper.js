@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 // Script to run tests after commit and generate coverage reports
-const { execSync, spawnSync } = require("child_process");
 const { execSync } = require("child_process");
 const path = require("path");
 const fs = require("fs");
@@ -15,7 +14,7 @@ try {
   console.log("Generating HTML coverage report...");
 
   try {
-    // Check if reportgenerator is already installed
+    // Check if reportgenerator is installed
     try {
       execSync("reportgenerator -version", { stdio: "pipe" });
       console.log("ReportGenerator is already installed");
@@ -23,12 +22,11 @@ try {
       console.log("Installing ReportGenerator tool...");
       execSync("dotnet tool install -g dotnet-reportgenerator-globaltool", {
         stdio: "inherit",
-        shell: true,
+        shell: true
       });
     }
 
     // Generate the report using coverage files from ALL test projects
-    // Use a central location that's not tied to a specific test project
     const reportDir = path.join("coverage-report");
     
     // Clear existing coverage reports
@@ -41,54 +39,26 @@ try {
     console.log("Creating new coverage report directory...");
     fs.mkdirSync(reportDir, { recursive: true });
 
-    // Create a temporary settings file to completely disable source control
-    const settingsPath = path.join("coverage-settings.xml");
-    fs.writeFileSync(
-      settingsPath,
-      `<?xml version="1.0" encoding="utf-8"?>
-      <ReportGeneratorSettings>
-        <Settings>
-          <UseSourceLink>False</UseSourceLink>
-          <UseHistoricCoverageFile>False</UseHistoricCoverageFile>
-          <DisableSourceControlIntegration>True</DisableSourceControlIntegration>
-        </Settings>
-      </ReportGeneratorSettings>`,
-    );
-
-    // Execute reportgenerator with extreme settings to disable GitHub lookups
-    // CRITICAL FIX: Process the coverage files to remove GitHub URLs
+    // Process the coverage files to remove GitHub URLs
     console.log("Pre-processing coverage files to remove GitHub URLs...");
     processAllCoverageFiles();
 
-    // Now run ReportGenerator on the processed files
+    // Run ReportGenerator on the processed files
     execSync(
-      `reportgenerator ` +
-        `"-reports:tests/**/TestResults/**/coverage.cobertura.xml" ` +
-      `"-reports:tests/**/TestResults/**/processed.coverage.cobertura.xml" ` +
-        `"-targetdir:${reportDir}" ` +
-        `"-reporttypes:Html" ` +
-        `"-sourcedirs:${process.cwd()}" ` +
-        `"-verbosity:Error" ` +
-        `"-settings:${settingsPath}" ` +
-        `"-tag:noupdate"`,
-      `"-verbosity:Warning"`,
+      `reportgenerator "-reports:tests/**/TestResults/**/processed.coverage.cobertura.xml" "-targetdir:${reportDir}" "-reporttypes:Html" "-sourcedirs:${process.cwd()}" "-verbosity:Warning"`,
       {
         stdio: "inherit",
-        shell: true,
-      },
+        shell: true
       }
     );
 
-    // Clean up settings file
-    fs.unlinkSync(settingsPath);
-
-    // Open the report in browser (Windows-specific)
+    // Open the report in browser
     console.log(`Coverage report generated at: ${reportDir}`);
     console.log(`Opening report in browser...`);
 
     execSync(`start "${reportDir}\\index.html"`, {
       stdio: "inherit",
-      shell: true,
+      shell: true
     });
   } catch (reportError) {
     console.error("Error generating coverage reports:", reportError.message);
@@ -115,3 +85,16 @@ function processAllCoverageFiles() {
     const content = fs.readFileSync(filePath, 'utf8');
     
     // Replace any GitHub URLs with local paths
+    const processed = content.replace(
+      /https:\/\/raw\.githubusercontent\.com\/[^"]+\/src\//g, 
+      'src/'
+    );
+    
+    // Write to a new file
+    const dir = path.dirname(filePath);
+    const processedPath = path.join(dir, 'processed.coverage.cobertura.xml');
+    fs.writeFileSync(processedPath, processed);
+    
+    console.log(`Processed: ${filePath} → ${processedPath}`);
+  });
+}
