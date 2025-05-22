@@ -26,13 +26,9 @@ try {
       });
     }
 
-    // Generate the report using the most recent coverage file
-    const reportDir = path.join(
-      "tests",
-      "Phoenix.MarketData.Infrastructure.Tests",
-      "CoverageReport",
-    );
-
+    // Generate the report using coverage files from ALL test projects
+    // Use a central location that's not tied to a specific test project
+    const reportDir = path.join("coverage-report");
     // Clear existing coverage reports
     if (fs.existsSync(reportDir)) {
       console.log("Clearing existing coverage reports...");
@@ -43,8 +39,12 @@ try {
     console.log("Creating new coverage report directory...");
     fs.mkdirSync(reportDir, { recursive: true });
 
+    // Execute reportgenerator with settings to:
+    // 1. Include ALL test results from ALL projects
+    // 2. Use local source files instead of GitHub lookups
+    // 3. Create a central report directory
     execSync(
-      `reportgenerator "-reports:tests/**/TestResults/**/coverage.cobertura.xml" "-targetdir:${reportDir}" "-reporttypes:Html"`,
+      `reportgenerator "-reports:tests/**/TestResults/**/coverage.cobertura.xml" "-targetdir:${reportDir}" "-reporttypes:Html" "-sourcedirs:src" "-verbosity:Info"`,
       {
         stdio: "inherit",
         shell: true,
