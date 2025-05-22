@@ -17,6 +17,7 @@ namespace Phoenix.MarketData.Infrastructure.Configuration
             return null;
         }
 
+        // Keep old method for backward compatibility (can be removed if not needed)
         public (string? Value, bool IsExpired) GetSecretWithExpiration(string secretName)
         {
             if (_cache.TryGetValue(secretName, out var cachedSecret))
@@ -27,17 +28,32 @@ namespace Phoenix.MarketData.Infrastructure.Configuration
             return (null, true);
         }
 
+        // Add new method required by interface
+        public bool TryGetSecret(string secretName, out string? value, out bool isExpired)
+        {
+            if (_cache.TryGetValue(secretName, out var cachedSecret))
+            {
+                value = cachedSecret.Value;
+                isExpired = cachedSecret.ExpiresOn <= DateTimeOffset.UtcNow;
+                return true;
+            }
+
+            value = null;
+            isExpired = true;
+            return false;
+        }
+
         public void CacheSecret(string secretName, string value)
         {
             // Default to 1 hour expiration if not specified
             CacheSecretWithExpiration(secretName, value, DateTimeOffset.UtcNow.AddHours(1));
-        }
+            }
 
         public void CacheSecretWithExpiration(string secretName, string value, DateTimeOffset expiresOn)
         {
             var cachedSecret = new CachedSecret(value, expiresOn);
             _cache.AddOrUpdate(secretName, cachedSecret, (_, _) => cachedSecret);
-        }
+    }
 
         private class CachedSecret
         {
@@ -45,7 +61,7 @@ namespace Phoenix.MarketData.Infrastructure.Configuration
             {
                 Value = value;
                 ExpiresOn = expiresOn;
-            }
+}
 
             public string Value { get; }
             public DateTimeOffset ExpiresOn { get; }

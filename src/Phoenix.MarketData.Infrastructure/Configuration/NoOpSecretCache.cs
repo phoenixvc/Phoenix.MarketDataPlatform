@@ -1,3 +1,4 @@
+using System;
 using Phoenix.MarketData.Core.Configuration;
 
 namespace Phoenix.MarketData.Infrastructure.Configuration
@@ -15,6 +16,16 @@ namespace Phoenix.MarketData.Infrastructure.Configuration
         /// Gets a secret with its expiration information - no-op implementation returns null
         /// </summary>
         public (string? Value, bool IsExpired) GetSecretWithExpiration(string secretName) => (null, false);
+
+        /// <summary>
+        /// Tries to get a secret with expiration information - no-op implementation always returns false
+        /// </summary>
+        public bool TryGetSecret(string secretName, out string? value, out bool isExpired)
+        {
+            value = null;
+            isExpired = false;
+            return false;
+        }
 
         /// <summary>
         /// Caches a secret with expiration information - no-op implementation does nothing
