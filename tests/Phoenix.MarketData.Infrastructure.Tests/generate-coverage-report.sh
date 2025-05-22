@@ -4,6 +4,10 @@
 if ! command -v reportgenerator &> /dev/null; then
     echo "Installing ReportGenerator tool..."
     dotnet tool install -g dotnet-reportgenerator-globaltool
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to install ReportGenerator tool"
+        exit 1
+    fi
 fi
 
 # Set working directory to the project directory
