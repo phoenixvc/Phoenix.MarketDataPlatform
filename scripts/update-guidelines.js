@@ -18,6 +18,10 @@ const updatedContent = content.replace(
 );
 
 // Write the updated content back to the file
-fs.writeFileSync(guidelinesPath, updatedContent);
-
+try {
+  fs.writeFileSync(guidelinesPath, updatedContent);
+} catch (error) {
+  console.error(`Failed to write updated guidelines file: ${error.message}`);
+  process.exit(1);
+}
 console.log(`Updated timestamp to ${formattedDate}`);
