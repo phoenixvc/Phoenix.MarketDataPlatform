@@ -8,7 +8,17 @@ namespace Phoenix.MarketData.Infrastructure.Configuration
     internal class NoOpSecretCache : ISecretCache
     {
         public string? GetSecret(string secretName) => null;
-        
+
         public void CacheSecret(string secretName, string value) { }
+
+        /// <summary>
+        /// Gets a secret with its expiration information - no-op implementation returns null
+        /// </summary>
+        public (string? Value, bool IsExpired) GetSecretWithExpiration(string secretName) => (null, false);
+
+        /// <summary>
+        /// Caches a secret with expiration information - no-op implementation does nothing
+        /// </summary>
+        public void CacheSecretWithExpiration(string secretName, string value, DateTimeOffset expiration) { }
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Azure;
 using Azure.Messaging;
@@ -71,8 +72,8 @@ namespace Phoenix.MarketData.Infrastructure.Events
             }
         }
 
-        // Generic event publish (CloudEvent, batch-safe)
-        public async Task PublishAsync<T>(T eventData, string? topic = null) where T : class
+        // Generic event publish (CloudEvent, batch-safe) - Updated with CancellationToken
+        public async Task PublishAsync<T>(T eventData, string? topic = null, CancellationToken cancellationToken = default) where T : class
         {
             if (eventData == null) throw new ArgumentNullException(nameof(eventData));
 
@@ -98,7 +99,7 @@ namespace Phoenix.MarketData.Infrastructure.Events
                 // Add logical topic name as a custom attribute for easier filtering/routing
                 cloudEvent.ExtensionAttributes.Add("topic", topicName);
 
-                await _client.SendEventAsync(cloudEvent);
+                await _client.SendEventAsync(cloudEvent, cancellationToken);
                 _logger.LogInformation("Published event {EventType} with source {Source}", eventType, source);
             }
             catch (Exception ex)
@@ -108,8 +109,8 @@ namespace Phoenix.MarketData.Infrastructure.Events
             }
         }
 
-        // Batch publish with chunking and size limits
-        public async Task PublishManyAsync<T>(IEnumerable<T> events, string? topic = null) where T : class
+        // Batch publish with chunking and size limits - Updated with CancellationToken
+        public async Task PublishManyAsync<T>(IEnumerable<T> events, string? topic = null, CancellationToken cancellationToken = default) where T : class
         {
             var eventsList = events?.ToList() ?? new List<T>();
             if (!eventsList.Any())
@@ -152,7 +153,8 @@ namespace Phoenix.MarketData.Infrastructure.Events
                     batchNumber++;
                     try
                     {
-                        await _client.SendEventsAsync(batch);
+                        // Pass the cancellation token to SendEventsAsync
+                        await _client.SendEventsAsync(batch, cancellationToken);
                         totalSent += batch.Count;
                         _logger.LogInformation("Published batch {BatchNumber}/{TotalBatches} with {Count} events of type {EventType}",
                             batchNumber, batches.Count, batch.Count, eventType);
@@ -186,7 +188,7 @@ namespace Phoenix.MarketData.Infrastructure.Events
         }
 
         // Market data changed/created "legacy" style event for IMarketData, with subject & event type logic
-        public async Task PublishMarketDataEventAsync<T>(T marketData) where T : IMarketDataEntity
+        public async Task PublishMarketDataEventAsync<T>(T marketData, CancellationToken cancellationToken = default) where T : IMarketDataEntity
         {
             if (marketData == null)
                 throw new ArgumentNullException(nameof(marketData));
@@ -205,7 +207,7 @@ namespace Phoenix.MarketData.Infrastructure.Events
 
             try
             {
-                await _client.SendEventAsync(eventGridEvent);
+                await _client.SendEventAsync(eventGridEvent, cancellationToken);
                 _logger.LogInformation("Published EventGridEvent {EventType} for {Subject}", eventType, eventGridEvent.Subject);
             }
             catch (Exception ex)

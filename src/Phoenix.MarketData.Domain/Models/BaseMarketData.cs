@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Phoenix.MarketData.Core.Models;
 
-public abstract class BaseMarketData : IMarketDataEntity
+public abstract class BaseMarketData : IMarketDataEntity, ISoftDeletable
 {
     private string? _id;
     private DateTimeOffset? _createTimestamp;
@@ -170,6 +170,7 @@ public abstract class BaseMarketData : IMarketDataEntity
     }
 
     public TimeOnly? AsOfTime { get; set; }
+    public bool IsDeleted { get; set; }
 
     private string CalculateId()
     {

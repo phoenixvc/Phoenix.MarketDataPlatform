@@ -27,9 +27,12 @@ namespace Phoenix.MarketData.Infrastructure.Tests.Mapping
                 AssetClass = "fx",
                 DataType = "spotprice",
                 Region = "global",
-                DocumentType = "price",
-                Tags = new List<string> { "tag1", "tag2" }
+                DocumentType = "price"
+                // Tags property is read-only, cannot be assigned here
             };
+
+            // Use SetTags method instead of direct assignment
+            domain.SetTags(new List<string> { "tag1", "tag2" });
 
             // Act
             var result = mapper.ToDto(domain);
@@ -40,7 +43,7 @@ namespace Phoenix.MarketData.Infrastructure.Tests.Mapping
             Assert.Equal(domain.AsOfDate, result.AsOfDate);
             Assert.Equal(domain.AsOfTime, result.AsOfTime);
             Assert.Equal(domain.Price, result.Price);
-            Assert.Equal(PriceSideDto.Bid, result.Side); // Check the DTO enum type
+            Assert.Equal((PriceSideDto)domain.Side, result.Side); // Cast to PriceSideDto for comparison
         }
 
         [Fact]
@@ -108,6 +111,7 @@ namespace Phoenix.MarketData.Infrastructure.Tests.Mapping
                 Price = 1.05m,
                 Side = PriceSide.Bid,
                 AsOfDate = DateOnly.FromDateTime(DateTime.Today),
+                AsOfTime = TimeOnly.FromDateTime(DateTime.Now),  // Added missing property
                 // Add required properties
                 SchemaVersion = "1.0",
                 AssetClass = "fx",
@@ -115,6 +119,9 @@ namespace Phoenix.MarketData.Infrastructure.Tests.Mapping
                 Region = "global",
                 DocumentType = "price"
             };
+
+            // Initialize Tags using the SetTags method
+            domain.SetTags(new List<string>());
 
             var instanceMapper = new FxSpotPriceDataMapper();
 

@@ -18,7 +18,7 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
             Func<IQueryable<T>, IQueryable<T>> predicateBuilder,
             bool includeSoftDeleted = false,
             ILogger? logger = null)
-            where T : class, IVersionedMarketDataEntity, IMarketDataEntity
+            where T : class, IMarketDataEntity
         {
             var results = new List<T>();
 
@@ -67,7 +67,7 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
             string id,
             int version,
             ILogger? logger = null)
-            where T : class, IEntity, IVersionedMarketDataEntity, IMarketDataEntity
+            where T : class, IEntity, IMarketDataEntity
         {
             try
             {

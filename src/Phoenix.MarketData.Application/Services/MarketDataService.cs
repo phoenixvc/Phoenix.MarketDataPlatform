@@ -14,7 +14,8 @@ namespace Phoenix.MarketData.Application.Services
         Task<string> PublishMarketDataAsync(T marketData);
         Task<T?> GetLatestMarketDataAsync(
             string dataType, string assetClass, string assetId, string region,
-            DateOnly asOfDate, string documentType);
+            DateOnly asOfDate, string documentType,
+            CancellationToken cancellationToken = default);  // Added cancellationToken parameter
         Task<IEnumerable<T>> QueryMarketDataAsync(
             string dataType, string assetClass, string? assetId = null,
             DateTime? fromDate = null, DateTime? toDate = null,
@@ -49,14 +50,19 @@ namespace Phoenix.MarketData.Application.Services
 
             var id = await _repository.AddAsync(marketData);
             await _eventPublisher.PublishDataChangedEventAsync(marketData);
-            return id is IEntity entity ? entity.Id : string.Empty;
+
+            // Return the repository's ID directly instead of re-deriving it
+            return id?.ToString() ?? string.Empty;
         }
+
         public async Task<T?> GetLatestMarketDataAsync(
             string dataType, string assetClass, string assetId, string region,
-            DateOnly asOfDate, string documentType)
+            DateOnly asOfDate, string documentType,
+            CancellationToken cancellationToken = default)  // Added cancellationToken parameter
         {
             var result = await _repository.GetLatestMarketDataAsync(
-                dataType, assetClass, assetId, region, asOfDate, documentType);
+                dataType, assetClass, assetId, region, asOfDate, documentType,
+                cancellationToken);  // Pass cancellationToken to repository
             return result;
         }
 
@@ -66,7 +72,8 @@ namespace Phoenix.MarketData.Application.Services
             CancellationToken cancellationToken = default)
         {
             return await _repository.QueryByRangeAsync(
-                dataType, assetClass, assetId, fromDate, toDate);
+                dataType, assetClass, assetId, fromDate, toDate,
+                cancellationToken);  // Pass cancellationToken to repository
+        }
     }
-}
 }

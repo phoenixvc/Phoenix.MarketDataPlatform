@@ -49,6 +49,7 @@ namespace Phoenix.MarketData.Infrastructure.Mapping
                 SchemaVersion = dto.SchemaVersion,
                 Version = dto.Version,
                 AssetId = dto.AssetId, // This will be auto-normalized to lowercase by the property setter
+                DisplayAssetId = dto.AssetId, // Add this line to preserve original case
                 AssetClass = dto.AssetClass,
                 DataType = dto.DataType,
                 Region = dto.Region,

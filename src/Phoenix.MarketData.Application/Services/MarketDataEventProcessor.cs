@@ -29,6 +29,10 @@ namespace Phoenix.MarketData.Application.Services
 
         public async Task ProcessCreatedEventAsync(IMarketDataIntegrationEvent createdEvent, CancellationToken cancellationToken = default)
         {
+            // Add null check guard clause
+            if (createdEvent == null)
+                throw new ArgumentNullException(nameof(createdEvent));
+
             // Implementation to process created events
             _logger.LogInformation("Processing created event: {EventId}", createdEvent.Id);
 
@@ -63,6 +67,10 @@ namespace Phoenix.MarketData.Application.Services
 
         public async Task ProcessChangedEventAsync(IMarketDataIntegrationEvent changedEvent, CancellationToken cancellationToken = default)
         {
+            // Add null check guard clause
+            if (changedEvent == null)
+                throw new ArgumentNullException(nameof(changedEvent));
+
             // Implementation to process changed events
             _logger.LogInformation("Processing changed event: {EventId}", changedEvent.Id);
 
@@ -71,40 +79,41 @@ namespace Phoenix.MarketData.Application.Services
                 // Example implementation - actual logic will depend on your requirements
                 // This might involve fetching data, comparing versions, and updating repositories
 
-                // For example, you might need to get the latest data to compare with the event:
-                if (DateTime.TryParse(changedEvent.Timestamp.ToString(), out var eventDate))
+                // Extract date from Timestamp
+                DateOnly dateOnly;
+
+                // Get the timestamp - it's already a DateTimeOffset
+                DateTimeOffset timestamp = changedEvent.Timestamp;
+
+                // Convert DateTimeOffset directly to DateOnly
+                dateOnly = DateOnly.FromDateTime(timestamp.DateTime);
+
+                // Use a configurable default region since Region isn't in the interface
+                const string defaultRegion = "global"; // Consider moving this to configuration
+
+                var latestData = await _marketDataService.GetLatestMarketDataAsync(
+                    changedEvent.DataType,
+                    changedEvent.AssetClass,
+                    changedEvent.AssetId,
+                    defaultRegion, // Use default region instead of trying to access changedEvent.Region
+                    dateOnly,
+                    changedEvent.DocumentType);
+
+                if (latestData != null)
                 {
-                    var dateOnly = new DateOnly(eventDate.Year, eventDate.Month, eventDate.Day);
+                    _logger.LogInformation("Found latest data for {AssetId} with version {Version}",
+                        changedEvent.AssetId, latestData.Version);
 
-                    var latestData = await _marketDataService.GetLatestMarketDataAsync(
-                        changedEvent.DataType,
-                        changedEvent.AssetClass,
-                        changedEvent.AssetId,
-                        "global", // Default region
-                        dateOnly,
-                        changedEvent.DocumentType);
-
-                    if (latestData != null)
-                    {
-                        _logger.LogInformation("Found latest data for {AssetId} with version {Version}",
-                            changedEvent.AssetId, latestData.Version);
-
-                        // Additional comparison and processing logic
-                        // This could include:
-                        // - Version comparison to avoid processing outdated events
-                        // - Merging or updating data
-                        // - Triggering downstream systems
-                    }
-                    else
-                    {
-                        _logger.LogWarning("No existing data found for changed event {EventId} for {AssetId}",
-                            changedEvent.Id, changedEvent.AssetId);
-                    }
+                    // Additional comparison and processing logic
+                    // This could include:
+                    // - Version comparison to avoid processing outdated events
+                    // - Merging or updating data
+                    // - Triggering downstream systems
                 }
                 else
                 {
-                    _logger.LogWarning("Could not parse timestamp {Timestamp} for event {EventId}",
-                        changedEvent.Timestamp, changedEvent.Id);
+                    _logger.LogWarning("No existing data found for changed event {EventId} for {AssetId}",
+                        changedEvent.Id, changedEvent.AssetId);
                 }
 
                 // Additional processing logic as needed

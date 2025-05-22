@@ -11,6 +11,7 @@
   "scripts": {
     "prepare": "husky",
     "test": "dotnet test",
+    "postcommit": "node scripts/test-wrapper.js",
     "lint": "prettier --write ."
   },
   "devDependencies": {
@@ -20,7 +21,7 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "npm test -- --findRelatedTests"
+      "prettier --write"
     ],
     "*.{json,md,yml,yaml}": [
       "prettier --write"

@@ -80,15 +80,4 @@ namespace Phoenix.MarketData.Domain.Models
         /// </summary>
         int? Version { get; set; }
     }
-
-    /// <summary>
-    /// Market data entity with strict versioning requirements (non-null version)
-    /// </summary>
-    public interface IVersionedMarketDataEntity : IMarketDataEntityBase
-    {
-        /// <summary>
-        /// Gets or sets the required version of this market data entity
-        /// </summary>
-        int Version { get; set; }
-    }
 }

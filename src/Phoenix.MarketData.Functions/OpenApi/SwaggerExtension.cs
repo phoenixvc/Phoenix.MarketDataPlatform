@@ -1,9 +1,9 @@
+using System.IO;
 using System.Reflection;
 using Microsoft.Azure.Functions.Worker.Extensions.OpenApi.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
-using System.IO;
+using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Abstractions;
 
 namespace Phoenix.MarketData.Functions.OpenApi
 {
@@ -11,34 +11,26 @@ namespace Phoenix.MarketData.Functions.OpenApi
     {
         public static IHostBuilder ConfigureSwagger(this IHostBuilder builder)
         {
-            return builder.ConfigureOpenApi((options) =>
+            return builder.ConfigureServices((hostContext, services) =>
             {
-                options.DocumentTitle = "Phoenix Market Data API";
-                options.DocumentName = "v1";
-                options.Version = "1.0.0";
-                options.OpenApiVersion = Microsoft.OpenApi.OpenApiSpecVersion.V3_0;
-                options.Info = new OpenApiInfo
-                {
-                    Title = "Phoenix Market Data API",
-                    Version = "1.0.0",
-                    Description = "API for managing and retrieving market data for various asset classes",
-                    Contact = new OpenApiContact
-                    {
-                        Name = "Phoenix Team"
-                    }
-                };
+                // Create and configure our custom options
+                var options = new PhoenixOpenApiConfigurationOptions();
 
                 // Use the pre-defined OpenAPI document for advanced customization
                 var customOpenApiPath = Path.Combine(
-                    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+                    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty,
                     "openapi.json");
-                
+
                 if (File.Exists(customOpenApiPath))
                 {
-                    options.CustomOpenApiDocument = File.ReadAllText(customOpenApiPath);
-                    options.UseCustomOpenApiDocument = true;
+                    options.CustomDocument = File.ReadAllText(customOpenApiPath);
                 }
-            });
+
+                // Register our custom options
+                services.AddSingleton<IOpenApiConfigurationOptions>(options);
+            })
+            // Configure OpenAPI with the basic setup
+            .ConfigureOpenApi();
         }
     }
 }

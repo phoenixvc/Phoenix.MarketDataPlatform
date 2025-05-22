@@ -6,6 +6,10 @@ on:
     paths:
       - ".aiguidance/ai-guidelines.md"
 
+# Add explicit permissions for security
+permissions:
+  contents: write # Required to commit and push changes
+
 jobs:
   update-timestamp:
     runs-on: ubuntu-latest

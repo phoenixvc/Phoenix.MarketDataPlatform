@@ -22,7 +22,11 @@ namespace Phoenix.MarketData.Infrastructure.Tests.Validation
             public string AssetClass { get; set; } = "test";
             public string DataType { get; set; } = "testdata";
             public string Region { get; set; } = "global";
-            public List<string> Tags { get; set; } = new List<string>();
+
+            // Fix: Change to IReadOnlyList<string> to match the interface
+            private readonly List<string> _tags = new List<string>();
+            public IReadOnlyList<string> Tags => _tags;
+
             public string DocumentType { get; set; } = "test";
             public DateTimeOffset CreateTimestamp => DateTimeOffset.UtcNow;
             public DateOnly AsOfDate { get; set; } = DateOnly.FromDateTime(DateTime.UtcNow);

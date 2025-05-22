@@ -4,6 +4,7 @@ using Phoenix.MarketData.Domain.Models;
 using Phoenix.MarketData.Infrastructure.Serialization;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Phoenix.MarketData.Infrastructure.Mapping
 {
@@ -25,7 +26,7 @@ namespace Phoenix.MarketData.Infrastructure.Mapping
                 createTimeStamp: domain.CreateTimestamp,
                 asOfDate: domain.AsOfDate,
                 asOfTime: domain.AsOfTime,
-                tags: domain.Tags,
+                tags: domain.Tags?.ToList() ?? new List<string>(), // Ensure we never pass null
                 price: domain.Price,
                 side: domain.Side
             );
@@ -37,6 +38,7 @@ namespace Phoenix.MarketData.Infrastructure.Mapping
         {
             ArgumentNullException.ThrowIfNull(dto);
 
+            // Create the domain object without setting Tags
             var domain = new FxSpotPriceData
             {
                 SchemaVersion = dto.SchemaVersion,
@@ -51,9 +53,17 @@ namespace Phoenix.MarketData.Infrastructure.Mapping
                 AsOfDate = dto.AsOfDate,
                 AsOfTime = dto.AsOfTime,
                 Price = dto.Price,
-                Tags = dto.Tags?.ToList() ?? new List<string>(),
                 Side = ConvertToDomainSide(dto.Side)
             };
+
+            // Add tags using the appropriate method
+            if (dto.Tags != null)
+            {
+                foreach (var tag in dto.Tags)
+                {
+                    domain.AddTag(tag);
+                }
+            }
 
             return domain;
         }

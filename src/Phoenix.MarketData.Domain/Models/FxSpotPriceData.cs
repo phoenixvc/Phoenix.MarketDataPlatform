@@ -8,4 +8,5 @@ public class FxSpotPriceData : BaseMarketData
     public PriceSide Side { get; set; } = PriceSide.Mid;
 
     public string Currency { get; set; } = CurrencyCodes.USD;
+
 }

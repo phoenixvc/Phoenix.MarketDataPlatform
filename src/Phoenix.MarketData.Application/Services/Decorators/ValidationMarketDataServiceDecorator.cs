@@ -7,7 +7,7 @@ using Phoenix.MarketData.Domain.Models;
 
 namespace Phoenix.MarketData.Application.Services.Decorators
 {
-    public class ValidationMarketDataServiceDecorator<T> : ServiceValidationDecorator<IMarketDataService<T>>, IMarketDataService<T>
+    public class ValidationMarketDataServiceDecorator<T> : ServiceValidationDecorator<IMarketDataService<T>>
         where T : class, IMarketDataEntity
     {
         private readonly IValidator<T> _validator;

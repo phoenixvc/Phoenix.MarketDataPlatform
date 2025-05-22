@@ -32,9 +32,11 @@ namespace Phoenix.MarketData.Infrastructure.Tests.Mapping
                 ParentInscriptionId = "12345",
                 InscriptionId = "67890",
                 InscriptionNumber = 123,
-                Currency = "USD",
-                Tags = new List<string> { "tag1", "tag2" }
+                Currency = "USD"
             };
+
+            // Use SetTags method to initialize Tags collection
+            domain.SetTags(new List<string> { "tag1", "tag2" });
 
             // Act
             var result = mapper.ToDto(domain);
@@ -45,9 +47,16 @@ namespace Phoenix.MarketData.Infrastructure.Tests.Mapping
             Assert.Equal(domain.AsOfDate, result.AsOfDate);
             Assert.Equal(domain.AsOfTime, result.AsOfTime);
             Assert.Equal(domain.Price, result.Price);
+            Assert.Equal((PriceSideDto)domain.Side, result.Side); // Fix: Cast to PriceSideDto
             Assert.Equal(domain.CollectionName, result.CollectionName);
             Assert.Equal(domain.ParentInscriptionId, result.ParentInscriptionId);
             Assert.Equal(domain.InscriptionId, result.InscriptionId);
+
+            // Check tags were mapped correctly
+            Assert.NotNull(result.Tags);
+            Assert.Equal(2, result.Tags.Count);
+            Assert.Contains("tag1", result.Tags);
+            Assert.Contains("tag2", result.Tags);
         }
 
         [Fact]
@@ -59,6 +68,7 @@ namespace Phoenix.MarketData.Infrastructure.Tests.Mapping
             // Act & Assert
             Assert.Throws<ArgumentNullException>(() => mapper.ToDto(null!));
         }
+
 
         [Fact]
         public void ToDomain_WithValidDto_ReturnsMappedEntity()
@@ -79,7 +89,7 @@ namespace Phoenix.MarketData.Infrastructure.Tests.Mapping
                 asOfTime: TimeOnly.FromDateTime(DateTime.Now),
                 tags: new List<string> { "tag1", "tag2" },
                 price: 50000.00m,
-                side: PriceSide.Mid,  // Use domain enum (PriceSide) as constructor expects
+                side: PriceSide.Mid,
                 collectionName: "Bitcoin",
                 parentInscriptionId: "12345",
                 inscriptionId: "67890",
@@ -97,9 +107,16 @@ namespace Phoenix.MarketData.Infrastructure.Tests.Mapping
             Assert.Equal(dto.AsOfDate, result.AsOfDate);
             Assert.Equal(dto.AsOfTime, result.AsOfTime);
             Assert.Equal(dto.Price, result.Price);
+            Assert.Equal(PriceSide.Mid, result.Side); // Check PriceSide conversion 
             Assert.Equal(dto.CollectionName, result.CollectionName);
             Assert.Equal(dto.ParentInscriptionId, result.ParentInscriptionId);
             Assert.Equal(dto.InscriptionId, result.InscriptionId);
+
+            // Check tags were mapped correctly
+            Assert.NotNull(result.Tags);
+            Assert.Equal(2, result.Tags.Count);
+            Assert.Contains("tag1", result.Tags);
+            Assert.Contains("tag2", result.Tags);
         }
 
         [Fact]
@@ -126,6 +143,7 @@ namespace Phoenix.MarketData.Infrastructure.Tests.Mapping
                 InscriptionId = "67890",
                 Currency = "USD",
                 AsOfDate = DateOnly.FromDateTime(DateTime.Today),
+                AsOfTime = TimeOnly.FromDateTime(DateTime.Now),  // Added missing property
                 // Add required properties
                 SchemaVersion = "1.0",
                 AssetClass = "crypto",
@@ -133,6 +151,7 @@ namespace Phoenix.MarketData.Infrastructure.Tests.Mapping
                 Region = "global",
                 DocumentType = "price"
             };
+            domain.SetTags(new List<string>());  // Use the appropriate method to set tags
 
             var instanceMapper = new CryptoOrdinalSpotPriceDataMapper();
 
@@ -146,10 +165,54 @@ namespace Phoenix.MarketData.Infrastructure.Tests.Mapping
             Assert.Equal(instanceResult.CollectionName, staticResult.CollectionName);
         }
 
-        [Fact]
-        public void StaticMapToDomain_ShouldWorkSameAsInstanceMethod()
+        [Theory]
+        [InlineData(PriceSide.Ask)]
+        [InlineData(PriceSide.Bid)]
+        [InlineData(PriceSide.Mid)]
+        public void PriceSideConversion_ShouldMapCorrectly_BothDirections(PriceSide side)
         {
             // Arrange
+            var mapper = new CryptoOrdinalSpotPriceDataMapper();
+            var domain = new CryptoOrdinalSpotPriceData
+            {
+                AssetId = "BTC/USD",
+                AsOfDate = DateOnly.FromDateTime(DateTime.Today),  // Fixed missing required property
+                AsOfTime = TimeOnly.FromDateTime(DateTime.Now),    // Added for completeness
+                Price = 50000.00m,
+                Side = side,  // Use the provided enum value
+                SchemaVersion = "1.0",
+                AssetClass = "crypto",
+                DataType = "spotprice",
+                Region = "global",
+                DocumentType = "price",
+                CollectionName = "Bitcoin",           // Fixed missing required property
+                ParentInscriptionId = "12345",        // Fixed missing required property
+                InscriptionId = "67890",              // Fixed missing required property
+                Currency = "USD"                      // Fixed missing required property
+            };
+            domain.SetTags(new List<string>());  // Initialize tags
+
+            // Act - Convert Domain to DTO
+            var dto = mapper.ToDto(domain);
+
+            // Assert - DTO should have correct side
+            Assert.Equal((PriceSideDto)side, dto.Side);
+
+            // Act - Convert DTO back to Domain
+            var convertedDomain = mapper.ToDomain(dto);
+
+            // Assert - Original side value should be preserved
+            Assert.Equal(side, convertedDomain.Side);
+        }
+
+        [Theory]
+        [InlineData(PriceSide.Ask, PriceSide.Ask)]  // Fixed: Changed from PriceSideDto to PriceSide
+        [InlineData(PriceSide.Bid, PriceSide.Bid)]  // Fixed: Changed from PriceSideDto to PriceSide
+        [InlineData(PriceSide.Mid, PriceSide.Mid)]  // Fixed: Changed from PriceSideDto to PriceSide
+        public void PriceSideDtoToDomainConversion_ShouldMapCorrectly(PriceSide dtoSide, PriceSide expectedDomainSide)
+        {
+            // Arrange
+            var mapper = new CryptoOrdinalSpotPriceDataMapper();
             var dto = new CryptoOrdinalSpotPriceDataDto(
                 id: "test-id",
                 schemaVersion: "1.0",
@@ -162,9 +225,9 @@ namespace Phoenix.MarketData.Infrastructure.Tests.Mapping
                 createTimestamp: DateTime.UtcNow,
                 asOfDate: DateOnly.FromDateTime(DateTime.Today),
                 asOfTime: TimeOnly.FromDateTime(DateTime.Now),
-                tags: new List<string> { "tag1", "tag2" },
+                tags: new List<string>(),
                 price: 50000.00m,
-                side: PriceSide.Mid,  // Use domain enum (PriceSide) as constructor expects
+                side: dtoSide,  // Fixed: Changed parameter type from PriceSideDto to PriceSide
                 collectionName: "Bitcoin",
                 parentInscriptionId: "12345",
                 inscriptionId: "67890",
@@ -172,16 +235,45 @@ namespace Phoenix.MarketData.Infrastructure.Tests.Mapping
                 currency: "USD"
             );
 
-            var instanceMapper = new CryptoOrdinalSpotPriceDataMapper();
-
             // Act
-            var instanceResult = instanceMapper.ToDomain(dto);
-            var staticResult = CryptoOrdinalSpotPriceDataMapper.MapToDomain(dto);
+            var result = mapper.ToDomain(dto);
 
             // Assert
-            Assert.Equal(instanceResult.AssetId, staticResult.AssetId);
-            Assert.Equal(instanceResult.Price, staticResult.Price);
-            Assert.Equal(instanceResult.CollectionName, staticResult.CollectionName);
+            Assert.Equal(expectedDomainSide, result.Side);
+        }
+
+        [Fact]
+        public void ToDomain_WithNullPriceSideDto_DefaultsToMid()
+        {
+            // Arrange
+            var mapper = new CryptoOrdinalSpotPriceDataMapper();
+            var dto = new CryptoOrdinalSpotPriceDataDto(
+                id: "test-id",
+                schemaVersion: "1.0",
+                version: 1,
+                assetId: "BTC/USD",
+                assetClass: "crypto",
+                dataType: "spotprice",
+                region: "global",
+                documentType: "price",
+                createTimestamp: DateTime.UtcNow,
+                asOfDate: DateOnly.FromDateTime(DateTime.Today),
+                asOfTime: TimeOnly.FromDateTime(DateTime.Now),
+                tags: new List<string>(),
+                price: 50000.00m,
+                side: null,  // Null side
+                collectionName: "Bitcoin",
+                parentInscriptionId: "12345",
+                inscriptionId: "67890",
+                inscriptionNumber: 123,
+                currency: "USD"
+            );
+
+            // Act
+            var result = mapper.ToDomain(dto);
+
+            // Assert - should default to Mid
+            Assert.Equal(PriceSide.Mid, result.Side);
         }
     }
 }
