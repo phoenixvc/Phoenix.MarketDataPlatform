@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Script to run tests after commit and generate coverage reports
 const { execSync, spawnSync } = require("child_process");
+const { execSync } = require("child_process");
 const path = require("path");
 const fs = require("fs");
 
@@ -29,6 +30,7 @@ try {
     // Generate the report using coverage files from ALL test projects
     // Use a central location that's not tied to a specific test project
     const reportDir = path.join("coverage-report");
+    
     // Clear existing coverage reports
     if (fs.existsSync(reportDir)) {
       console.log("Clearing existing coverage reports...");
@@ -54,19 +56,27 @@ try {
     );
 
     // Execute reportgenerator with extreme settings to disable GitHub lookups
+    // CRITICAL FIX: Process the coverage files to remove GitHub URLs
+    console.log("Pre-processing coverage files to remove GitHub URLs...");
+    processAllCoverageFiles();
+
+    // Now run ReportGenerator on the processed files
     execSync(
       `reportgenerator ` +
         `"-reports:tests/**/TestResults/**/coverage.cobertura.xml" ` +
+      `"-reports:tests/**/TestResults/**/processed.coverage.cobertura.xml" ` +
         `"-targetdir:${reportDir}" ` +
         `"-reporttypes:Html" ` +
         `"-sourcedirs:${process.cwd()}" ` +
         `"-verbosity:Error" ` +
         `"-settings:${settingsPath}" ` +
         `"-tag:noupdate"`,
+      `"-verbosity:Warning"`,
       {
         stdio: "inherit",
         shell: true,
       },
+      }
     );
 
     // Clean up settings file
@@ -86,3 +96,22 @@ try {
 } catch (error) {
   console.error("Tests failed");
 }
+
+// Helper function to process all coverage files and remove GitHub URLs
+function processAllCoverageFiles() {
+  // Find all coverage files
+  const findCoverageCmd = `dir /s /b tests\\*coverage.cobertura.xml`;
+  const coverageFiles = execSync(findCoverageCmd, { encoding: 'utf8', shell: true })
+    .split('\r\n')
+    .filter(file => file.trim() !== '');
+  
+  console.log(`Found ${coverageFiles.length} coverage files to process`);
+  
+  // Process each file
+  coverageFiles.forEach(filePath => {
+    if (!filePath || !fs.existsSync(filePath)) return;
+    
+    // Read the coverage file
+    const content = fs.readFileSync(filePath, 'utf8');
+    
+    // Replace any GitHub URLs with local paths
