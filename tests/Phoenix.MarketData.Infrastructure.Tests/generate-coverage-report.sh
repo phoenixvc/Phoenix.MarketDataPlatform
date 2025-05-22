@@ -12,7 +12,7 @@ cd "$SCRIPT_DIR"
 
 # Run the tests with coverage
 echo "Running tests with coverage collection..."
-dotnet test .
+dotnet test . --collect:"XPlat Code Coverage"
 
 # Generate HTML report
 echo "Generating HTML coverage report..."
