@@ -28,23 +28,50 @@ public class JsonSchemaValidator
 
     public ValidationResult Validate(string jsonPayload)
     {
-        var element = JsonDocument.Parse(jsonPayload).RootElement;
+        try
+        {
+            var element = JsonDocument.Parse(jsonPayload).RootElement;
 
-        // NEW: Run validation directly
-        var results = _schema.Validate(element);
+            // Run validation directly
+            var results = _schema.Validate(element);
 
-        if (results.IsValid)
-            return ValidationResult.Success();
+            if (results.IsValid)
+                return ValidationResult.Success();
 
-        var errors = GetAllMessages(results)
-            .Select(msg => new ValidationError
+            var errors = GetAllMessages(results)
+                .Select(msg => new ValidationError
+                {
+                    ErrorMessage = msg,
+                    Source = "JsonSchema.Net"
+                })
+                .ToList();
+
+            return ValidationResult.Failure(errors);
+        }
+        catch (JsonException ex)
+        {
+            // Handle JSON parsing errors gracefully
+            return ValidationResult.Failure(new List<ValidationError>
             {
-                ErrorMessage = msg,
-                Source = "JsonSchema.Net"
-            })
-            .ToList();
-
-        return ValidationResult.Failure(errors);
+                new ValidationError
+                {
+                    ErrorMessage = $"Invalid JSON format: {ex.Message}",
+                    Source = "JsonSchema.Net"
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            // Handle any other unexpected errors
+            return ValidationResult.Failure(new List<ValidationError>
+            {
+                new ValidationError
+                {
+                    ErrorMessage = $"Validation error: {ex.Message}",
+                    Source = "JsonSchema.Net"
+                }
+            });
+        }
     }
 
     private static IEnumerable<string> GetAllMessages(ValidationResults results)

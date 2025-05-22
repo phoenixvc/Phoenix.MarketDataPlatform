@@ -18,7 +18,7 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
             Func<IQueryable<T>, IQueryable<T>> predicateBuilder,
             bool includeSoftDeleted = false,
             ILogger? logger = null)
-            where T : class, IVersionedMarketDataEntity
+            where T : class, IVersionedMarketDataEntity, IMarketDataEntity
         {
             var results = new List<T>();
 
@@ -32,10 +32,15 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
                 {
                     var response = await iterator.ReadNextAsync();
 
-                    results.AddRange(
-                        !includeSoftDeleted && typeof(ISoftDeletable).IsAssignableFrom(typeof(T))
-                            ? response.Where(e => !(e as ISoftDeletable)!.IsDeleted)
-                            : response);
+                    // Apply soft-delete filter in memory after query execution
+                    if (!includeSoftDeleted && typeof(ISoftDeletable).IsAssignableFrom(typeof(T)))
+                    {
+                        results.AddRange(response.Where(e => !(e as ISoftDeletable)!.IsDeleted));
+                    }
+                    else
+                    {
+                        results.AddRange(response);
+                    }
                 }
 
                 logger?.LogDebug("Successfully retrieved {Count} items of type {EntityType}",
@@ -62,7 +67,7 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
             string id,
             int version,
             ILogger? logger = null)
-            where T : class, IEntity, IVersionedMarketDataEntity
+            where T : class, IEntity, IVersionedMarketDataEntity, IMarketDataEntity
         {
             try
             {
@@ -70,15 +75,22 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
                     typeof(T).Name, id, version);
 
                 var container = repo.GetContainer();
-                var query = container.GetItemLinqQueryable<T>()
-                    .Where(e => e.Id == id && e.Version == version)
-                    .ToFeedIterator();
 
-                while (query.HasMoreResults)
+                // Use SQL query instead of LINQ to avoid dynamic cast issues
+                var queryDefinition = new QueryDefinition(
+                    "SELECT * FROM c WHERE c.id = @id AND c.version = @version")
+                    .WithParameter("@id", id)
+                    .WithParameter("@version", version);
+
+                var iterator = container.GetItemQueryIterator<T>(queryDefinition);
+
+                while (iterator.HasMoreResults)
                 {
-                    var response = await query.ReadNextAsync();
+                    var response = await iterator.ReadNextAsync();
                     var entity = response.FirstOrDefault();
-                    if (entity != null && !IsSoftDeleted(entity))
+
+                    // Check for soft deleted
+                    if (entity != null && !(entity is ISoftDeletable sd && sd.IsDeleted))
                     {
                         logger?.LogDebug("Found entity of type {EntityType} with id {Id} and version {Version}",
                             typeof(T).Name, id, version);
@@ -102,11 +114,6 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
                     typeof(T).Name, id, version, ex.Message);
                 throw;
             }
-        }
-
-        private static bool IsSoftDeleted<T>(T entity) where T : class
-        {
-            return entity is ISoftDeletable sd && sd.IsDeleted;
         }
     }
 }

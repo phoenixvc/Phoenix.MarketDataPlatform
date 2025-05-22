@@ -20,10 +20,16 @@ public class TimeOnlyJsonConverter : JsonConverter<TimeOnly>
         if (string.IsNullOrEmpty(str))
             throw new JsonException("Cannot convert null or empty string to TimeOnly.");
 
+        // Try with the exact format first
         if (TimeOnly.TryParseExact(str, Format, CultureInfo.InvariantCulture, DateTimeStyles.None, out var result))
             return result;
 
-        return TimeOnly.MinValue;
+        // Try with standard parsing as a fallback
+        if (TimeOnly.TryParse(str, CultureInfo.InvariantCulture, DateTimeStyles.None, out result))
+            return result;
+
+        // If both parsing attempts fail, throw an exception with a helpful message
+        throw new JsonException($"Cannot parse '{str}' to TimeOnly. Expected format: '{Format}'.");
     }
 
     public override void Write(Utf8JsonWriter writer, TimeOnly value, JsonSerializerOptions options)

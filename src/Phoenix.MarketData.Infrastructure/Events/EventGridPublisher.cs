@@ -79,7 +79,8 @@ namespace Phoenix.MarketData.Infrastructure.Events
             try
             {
                 var eventType = typeof(T).Name;
-                var source = BuildSourceUri(topic ?? DeriveTopicFromEventType(eventType));
+                var topicName = topic ?? DeriveTopicFromEventType(eventType);
+                var source = BuildSourceUri(topicName);
 
                 var data = BinaryData.FromString(JsonSerializer.Serialize(eventData));
                 var cloudEvent = new CloudEvent(
@@ -94,11 +95,8 @@ namespace Phoenix.MarketData.Infrastructure.Events
                     Time = DateTimeOffset.UtcNow
                 };
 
-                // Add topic as a custom attribute if provided
-                if (!string.IsNullOrEmpty(topic))
-                {
-                    cloudEvent.ExtensionAttributes.Add("topic", topic);
-                }
+                // Add logical topic name as a custom attribute for easier filtering/routing
+                cloudEvent.ExtensionAttributes.Add("topic", topicName);
 
                 await _client.SendEventAsync(cloudEvent);
                 _logger.LogInformation("Published event {EventType} with source {Source}", eventType, source);
@@ -120,7 +118,8 @@ namespace Phoenix.MarketData.Infrastructure.Events
             try
             {
                 var eventType = typeof(T).Name;
-                var source = BuildSourceUri(topic ?? DeriveTopicFromEventType(eventType));
+                var topicName = topic ?? DeriveTopicFromEventType(eventType);
+                var source = BuildSourceUri(topicName);
 
                 // Convert all events to CloudEvents first
                 var allCloudEvents = eventsList.Select(e =>
@@ -137,11 +136,8 @@ namespace Phoenix.MarketData.Infrastructure.Events
                         Time = DateTimeOffset.UtcNow
                     };
 
-                    // Add topic as a custom attribute if provided
-                    if (!string.IsNullOrEmpty(topic))
-                    {
-                        cloudEvent.ExtensionAttributes.Add("topic", topic);
-                    }
+                    // Add logical topic name as a custom attribute for easier filtering/routing
+                    cloudEvent.ExtensionAttributes.Add("topic", topicName);
 
                     return cloudEvent;
                 }).ToList();
@@ -229,6 +225,7 @@ namespace Phoenix.MarketData.Infrastructure.Events
         // Helper: Build a proper URI for the CloudEvent source
         private Uri BuildSourceUri(string topic)
         {
+            // If the topic is already a valid absolute URI, use it directly
             if (Uri.TryCreate(topic, UriKind.Absolute, out var uri))
             {
                 return uri;
@@ -237,10 +234,11 @@ namespace Phoenix.MarketData.Infrastructure.Events
             // Normalize the topic name for use in a URI
             var normalizedTopic = topic.Replace(" ", "-").ToLowerInvariant();
 
-            // Ensure no double slashes in the URL
+            // Ensure no double slashes in the URL by trimming slashes
             var baseUri = _baseSourceUri.TrimEnd('/');
             normalizedTopic = normalizedTopic.TrimStart('/');
 
+            // Always create a valid absolute URI with the base source URI
             return new Uri($"{baseUri}/{normalizedTopic}");
         }
 

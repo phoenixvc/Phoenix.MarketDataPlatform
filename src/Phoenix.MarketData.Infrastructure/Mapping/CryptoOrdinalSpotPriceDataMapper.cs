@@ -26,7 +26,7 @@ namespace Phoenix.MarketData.Infrastructure.Mapping
                 createTimestamp: domain.CreateTimestamp,
                 asOfDate: domain.AsOfDate,
                 asOfTime: domain.AsOfTime,
-                tags: domain.Tags,
+                tags: domain.Tags?.ToList() ?? new List<string>(), // Convert IReadOnlyList to List
                 price: domain.Price,
                 side: domain.Side,
                 collectionName: domain.CollectionName ?? string.Empty,
