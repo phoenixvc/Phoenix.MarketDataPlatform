@@ -28,6 +28,10 @@ COVERAGE_PATTERN="$TEST_RESULTS_DIR/**/coverage.cobertura.xml"
 
 # Generate the report using the wildcard pattern
 reportgenerator "-reports:$COVERAGE_PATTERN" "-targetdir:$REPORT_DIR" -reporttypes:Html
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to generate coverage report"
+    exit 1
+fi
 
 # Open the report in the default browser
 INDEX_PATH="$REPORT_DIR/index.html"
