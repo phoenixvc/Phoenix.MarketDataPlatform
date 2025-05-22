@@ -49,7 +49,7 @@ namespace Phoenix.MarketData.Application.Events
             _logger.LogInformation("Received market data created event for {DataType} {AssetId}",
                 eventData.DataType, eventData.AssetId);
 
-            await _retryPolicy.ExecuteAsync(async () =>
+            await _retryPolicy.ExecuteAsync(async (ctx, ct) =>
             {
                 try
                 {

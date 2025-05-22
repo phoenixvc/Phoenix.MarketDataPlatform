@@ -28,8 +28,15 @@ namespace Phoenix.MarketData.Core.Repositories
         /// <param name="pageSize">Number of items per page</param>
         /// <param name="cancellationToken">Optional cancellation token</param>
         /// <returns>A paged result containing the entities and pagination metadata</returns>
-        Task<PagedResult<T>> GetPagedAsync(int pageIndex = 0, int pageSize = 50, CancellationToken cancellationToken = default);
+        Task<PagedResult<T>> GetPagedAsync(
+            int pageIndex = 0,
+            int pageSize = 50,
+            CancellationToken cancellationToken = default);
 
+        /// <remarks>
+        /// Implementations should throw <see cref="ArgumentOutOfRangeException"/> when
+        /// <paramref name="pageIndex"/> < 0 or <paramref name="pageSize"/> <= 0.
+        /// </remarks>
         /// <summary>
         /// Gets all entities (use with caution on large datasets)
         /// </summary>

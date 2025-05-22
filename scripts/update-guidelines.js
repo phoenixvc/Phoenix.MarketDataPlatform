@@ -46,6 +46,15 @@ try {
     console.error(`Failed to write updated content: ${writeError.message}`);
     process.exit(1);
   }
+
+  // Write the updated content back to the file
+  try {
+    fs.writeFileSync(guidelinesPath, updatedContent);
+    console.log(`Updated timestamp to ${formattedDate}`);
+  } catch (writeError) {
+    console.error(`Failed to write updated content: ${writeError.message}`);
+    process.exit(1);
+  }
 } catch (error) {
   console.error(`Unexpected error: ${error.message}`);
   process.exit(1);

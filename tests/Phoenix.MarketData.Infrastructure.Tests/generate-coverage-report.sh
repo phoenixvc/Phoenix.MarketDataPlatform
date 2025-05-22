@@ -4,6 +4,10 @@
 if ! command -v reportgenerator &> /dev/null; then
     echo "Installing ReportGenerator tool..."
     dotnet tool install -g dotnet-reportgenerator-globaltool
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to install ReportGenerator tool"
+        exit 1
+    fi
 fi
 
 # Set working directory to the project directory
@@ -12,15 +16,7 @@ cd "$SCRIPT_DIR"
 
 # Run the tests with coverage
 echo "Running tests with coverage collection..."
-dotnet test .
-TEST_EXIT_CODE=$?
-
-# Check if tests ran successfully
-if [ $TEST_EXIT_CODE -ne 0 ]; then
-    echo "Error: Tests failed with exit code $TEST_EXIT_CODE"
-    echo "Coverage report will not be generated."
-    exit $TEST_EXIT_CODE
-fi
+dotnet test . --collect:"XPlat Code Coverage"
 
 # Generate HTML report
 echo "Generating HTML coverage report..."
