@@ -5,8 +5,8 @@ riderModule.iml
 /_ReSharper.Caches/
 
 # Coverage reports
+coverage-report/
 **/TestResults/
-**/CoverageReport/
 *.cobertura.xml
 *.opencover.xml
 coverage.json

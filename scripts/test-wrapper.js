@@ -41,10 +41,16 @@ try {
 
     // Execute reportgenerator with settings to:
     // 1. Include ALL test results from ALL projects
-    // 2. Use local source files instead of GitHub lookups
-    // 3. Create a central report directory
+    // 2. COMPLETELY DISABLE source control integration with -disableservicefabricintegration
+    // 3. Use multiple source directories to find local files
     execSync(
-      `reportgenerator "-reports:tests/**/TestResults/**/coverage.cobertura.xml" "-targetdir:${reportDir}" "-reporttypes:Html" "-sourcedirs:src" "-verbosity:Info"`,
+      `reportgenerator "-reports:tests/**/TestResults/**/coverage.cobertura.xml" ` +
+        `"-targetdir:${reportDir}" ` +
+        `"-reporttypes:Html" ` +
+        `"-sourcedirs:src;." ` +
+        `"-verbosity:Error" ` +
+        `"-historydir:${reportDir}/history" ` +
+        `"-disableservicefabricintegration"`,
       {
         stdio: "inherit",
         shell: true,
