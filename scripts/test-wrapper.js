@@ -39,23 +39,38 @@ try {
     console.log("Creating new coverage report directory...");
     fs.mkdirSync(reportDir, { recursive: true });
 
-    // Execute reportgenerator with settings to:
-    // 1. Include ALL test results from ALL projects
-    // 2. COMPLETELY DISABLE source control integration with -disableservicefabricintegration
-    // 3. Use multiple source directories to find local files
+    // Create a temporary settings file to completely disable source control
+    const settingsPath = path.join("coverage-settings.xml");
+    fs.writeFileSync(
+      settingsPath,
+      `<?xml version="1.0" encoding="utf-8"?>
+      <ReportGeneratorSettings>
+        <Settings>
+          <UseSourceLink>False</UseSourceLink>
+          <UseHistoricCoverageFile>False</UseHistoricCoverageFile>
+          <DisableSourceControlIntegration>True</DisableSourceControlIntegration>
+        </Settings>
+      </ReportGeneratorSettings>`,
+    );
+
+    // Execute reportgenerator with extreme settings to disable GitHub lookups
     execSync(
-      `reportgenerator "-reports:tests/**/TestResults/**/coverage.cobertura.xml" ` +
+      `reportgenerator ` +
+        `"-reports:tests/**/TestResults/**/coverage.cobertura.xml" ` +
         `"-targetdir:${reportDir}" ` +
         `"-reporttypes:Html" ` +
-        `"-sourcedirs:src;." ` +
+        `"-sourcedirs:${process.cwd()}" ` +
         `"-verbosity:Error" ` +
-        `"-historydir:${reportDir}/history" ` +
-        `"-disableservicefabricintegration"`,
+        `"-settings:${settingsPath}" ` +
+        `"-tag:noupdate"`,
       {
         stdio: "inherit",
         shell: true,
       },
     );
+
+    // Clean up settings file
+    fs.unlinkSync(settingsPath);
 
     // Open the report in browser (Windows-specific)
     console.log(`Coverage report generated at: ${reportDir}`);

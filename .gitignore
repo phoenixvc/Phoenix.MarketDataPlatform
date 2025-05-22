@@ -4,12 +4,15 @@ obj/
 riderModule.iml
 /_ReSharper.Caches/
 
-# Coverage reports
+# Coverage reports - comprehensive patterns
 coverage-report/
+**/CoverageReport/
 **/TestResults/
 *.cobertura.xml
 *.opencover.xml
 coverage.json
+coverage.settings.xml
+coverage-settings.xml
 
 # Node.js
 node_modules/
