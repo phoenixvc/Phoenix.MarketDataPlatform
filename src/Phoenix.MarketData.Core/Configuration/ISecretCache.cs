@@ -16,7 +16,11 @@ namespace Phoenix.MarketData.Core.Configuration
         /// </summary>
         /// <param name="secretName">The name of the secret to retrieve</param>
         /// <returns>A tuple containing the secret value and whether it's expired; if not in cache, returns (null, true)</returns>
-        (string? Value, bool IsExpired) GetSecretWithExpiration(string secretName);
+-       (string? Value, bool IsExpired) GetSecretWithExpiration(string secretName);
++       bool TryGetSecret(
++           string secretName,
++           out string? value,
++           out bool isExpired);
 
         /// <summary>
         /// Caches a secret with the specified name and value
