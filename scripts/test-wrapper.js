@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Script to run tests after commit and generate coverage reports
-const { execSync } = require("child_process");
+const { execSync, spawnSync } = require("child_process");
 const path = require("path");
+const fs = require("fs");
 
 try {
   // Run the tests
@@ -13,14 +14,17 @@ try {
   console.log("Generating HTML coverage report...");
 
   try {
-    // Install reportgenerator if needed (will skip if already installed)
-    execSync(
-      "dotnet tool install -g dotnet-reportgenerator-globaltool --skip-duplicate",
-      {
+    // Check if reportgenerator is already installed
+    try {
+      execSync("reportgenerator -version", { stdio: "pipe" });
+      console.log("ReportGenerator is already installed");
+    } catch (error) {
+      console.log("Installing ReportGenerator tool...");
+      execSync("dotnet tool install -g dotnet-reportgenerator-globaltool", {
         stdio: "inherit",
         shell: true,
-      },
-    );
+      });
+    }
 
     // Generate the report using the most recent coverage file
     const reportDir = path.join(
@@ -28,6 +32,11 @@ try {
       "Phoenix.MarketData.Infrastructure.Tests",
       "CoverageReport",
     );
+
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(reportDir)) {
+      fs.mkdirSync(reportDir, { recursive: true });
+    }
 
     execSync(
       `reportgenerator "-reports:tests/**/TestResults/**/coverage.cobertura.xml" "-targetdir:${reportDir}" "-reporttypes:Html"`,
