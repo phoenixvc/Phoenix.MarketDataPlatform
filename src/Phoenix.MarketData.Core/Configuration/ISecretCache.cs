@@ -15,12 +15,11 @@ namespace Phoenix.MarketData.Core.Configuration
         /// Gets a secret and its expiration status from the cache
         /// </summary>
         /// <param name="secretName">The name of the secret to retrieve</param>
-        /// <returns>A tuple containing the secret value and whether it's expired; if not in cache, returns (null, true)</returns>
--       (string? Value, bool IsExpired) GetSecretWithExpiration(string secretName);
-+       bool TryGetSecret(
-+           string secretName,
-+           out string? value,
-+           out bool isExpired);
+        /// <returns>True if the secret was found in the cache, false otherwise</returns>
+        bool TryGetSecret(
+            string secretName,
+            out string? value,
+            out bool isExpired);
 
         /// <summary>
         /// Caches a secret with the specified name and value
@@ -37,5 +36,4 @@ namespace Phoenix.MarketData.Core.Configuration
         /// <param name="expiresOn">When the cached secret expires</param>
         void CacheSecretWithExpiration(string secretName, string value, DateTimeOffset expiresOn);
     }
-        
 }
