@@ -1,40 +1,78 @@
+using System;
 using System.Text.Json.Serialization;
-using System.Diagnostics.CodeAnalysis; // Add this for SetsRequiredMembers attribute
+using System.Diagnostics.CodeAnalysis;
 
 namespace Phoenix.MarketData.Core.Events.IntegrationEvents
 {
-    // Common interface for all market data events
+    /// <summary>
+    /// Common interface for all market data integration events
+    /// </summary>
     public interface IMarketDataIntegrationEvent
     {
+        /// <summary>Gets the unique identifier of the market data</summary>
         string Id { get; }
+
+        /// <summary>Gets the asset identifier</summary>
         string AssetId { get; }
+
+        /// <summary>Gets the asset class</summary>
         string AssetClass { get; }
+
+        /// <summary>Gets the data type</summary>
         string DataType { get; }
+
+        /// <summary>Gets the document type</summary>
         string DocumentType { get; }
+
+        /// <summary>Gets the optional version</summary>
         int? Version { get; }
+
+        /// <summary>Gets the event type identifier</summary>
         string EventType { get; }
+
+        /// <summary>Gets the timestamp when the event occurred</summary>
         DateTimeOffset Timestamp { get; }
     }
 
-    // Abstract base class containing all common functionality
+    /// <summary>
+    /// Abstract base class implementing common functionality for market data integration events
+    /// </summary>
     public abstract class MarketDataIntegrationEventBase : IMarketDataIntegrationEvent
     {
+        /// <summary>Gets the unique identifier of the market data</summary>
         public required string Id { get; init; }
+
+        /// <summary>Gets the asset identifier</summary>
         public required string AssetId { get; init; }
+
+        /// <summary>Gets the asset class</summary>
         public required string AssetClass { get; init; }
+
+        /// <summary>Gets the data type</summary>
         public required string DataType { get; init; }
+
+        /// <summary>Gets the document type</summary>
         public required string DocumentType { get; init; }
+
+        /// <summary>Gets the optional version</summary>
         public int? Version { get; init; }
-        public abstract string EventType { get; }  // Abstract property that derived classes must implement
+
+        /// <summary>Gets the event type identifier - implemented by derived classes</summary>
+        public abstract string EventType { get; }
+
+        /// <summary>Gets the timestamp when the event occurred</summary>
         public required DateTimeOffset Timestamp { get; init; }
 
-        // Default constructor for object initializer syntax
+        /// <summary>
+        /// Default constructor for object initializer syntax
+        /// </summary>
         protected MarketDataIntegrationEventBase()
         {
         }
 
-        // Constructor that can be called by derived classes
-        // This attribute marks the constructor as setting all required members
+        /// <summary>
+        /// Constructor that sets all required members
+        /// </summary>
         [SetsRequiredMembers]
         protected MarketDataIntegrationEventBase(
             string id,
@@ -55,18 +93,24 @@ namespace Phoenix.MarketData.Core.Events.IntegrationEvents
         }
     }
 
-    // Concrete implementation for "Created" events
+    /// <summary>
+    /// Event raised when market data is created
+    /// </summary>
     public class MarketDataCreatedIntegrationEvent : MarketDataIntegrationEventBase
     {
-        // Override with specific event type
+        /// <summary>Gets the event type identifier</summary>
         public override string EventType => "Created";
 
-        // Default constructor for object initializer
+        /// <summary>
+        /// Default constructor for object initializer
+        /// </summary>
         public MarketDataCreatedIntegrationEvent() : base()
         {
         }
 
-        // Constructor that sets all required properties
+        /// <summary>
+        /// Constructor that sets all required properties
+        /// </summary>
         [JsonConstructor]
         [SetsRequiredMembers]
         public MarketDataCreatedIntegrationEvent(
@@ -82,18 +126,24 @@ namespace Phoenix.MarketData.Core.Events.IntegrationEvents
         }
     }
 
-    // Concrete implementation for "Changed" events
+    /// <summary>
+    /// Event raised when market data is changed
+    /// </summary>
     public class MarketDataChangedIntegrationEvent : MarketDataIntegrationEventBase
     {
-        // Override with specific event type
+        /// <summary>Gets the event type identifier</summary>
         public override string EventType => "Changed";
 
-        // Default constructor for object initializer
+        /// <summary>
+        /// Default constructor for object initializer
+        /// </summary>
         public MarketDataChangedIntegrationEvent() : base()
         {
         }
 
-        // Constructor that sets all required properties
+        /// <summary>
+        /// Constructor that sets all required properties
+        /// </summary>
         [JsonConstructor]
         [SetsRequiredMembers]
         public MarketDataChangedIntegrationEvent(

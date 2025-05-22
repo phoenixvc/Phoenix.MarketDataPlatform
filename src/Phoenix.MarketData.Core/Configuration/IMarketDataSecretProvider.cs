@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Phoenix.MarketData.Core.Configuration
@@ -10,21 +11,29 @@ namespace Phoenix.MarketData.Core.Configuration
         /// <summary>
         /// Gets the Cosmos DB connection string
         /// </summary>
-        Task<string> GetCosmosConnectionStringAsync();
-        
+        /// <param name="cancellationToken">Optional cancellation token to cancel the operation</param>
+        /// <returns>The Cosmos DB connection string</returns>
+        Task<string> GetCosmosConnectionStringAsync(CancellationToken cancellationToken = default);
+
         /// <summary>
         /// Gets the Event Grid API key
         /// </summary>
-        Task<string> GetEventGridKeyAsync();
-        
+        /// <param name="cancellationToken">Optional cancellation token to cancel the operation</param>
+        /// <returns>The Event Grid API key</returns>
+        Task<string> GetEventGridKeyAsync(CancellationToken cancellationToken = default);
+
         /// <summary>
         /// Gets the Event Grid endpoint
         /// </summary>
-        Task<string> GetEventGridEndpointAsync();
-        
+        /// <param name="cancellationToken">Optional cancellation token to cancel the operation</param>
+        /// <returns>The Event Grid endpoint URL</returns>
+        Task<string> GetEventGridEndpointAsync(CancellationToken cancellationToken = default);
+
         /// <summary>
         /// Gets the Event Hub connection string
         /// </summary>
-        Task<string> GetEventHubConnectionStringAsync();
+        /// <param name="cancellationToken">Optional cancellation token to cancel the operation</param>
+        /// <returns>The Event Hub connection string</returns>
+        Task<string> GetEventHubConnectionStringAsync(CancellationToken cancellationToken = default);
     }
 }

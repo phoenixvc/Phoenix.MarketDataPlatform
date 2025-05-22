@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,42 +10,51 @@ namespace Phoenix.MarketData.Core.Validation
     /// <summary>
     /// Generic decorator for adding validation to any service operation
     /// </summary>
-    /// <typeparam name="TService">Type of service being decorated</typeparam>
+    /// <typeparam name="TRequest">Type of service being decorated</typeparam>
     public class ValidationDecorator<TRequest> : IRequestHandler<TRequest>
         where TRequest : IRequest
     {
         private readonly IRequestHandler<TRequest> _decoratedHandler;
-        private readonly IValidator<TRequest> _validator;
+        private readonly IValidator<TRequest>? _validator;
 
+        /// <summary>
+        /// Initializes a new instance of the ValidationDecorator class
+        /// </summary>
+        /// <param name="decoratedHandler">The handler being decorated</param>
+        /// <param name="validator">The validator to use (can be null to skip validation)</param>
+        /// <exception cref="ArgumentNullException">Thrown when decoratedHandler is null</exception>
         public ValidationDecorator(
             IRequestHandler<TRequest> decoratedHandler,
-            IValidator<TRequest> validator)
+            IValidator<TRequest>? validator = null)
         {
-            _decoratedHandler = decoratedHandler ?? throw new System.ArgumentNullException(nameof(decoratedHandler));
-            _validator = validator;
+            _decoratedHandler = decoratedHandler ?? throw new ArgumentNullException(nameof(decoratedHandler));
+            _validator = validator; // Null validator is allowed (means no validation will be performed)
         }
 
+        /// <summary>
+        /// Handles the request by validating it first, then passing it to the decorated handler
+        /// </summary>
+        /// <param name="request">The request to handle</param>
+        /// <param name="cancellationToken">The cancellation token</param>
         public async Task Handle(TRequest request, CancellationToken cancellationToken)
         {
-            await ValidateAsync(request, _validator, cancellationToken);
+            await ValidateRequestAsync(request, cancellationToken);
             await _decoratedHandler.Handle(request, cancellationToken);
         }
 
         /// <summary>
-        /// Validates an entity using the provided validator and throws a ValidationException if validation fails
+        /// Validates the request using the configured validator and throws a ValidationException if validation fails
         /// </summary>
-        /// <typeparam name="TEntity">Type of entity to validate</typeparam>
-        /// <param name="entity">The entity to validate</param>
-        /// <param name="validator">The validator to use</param>
+        /// <param name="request">The request to validate</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>A task that completes when validation is done</returns>
         /// <exception cref="ValidationException">Thrown when validation fails</exception>
-        private async Task ValidateAsync<TEntity>(TEntity entity, IValidator<TEntity> validator, CancellationToken cancellationToken)
+        private async Task ValidateRequestAsync(TRequest request, CancellationToken cancellationToken)
         {
-            if (validator == null)
-                return;
+            if (_validator == null)
+                return; // No validation needed if validator is null
 
-            var validationResult = await validator.ValidateAsync(entity, cancellationToken);
+            var validationResult = await _validator.ValidateAsync(request, cancellationToken);
             if (!validationResult.IsValid)
             {
                 var errors = validationResult.Errors.Select(f => new ValidationError

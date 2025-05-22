@@ -16,7 +16,7 @@ namespace Phoenix.MarketData.Domain.Constants
         public const string CNY = "CNY";
         public const string BTC = "BTC";
         public const string ETH = "ETH";
-        // Add more as you need, but don’t add tokens or meme coins unless you’re running a casino.
+        // Add established currencies as needed. Avoid adding volatile tokens or meme coins as they lack stability for financial applications.
 
         /// <summary>
         /// Returns a list of all defined codes.
