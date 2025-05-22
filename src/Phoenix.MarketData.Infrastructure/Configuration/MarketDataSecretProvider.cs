@@ -95,26 +95,24 @@ namespace Phoenix.MarketData.Infrastructure.Configuration
             try
             {
                 // Try to get from cache first
-                // Use the appropriate method depending on what's available in ISecretCache
                 string? cachedValue;
-                bool isCacheExpired = true;
+                bool isCacheExpired;
 
-                // Use GetSecretWithExpiration if implemented, otherwise use GetSecret
-                if (_secretCache is ISecretCache cacheWithExpiration)
+                // Use the new TryGetSecret method instead of GetSecretWithExpiration
+                if (_secretCache.TryGetSecret(secretName, out cachedValue, out isCacheExpired))
                 {
-                    (cachedValue, isCacheExpired) = cacheWithExpiration.GetSecretWithExpiration(secretName);
+                    if (!string.IsNullOrEmpty(cachedValue) && !isCacheExpired)
+                    {
+                        _logger?.LogDebug("Retrieved secret '{SecretName}' from cache", secretName);
+                        return cachedValue;
+                    }
                 }
                 else
                 {
+                    // Fallback to GetSecret if TryGetSecret returns false
                     cachedValue = _secretCache.GetSecret(secretName);
-                    // Assume it's not expired if it exists (fallback behavior)
-                    isCacheExpired = string.IsNullOrEmpty(cachedValue);
-                }
-
-                if (!string.IsNullOrEmpty(cachedValue) && !isCacheExpired)
-                {
-                    _logger?.LogDebug("Retrieved secret '{SecretName}' from cache", secretName);
-                    return cachedValue;
+                    // Assume it's expired if we need to fall back to GetSecret
+                    isCacheExpired = true;
                 }
 
                 // If cache is expired or empty, retrieve from Key Vault
@@ -125,7 +123,6 @@ namespace Phoenix.MarketData.Infrastructure.Configuration
                     name: secretName,
                     version: null, // Get latest version
                     cancellationToken: cancellationToken);
-
                 var secret = response?.Value;
 
                 if (secret == null)
@@ -147,15 +144,8 @@ namespace Phoenix.MarketData.Infrastructure.Configuration
                 // Get expiration date from Key Vault if available, or use default expiration
                 DateTimeOffset expiresOn = secret.Properties.ExpiresOn ?? DateTimeOffset.UtcNow.Add(_defaultSecretLifetime);
 
-                // Cache the secret with expiration if supported
-                if (_secretCache is ISecretCache cacheWithExp)
-                {
-                    cacheWithExp.CacheSecretWithExpiration(secretName, value, expiresOn);
-                }
-                else
-                {
-                    _secretCache.CacheSecret(secretName, value);
-                }
+                // Cache the secret with expiration
+                _secretCache.CacheSecretWithExpiration(secretName, value, expiresOn);
 
                 _logger?.LogDebug("Successfully retrieved and cached secret '{SecretName}'", secretName);
                 return value;
