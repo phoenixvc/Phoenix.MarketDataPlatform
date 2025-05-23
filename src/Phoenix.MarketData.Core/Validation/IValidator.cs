@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using System.Threading;
 
-namespace Phoenix.MarketData.Core.Validation
+namespace Phoenix.MarketData.Domain.Validation
 {
     /// <summary>
     /// Interface for validators that can validate entities

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using Json.Schema;
 
-namespace Phoenix.MarketData.Core.Validation;
+namespace Phoenix.MarketData.Domain.Validation;
 
 /// <summary>
 /// Extension methods for Json.Schema validation results

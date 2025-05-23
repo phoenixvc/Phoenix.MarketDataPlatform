@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Concurrent;
-using Phoenix.MarketData.Core.Configuration;
+using Phoenix.MarketData.Domain.Configuration;
 
 namespace Phoenix.MarketData.Infrastructure.Configuration
 {
@@ -47,21 +47,25 @@ namespace Phoenix.MarketData.Infrastructure.Configuration
         {
             // Default to 1 hour expiration if not specified
             CacheSecretWithExpiration(secretName, value, DateTimeOffset.UtcNow.AddHours(1));
-            }
+        }
 
         public void CacheSecretWithExpiration(string secretName, string value, DateTimeOffset expiresOn)
         {
             var cachedSecret = new CachedSecret(value, expiresOn);
             _cache.AddOrUpdate(secretName, cachedSecret, (_, _) => cachedSecret);
-    }
+        }
 
         private class CachedSecret
         {
             public CachedSecret(string value, DateTimeOffset expiresOn)
             {
+                if (string.IsNullOrEmpty(value))
+                    throw new ArgumentException("Secret value cannot be null or empty", nameof(value));
+                if (expiresOn <= DateTimeOffset.UtcNow)
+                    throw new ArgumentException("Expiration must be a future date/time", nameof(expiresOn));
                 Value = value;
                 ExpiresOn = expiresOn;
-}
+            }
 
             public string Value { get; }
             public DateTimeOffset ExpiresOn { get; }

@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Phoenix.MarketData.Core.Models;
-using Phoenix.MarketData.Core.Validation;
+using Phoenix.MarketData.Domain.Models;
+using Phoenix.MarketData.Domain.Validation;
 
 namespace Phoenix.MarketData.Infrastructure.Validation
 {

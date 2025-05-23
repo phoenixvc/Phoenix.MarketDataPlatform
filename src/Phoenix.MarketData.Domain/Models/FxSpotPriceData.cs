@@ -1,6 +1,6 @@
 ﻿using Phoenix.MarketData.Domain.Constants;
 
-namespace Phoenix.MarketData.Core.Models;
+namespace Phoenix.MarketData.Domain.Models;
 
 public class FxSpotPriceData : BaseMarketData
 {

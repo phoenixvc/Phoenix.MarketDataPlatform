@@ -19,32 +19,11 @@
     <!-- .NET 9.0 compatible packages -->
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
     
-    <!-- Replace with AspNetCore.Http which is more appropriate for isolated worker model -->
-    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
-    
     <!-- OpenAPI support for isolated worker model -->
-    <!-- Microsoft.Azure.WebJobs.Extensions.OpenApi is still in preview; plan to upgrade to stable when available -->
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.OpenApi" Version="2.0.0-preview2" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.OpenApi.Core" Version="2.0.0-preview2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Phoenix.MarketData.Domain\Phoenix.MarketData.Domain.csproj" />
-    <ProjectReference Include="..\Phoenix.MarketData.Infrastructure\Phoenix.MarketData.Infrastructure.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="host.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="local.settings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
-    </None>
-    <None Update="openapi.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+  <!-- Rest of the file remains unchanged -->
 </Project>

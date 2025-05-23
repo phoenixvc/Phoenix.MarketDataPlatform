@@ -6,7 +6,7 @@ using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Azure.Core;
 using Microsoft.Extensions.Logging;
-using Phoenix.MarketData.Core.Configuration;
+using Phoenix.MarketData.Domain.Configuration;
 using Azure;
 
 namespace Phoenix.MarketData.Infrastructure.Configuration

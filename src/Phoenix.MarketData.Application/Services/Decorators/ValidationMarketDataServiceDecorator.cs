@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Phoenix.MarketData.Core.Validation;
+using Phoenix.MarketData.Domain.Validation;
 using Phoenix.MarketData.Domain.Models;
 
 namespace Phoenix.MarketData.Application.Services.Decorators
@@ -21,13 +21,13 @@ namespace Phoenix.MarketData.Application.Services.Decorators
         public async Task<string> PublishMarketDataAsync(T marketData)
         {
             // Validate market data before delegating to decorated service
-            var validationResult = await _validator.ValidateAsync(marketData);
+            var validationResult = await _validator.ValidateAsync(marketData).ConfigureAwait(false);
             if (!validationResult.IsValid)
             {
                 throw new ValidationException(validationResult.Errors);
             }
 
-            return await DecoratedService.PublishMarketDataAsync(marketData);
+            return await DecoratedService.PublishMarketDataAsync(marketData).ConfigureAwait(false);
         }
 
         public async Task<T?> GetLatestMarketDataAsync(
@@ -35,7 +35,7 @@ namespace Phoenix.MarketData.Application.Services.Decorators
             DateOnly asOfDate, string documentType)
         {
             // No validation needed for read operations
-            return await DecoratedService.GetLatestMarketDataAsync(dataType, assetClass, assetId, region, asOfDate, documentType);
+            return await DecoratedService.GetLatestMarketDataAsync(dataType, assetClass, assetId, region, asOfDate, documentType).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<T>> QueryMarketDataAsync(
@@ -44,7 +44,7 @@ namespace Phoenix.MarketData.Application.Services.Decorators
             CancellationToken cancellationToken = default)
         {
             // No validation needed for read operations
-            return await DecoratedService.QueryMarketDataAsync(dataType, assetClass, assetId, fromDate, toDate, cancellationToken);
+            return await DecoratedService.QueryMarketDataAsync(dataType, assetClass, assetId, fromDate, toDate, cancellationToken).ConfigureAwait(false);
         }
     }
 }

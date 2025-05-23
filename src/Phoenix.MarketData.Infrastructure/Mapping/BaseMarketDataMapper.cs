@@ -1,4 +1,4 @@
-﻿using Phoenix.MarketData.Core.Models;
+﻿using Phoenix.MarketData.Domain.Models;
 using Phoenix.MarketData.Infrastructure.Serialization;
 
 namespace Phoenix.MarketData.Infrastructure.Mapping
@@ -30,7 +30,7 @@ namespace Phoenix.MarketData.Infrastructure.Mapping
             domain.AsOfTime = dto.AsOfTime;
             domain.CreateTimestamp = dto.CreateTimestamp ?? DateTime.UtcNow;
 
-                        // Add tags using the appropriate method
+            // Add tags using the appropriate method
             if (dto.Tags != null)
             {
                 foreach (var tag in dto.Tags)

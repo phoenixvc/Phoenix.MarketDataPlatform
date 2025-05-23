@@ -1,7 +1,7 @@
 using System;
 using Phoenix.MarketData.Domain.Models;
 
-namespace Phoenix.MarketData.Core.Domain.Events;
+namespace Phoenix.MarketData.Domain.Domain.Events;
 
 /// <summary>
 /// Event raised when new market data is created

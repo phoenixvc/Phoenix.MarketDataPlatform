@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Moq;
-using Phoenix.MarketData.Core.Validation;
+using Phoenix.MarketData.Domain.Validation;
 using Phoenix.MarketData.Domain.Models;
 using Phoenix.MarketData.Infrastructure.Validation;
 using Xunit;

@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Phoenix.MarketData.Core.Configuration
+namespace Phoenix.MarketData.Domain.Configuration
 {
     /// <summary>
     /// Provides secure access to application secrets

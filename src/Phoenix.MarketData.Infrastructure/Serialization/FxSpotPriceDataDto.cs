@@ -1,4 +1,4 @@
-﻿using Phoenix.MarketData.Core;
+﻿using Phoenix.MarketData.Domain;
 using System.Text.Json.Serialization; // <- for System.Text.Json attributes
 
 namespace Phoenix.MarketData.Infrastructure.Serialization;

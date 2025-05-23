@@ -1,4 +1,6 @@
-﻿namespace Phoenix.MarketData.Core.Models;
+﻿using Phoenix.MarketData.Domain.Models;
+
+namespace Phoenix.MarketData.Domain.Models;
 
 /// <summary>
 /// Represents an FX Volatility Surface market data object.

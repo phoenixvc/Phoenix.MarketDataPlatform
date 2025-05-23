@@ -8,8 +8,8 @@ using Azure;
 using Azure.Messaging;
 using Azure.Messaging.EventGrid;
 using Microsoft.Extensions.Logging;
-using Phoenix.MarketData.Core.Configuration;
-using Phoenix.MarketData.Core.Events;
+using Phoenix.MarketData.Domain.Configuration;
+using Phoenix.MarketData.Domain.Events;
 using Phoenix.MarketData.Domain.Models;
 
 namespace Phoenix.MarketData.Infrastructure.Events
@@ -29,6 +29,10 @@ namespace Phoenix.MarketData.Infrastructure.Events
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            if (!Uri.TryCreate(baseSourceUri, UriKind.Absolute, out var uri) || !uri.IsAbsoluteUri)
+            {
+                throw new ArgumentException("baseSourceUri must be a valid absolute URI", nameof(baseSourceUri));
+            }
             _baseSourceUri = baseSourceUri;
         }
 
@@ -123,13 +127,21 @@ namespace Phoenix.MarketData.Infrastructure.Events
                 var topicName = topic ?? DeriveTopicFromEventType(eventType);
                 var source = BuildSourceUri(topicName);
 
-                // Convert all events to CloudEvents first
-                var allCloudEvents = eventsList.Select(e =>
+                var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                // Convert all events to CloudEvents first, checking payload size
+                var allCloudEvents = new List<CloudEvent>();
+                foreach (var e in eventsList)
                 {
+                    var data = BinaryData.FromObjectAsJson(e, options);
+                    if (data.ToArray().Length > MaxPayloadSizeBytes)
+                    {
+                        _logger.LogError("Event of type {EventType} exceeds the 1MB payload limit and will not be published.", eventType);
+                        continue; // Or handle splitting/alternative logic as needed
+                    }
                     var cloudEvent = new CloudEvent(
                         source.ToString(),
                         eventType,
-                        BinaryData.FromString(JsonSerializer.Serialize(e)),
+                        data,
                         "application/json",
                         CloudEventDataFormat.Json
                     )
@@ -138,15 +150,11 @@ namespace Phoenix.MarketData.Infrastructure.Events
                         Time = DateTimeOffset.UtcNow
                     };
                     cloudEvent.ExtensionAttributes.Add("topic", topicName);
-                    return cloudEvent;
-                }).ToList();
+                    allCloudEvents.Add(cloudEvent);
+                }
 
-                // Split into batches of 100 or fewer events
-                var batches = allCloudEvents
-                    .Select((ce, idx) => new { ce, idx })
-                    .GroupBy(x => x.idx / MaxEventsPerBatch)
-                    .Select(g => g.Select(x => x.ce).ToList())
-                    .ToList();
+                // Split into batches respecting Event Grid limits (count and size)
+                var batches = SplitIntoBatches(allCloudEvents);
 
                 int totalSent = 0;
                 int batchNumber = 0;
@@ -176,7 +184,7 @@ namespace Phoenix.MarketData.Infrastructure.Events
                                 // Continue with other batches but record the failure
                                 break;
                             }
-                            await Task.Delay(1000 * retryCount, cancellationToken); // Exponential backoff
+                            await Task.Delay((int)(1000 * Math.Pow(2, retryCount)), cancellationToken); // Exponential backoff
                         }
                     }
                 }

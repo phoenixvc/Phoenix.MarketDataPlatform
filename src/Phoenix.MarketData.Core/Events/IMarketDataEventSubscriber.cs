@@ -1,8 +1,8 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Phoenix.MarketData.Core.Events.IntegrationEvents;
+using Phoenix.MarketData.Domain.Events.IntegrationEvents;
 
-namespace Phoenix.MarketData.Core.Events
+namespace Phoenix.MarketData.Domain.Events
 {
     /// <summary>
     /// Interface for a service that subscribes to market data events and processes them

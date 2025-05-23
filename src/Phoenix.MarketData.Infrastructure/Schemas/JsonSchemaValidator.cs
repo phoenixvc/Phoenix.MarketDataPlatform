@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 using Json.Schema;
-using Phoenix.MarketData.Core.Validation; // Your ValidationResult location
+using Phoenix.MarketData.Domain.Validation; // Your ValidationResult location
 
 namespace Phoenix.MarketData.Infrastructure.Schemas;
 

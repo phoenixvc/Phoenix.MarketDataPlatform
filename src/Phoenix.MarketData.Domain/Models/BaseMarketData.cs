@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Phoenix.MarketData.Core.Models;
+namespace Phoenix.MarketData.Domain.Models;
 
 public abstract class BaseMarketData : IMarketDataEntity, ISoftDeletable
 {

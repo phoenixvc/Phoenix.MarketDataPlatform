@@ -74,23 +74,36 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
 
         public async Task<int> BulkInsertAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default)
         {
-            int count = 0;
+            var entityList = entities.ToList();
+            var tasks = new List<Task>();
             var exceptions = new List<Exception>();
-            foreach (var entity in entities)
+            int count = 0;
+
+            foreach (var entity in entityList)
             {
-                try
+                var task = Task.Run(async () =>
                 {
-                    var partitionKey = GetPartitionKey(entity);
-                    await _container.CreateItemAsync(entity, partitionKey, cancellationToken: cancellationToken);
-                    count++;
-                }
-                catch (Exception ex)
-                {
-                    exceptions.Add(ex);
-                    _logger.LogError(ex, "Bulk insert failed for entity {EntityType} with ID {Id}: {ErrorMessage}",
-                        typeof(T).Name, entity.Id, ex.Message);
-                }
+                    try
+                    {
+                        var partitionKey = GetPartitionKey(entity);
+                        await _container.CreateItemAsync(entity, partitionKey, cancellationToken: cancellationToken);
+                        Interlocked.Increment(ref count);
+                    }
+                    catch (Exception ex)
+                    {
+                        lock (exceptions)
+                        {
+                            exceptions.Add(ex);
+                        }
+                        _logger.LogError(ex, "Bulk insert failed for entity {EntityType} with ID {Id}: {ErrorMessage}",
+                            typeof(T).Name, entity.Id, ex.Message);
+                    }
+                }, cancellationToken);
+                tasks.Add(task);
             }
+
+            await Task.WhenAll(tasks);
+
             if (exceptions.Count > 0)
                 throw new AggregateException($"Bulk insert completed with {exceptions.Count} failures.", exceptions);
             return count;

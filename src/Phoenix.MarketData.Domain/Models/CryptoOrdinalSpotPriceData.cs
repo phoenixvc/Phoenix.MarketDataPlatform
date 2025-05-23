@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Phoenix.MarketData.Core.Models;
+namespace Phoenix.MarketData.Domain.Models;
 
 /// <summary>
 /// Represents spot price data for cryptocurrency ordinals/inscriptions.

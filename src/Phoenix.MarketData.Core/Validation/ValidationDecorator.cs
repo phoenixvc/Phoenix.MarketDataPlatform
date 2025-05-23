@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
 
-namespace Phoenix.MarketData.Core.Validation
+namespace Phoenix.MarketData.Domain.Validation
 {
     /// <summary>
     /// Generic decorator for adding validation to any service operation

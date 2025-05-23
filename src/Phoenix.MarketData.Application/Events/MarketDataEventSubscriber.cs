@@ -3,10 +3,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Polly;
-using Phoenix.MarketData.Core.Events;
+using Phoenix.MarketData.Domain.Events;
 using Phoenix.MarketData.Application.Services;
 using Phoenix.MarketData.Domain.Models;
-using Phoenix.MarketData.Core.Events.IntegrationEvents;
+using Phoenix.MarketData.Domain.Events.IntegrationEvents;
 
 namespace Phoenix.MarketData.Application.Events
 {
@@ -56,16 +56,16 @@ namespace Phoenix.MarketData.Application.Events
                  {
                      // Process event
                      _logger.LogInformation("Processing market data created event: {EventId}", eventData.Id);
- 
+
                      // Call the event processor to handle the event
-                    await _eventProcessor.ProcessCreatedEventAsync(eventData, ct);
+                     await _eventProcessor.ProcessCreatedEventAsync(eventData, ct);
                  }
                  catch (Exception ex) when (!(ex is OperationCanceledException))
                  {
                      _logger.LogError(ex, "Error processing market data created event: {EventId}", eventData.Id);
                      throw; // Rethrowing to trigger retry
                  }
-            }, cancellationToken);
+             }, cancellationToken);
         }
 
         /// <summary>

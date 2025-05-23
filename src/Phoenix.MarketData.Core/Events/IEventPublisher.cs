@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Phoenix.MarketData.Core.Events
+namespace Phoenix.MarketData.Domain.Events
 {
     /// <summary>
     /// Defines the contract for publishing domain events

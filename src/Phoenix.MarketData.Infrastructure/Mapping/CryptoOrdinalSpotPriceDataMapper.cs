@@ -1,5 +1,5 @@
-using Phoenix.MarketData.Core;
-using Phoenix.MarketData.Core.Models;
+using Phoenix.MarketData.Domain;
+using Phoenix.MarketData.Domain.Models;
 using Phoenix.MarketData.Domain.Models;
 using Phoenix.MarketData.Infrastructure.Serialization;
 using System;
@@ -54,7 +54,7 @@ namespace Phoenix.MarketData.Infrastructure.Mapping
                 DataType = dto.DataType,
                 Region = dto.Region,
                 DocumentType = dto.DocumentType,
-                CreateTimestamp = DateTime.UtcNow,
+                CreateTimestamp = dto.CreateTimestamp ?? DateTimeOffset.UtcNow,
                 AsOfDate = dto.AsOfDate,
                 AsOfTime = dto.AsOfTime,
                 Price = dto.Price,

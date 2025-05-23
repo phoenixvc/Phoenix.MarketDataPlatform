@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Phoenix.MarketData.Core.Events;
-using Phoenix.MarketData.Core.Validation;
+using Phoenix.MarketData.Domain.Events;
+using Phoenix.MarketData.Domain.Validation;
 using Phoenix.MarketData.Domain.Models;
 using Phoenix.MarketData.Infrastructure.Repositories;
 

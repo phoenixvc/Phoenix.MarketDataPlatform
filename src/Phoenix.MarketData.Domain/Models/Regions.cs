@@ -1,4 +1,4 @@
-﻿namespace Phoenix.MarketData.Core;
+﻿namespace Phoenix.MarketData.Domain;
 
 /// <summary>
 /// Provides predefined constants representing various regions for market data classification.

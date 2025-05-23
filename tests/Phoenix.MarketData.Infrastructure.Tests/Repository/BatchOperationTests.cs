@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Moq;
-using Phoenix.MarketData.Core.Models;
+using Phoenix.MarketData.Domain.Models;
 using Phoenix.MarketData.Infrastructure.Repositories;
 using Phoenix.MarketData.Infrastructure.Tests.Repository.Base;
 using Xunit;
@@ -44,7 +44,7 @@ namespace Phoenix.MarketData.Infrastructure.Tests.Repository
                 .ReturnsAsync(mockResponse.Object);
 
             // Act
-            await Repository.AddBatchAsync(items);
+            await Repository.AddSequentialAsync(items);
 
             // Assert
             MockContainer.Verify(c =>
@@ -94,7 +94,7 @@ namespace Phoenix.MarketData.Infrastructure.Tests.Repository
                 .ReturnsAsync(mockResponse.Object);
 
             // Act
-            await Repository.UpdateBatchAsync(items);
+            await Repository.UpdateSequentialAsync(items);
 
             // Assert
             MockContainer.Verify(c =>
@@ -155,7 +155,7 @@ namespace Phoenix.MarketData.Infrastructure.Tests.Repository
                 .Returns(mockFeedIterator.Object);
 
             // Act
-            await Repository.DeleteBatchAsync(ids, false);
+            await Repository.DeleteSequentialAsync(ids, false);
 
             // Assert
             MockContainer.Verify(c =>

@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Phoenix.MarketData.Core.Validation
+namespace Phoenix.MarketData.Domain.Validation
 {
     /// <summary>
     /// Generic decorator for adding validation to service operations

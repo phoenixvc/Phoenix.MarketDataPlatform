@@ -2,7 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Moq;
-using Phoenix.MarketData.Core.Validation;
+using Phoenix.MarketData.Domain.Validation;
 using Phoenix.MarketData.Domain.Models;
 using Phoenix.MarketData.Application.Services;
 using Phoenix.MarketData.Application.Services.Decorators;

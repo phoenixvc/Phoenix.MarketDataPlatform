@@ -15,6 +15,7 @@ using System.Net;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.OpenApi.Models;
 using Phoenix.MarketData.Functions.OpenApi;
+using System.ComponentModel.DataAnnotations;
 
 namespace Phoenix.MarketData.Functions;
 
@@ -140,12 +141,14 @@ public class SaveDocumentToDb
         {
             _logger.LogError(ex, $"Error saving {dataType}/{assetClass} data to repository.");
 
-            // Determine if it's a client error or server error
-            if (ex is ArgumentException || ex is InvalidOperationException)
+            // Refined error handling: treat only known validation/argument errors as client errors
+            if (ex is ValidationException ||
+                (ex is ArgumentException argEx && argEx.ParamName != null && argEx.ParamName.StartsWith("input", StringComparison.OrdinalIgnoreCase)))
             {
                 return new BadRequestObjectResult($"Invalid data: {ex.Message}");
             }
 
+            // All other exceptions are server errors
             return new ObjectResult("Error saving document to database.")
             {
                 StatusCode = (int)HttpStatusCode.InternalServerError

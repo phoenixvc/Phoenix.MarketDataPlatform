@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Phoenix.MarketData.Domain.Models;
 
-namespace Phoenix.MarketData.Core.Repositories
+namespace Phoenix.MarketData.Domain.Repositories
 {
     /// <summary>
     /// Repository interface for market data entities that provides CRUD operations with versioning support.

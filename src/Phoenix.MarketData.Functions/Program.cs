@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Phoenix.MarketData.Core.Events;
+using Phoenix.MarketData.Domain.Events;
 using Phoenix.MarketData.Infrastructure.Events;
 using Phoenix.MarketData.Infrastructure.Repositories;
 using Phoenix.MarketData.Infrastructure.Serialization.JsonConverters;
@@ -14,7 +14,7 @@ using Phoenix.MarketData.Domain.Models;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Abstractions;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Configurations;
 using Microsoft.OpenApi.Models;
-using Phoenix.MarketData.Core.Models;
+using Phoenix.MarketData.Domain.Models;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Enums;
 var host = new HostBuilder()
     .ConfigureFunctionsWorkerDefaults()

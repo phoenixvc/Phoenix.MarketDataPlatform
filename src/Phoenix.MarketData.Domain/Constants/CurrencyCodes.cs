@@ -18,12 +18,14 @@ namespace Phoenix.MarketData.Domain.Constants
         public const string ETH = "ETH";
         // Add established currencies as needed. Avoid adding volatile tokens or meme coins as they lack stability for financial applications.
 
-        /// <summary>
-        /// Returns a list of all defined codes.
-        /// </summary>
-        public static IReadOnlyList<string> All => new[]
+        private static readonly string[] _allCodes =
         {
             USD, EUR, GBP, ZAR, JPY, CHF, AUD, CAD, CNY, BTC, ETH
         };
+
+        /// <summary>
+        /// Returns a list of all defined codes.
+        /// </summary>
+        public static IReadOnlyList<string> All => _allCodes;
     }
 }

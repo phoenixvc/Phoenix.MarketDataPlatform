@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Phoenix.MarketData.Core.Repositories
+namespace Phoenix.MarketData.Domain.Repositories
 {
     /// <summary>
     /// Query-focused repository interface for read operations

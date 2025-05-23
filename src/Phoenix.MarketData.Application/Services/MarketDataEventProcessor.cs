@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Phoenix.MarketData.Core.Events.IntegrationEvents;
+using Phoenix.MarketData.Domain.Events.IntegrationEvents;
 using Phoenix.MarketData.Domain.Models;
 
 namespace Phoenix.MarketData.Application.Services

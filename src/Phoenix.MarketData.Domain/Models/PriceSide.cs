@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Phoenix.MarketData.Core;
+namespace Phoenix.MarketData.Domain;
 
 public enum PriceSide
 {

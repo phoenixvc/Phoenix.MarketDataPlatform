@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Phoenix.MarketData.Core.Validation
+namespace Phoenix.MarketData.Domain.Validation
 {
     /// <summary>
     /// Represents the outcome of a validation operation

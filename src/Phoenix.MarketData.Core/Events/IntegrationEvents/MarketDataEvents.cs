@@ -2,7 +2,7 @@ using System;
 using System.Text.Json.Serialization;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Phoenix.MarketData.Core.Events.IntegrationEvents
+namespace Phoenix.MarketData.Domain.Events.IntegrationEvents
 {
     /// <summary>
     /// Common interface for all market data integration events
@@ -90,6 +90,12 @@ namespace Phoenix.MarketData.Core.Events.IntegrationEvents
             DateTimeOffset timestamp,
             string region)
         {
+            if (id == null) throw new ArgumentNullException(nameof(id));
+            if (assetId == null) throw new ArgumentNullException(nameof(assetId));
+            if (assetClass == null) throw new ArgumentNullException(nameof(assetClass));
+            if (dataType == null) throw new ArgumentNullException(nameof(dataType));
+            if (documentType == null) throw new ArgumentNullException(nameof(documentType));
+            if (region == null) throw new ArgumentNullException(nameof(region));
             Id = id;
             AssetId = assetId;
             AssetClass = assetClass;

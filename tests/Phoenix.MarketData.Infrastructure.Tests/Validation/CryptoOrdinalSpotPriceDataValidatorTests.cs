@@ -2,10 +2,10 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
-using Phoenix.MarketData.Core.Validation;
+using Phoenix.MarketData.Domain.Validation;
 using Phoenix.MarketData.Domain.Models;
 using Phoenix.MarketData.Infrastructure.Validation;
-using Phoenix.MarketData.Core.Models;
+using Phoenix.MarketData.Domain.Models;
 
 namespace Phoenix.MarketData.Infrastructure.Tests.Validation
 {

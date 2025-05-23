@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Phoenix.MarketData.Core.Validation;
+using Phoenix.MarketData.Domain.Validation;
 using Phoenix.MarketData.Domain.Models;
 
 namespace Phoenix.MarketData.Infrastructure.Validation
@@ -18,27 +18,27 @@ namespace Phoenix.MarketData.Infrastructure.Validation
         {
             Task<ValidationResult> ValidateAsync(object entity, CancellationToken cancellationToken);
         }
-        
+
         // Generic implementation of the wrapper
         private class ValidatorWrapper<TEntity> : IValidatorWrapper where TEntity : IMarketDataEntity
         {
             private readonly IValidator<TEntity> _validator;
-            
+
             public ValidatorWrapper(IValidator<TEntity> validator)
-                {
+            {
                 _validator = validator;
-                }
-            
+            }
+
             public async Task<ValidationResult> ValidateAsync(object entity, CancellationToken cancellationToken)
             {
                 if (entity is TEntity typedEntity)
                 {
                     return await _validator.ValidateAsync(typedEntity, cancellationToken);
-    }
-                
+                }
+
                 throw new InvalidOperationException(
                     $"Expected entity of type {typeof(TEntity).Name}, but got {entity.GetType().Name}");
-}
+            }
         }
 
         public void RegisterValidator<TEntity>(IValidator<TEntity> validator) where TEntity : T
@@ -52,12 +52,12 @@ namespace Phoenix.MarketData.Infrastructure.Validation
                 throw new ArgumentNullException(nameof(entity));
 
             var entityType = entity.GetType();
-            
+
             if (_validators.TryGetValue(entityType, out var wrapper))
             {
                 return await wrapper.ValidateAsync(entity, cancellationToken);
             }
-            
+
             // If no specific validator is found, return success
             return ValidationResult.Success();
         }

@@ -1,5 +1,5 @@
 using System;
-using Phoenix.MarketData.Core.Configuration;
+using Phoenix.MarketData.Domain.Configuration;
 
 namespace Phoenix.MarketData.Infrastructure.Configuration
 {

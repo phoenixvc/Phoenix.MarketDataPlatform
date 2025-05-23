@@ -3,8 +3,8 @@ using System.Threading;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Phoenix.MarketData.Core.Events;
-using Phoenix.MarketData.Core.Models;
+using Phoenix.MarketData.Domain.Events;
+using Phoenix.MarketData.Domain.Models;
 using Phoenix.MarketData.Infrastructure.Repositories;
 
 namespace Phoenix.MarketData.Infrastructure.Tests.Repository.Base
@@ -24,16 +24,16 @@ namespace Phoenix.MarketData.Infrastructure.Tests.Repository.Base
             MockContainer = new Mock<Container>();
             MockLogger = new Mock<ILogger<CosmosRepository<FxSpotPriceData>>>();
             MockEventPublisher = new Mock<IEventPublisher>();
-            
+
             Repository = new CosmosRepository<FxSpotPriceData>(
-                MockContainer.Object, 
-                MockLogger.Object, 
+                MockContainer.Object,
+                MockLogger.Object,
                 MockEventPublisher.Object);
 
             // Define these first to match the original file structure
             Id = "price.spot__fx__eurusd__global__2025-05-14__official__1";
             PartitionKey = "eurusd";
-            
+
             // Initialize MarketData but don't set Id directly as it's calculated from properties
             MarketData = new FxSpotPriceData
             {
@@ -47,7 +47,7 @@ namespace Phoenix.MarketData.Infrastructure.Tests.Repository.Base
                 DocumentType = "official",
                 AsOfDate = new DateOnly(2025, 5, 14)
             };
-            
+
             // Note: Id is computed automatically based on the properties above
             // so we don't need to set it explicitly
         }

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
 using Microsoft.Extensions.Logging;
-using Phoenix.MarketData.Core.Events;
+using Phoenix.MarketData.Domain.Events;
 using Phoenix.MarketData.Domain.Models;
 
 namespace Phoenix.MarketData.Infrastructure.Repositories
@@ -28,7 +28,11 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
                     var response = await iterator.ReadNextAsync();
                     if (!includeSoftDeleted && typeof(ISoftDeletable).IsAssignableFrom(typeof(T)))
                     {
-                        results.AddRange(response.Where(e => !(e as ISoftDeletable)!.IsDeleted));
+                        results.AddRange(response.Where(e =>
+                        {
+                            var sd = e as ISoftDeletable;
+                            return sd == null || !sd.IsDeleted;
+                        }));
                     }
                     else
                     {

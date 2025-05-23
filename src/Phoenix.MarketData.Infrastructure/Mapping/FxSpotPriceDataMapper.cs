@@ -1,5 +1,5 @@
-﻿using Phoenix.MarketData.Core;
-using Phoenix.MarketData.Core.Models;
+﻿using Phoenix.MarketData.Domain;
+using Phoenix.MarketData.Domain.Models;
 using Phoenix.MarketData.Domain.Models;
 using Phoenix.MarketData.Infrastructure.Serialization;
 using System;

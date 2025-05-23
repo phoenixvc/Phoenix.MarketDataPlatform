@@ -18,28 +18,38 @@ namespace Phoenix.MarketData.Functions.OpenApi
 
         public async Task InvokeAsync(HttpContext context)
         {
-            if (context.Request.Path.StartsWithSegments("/api/swagger.json") || 
+            if (context.Request.Path.StartsWithSegments("/api/swagger.json") ||
                 context.Request.Path.StartsWithSegments("/api/openapi.json"))
             {
                 _logger.LogInformation("Serving OpenAPI specification");
-                
+
                 context.Response.ContentType = "application/json";
                 var openApiFilePath = Path.Combine(Directory.GetCurrentDirectory(), "openapi.json");
-                
-                if (File.Exists(openApiFilePath))
+
+                try
                 {
-                    await context.Response.SendFileAsync(openApiFilePath);
-                    return;
+                    if (File.Exists(openApiFilePath))
+                    {
+                        await context.Response.SendFileAsync(openApiFilePath);
+                        return;
+                    }
+                    else
+                    {
+                        _logger.LogError($"OpenAPI file not found at: {openApiFilePath}");
+                        context.Response.StatusCode = StatusCodes.Status404NotFound;
+                        await context.Response.WriteAsync("OpenAPI specification not found.");
+                        return;
+                    }
                 }
-                else
+                catch (Exception ex) when (ex is System.Security.SecurityException || ex is UnauthorizedAccessException || ex is IOException)
                 {
-                    _logger.LogError($"OpenAPI file not found at: {openApiFilePath}");
-                    context.Response.StatusCode = StatusCodes.Status404NotFound;
-                    await context.Response.WriteAsync("OpenAPI specification not found.");
+                    _logger.LogError(ex, $"Error accessing OpenAPI file at: {openApiFilePath}");
+                    context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                    await context.Response.WriteAsync("Error accessing OpenAPI specification.");
                     return;
                 }
             }
-            
+
             await _next(context);
         }
     }

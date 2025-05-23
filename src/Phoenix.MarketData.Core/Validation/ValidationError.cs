@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Phoenix.MarketData.Core.Validation;
+namespace Phoenix.MarketData.Domain.Validation;
 
 public class ValidationError
 {

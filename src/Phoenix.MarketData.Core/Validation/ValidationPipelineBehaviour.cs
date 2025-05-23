@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using MediatR;
 using FluentValidation;
 
-namespace Phoenix.MarketData.Core.Validation;
+namespace Phoenix.MarketData.Domain.Validation;
 
 /// <summary>
 /// Pipeline behavior that validates requests using FluentValidation before they are processed
@@ -43,14 +43,14 @@ public class ValidationPipelineBehavior<TRequest, TResponse> : IPipelineBehavior
         }
 
         var context = new ValidationContext<TRequest>(request);
-        
+
         // Execute all validators asynchronously
         var validationTasks = _validators
             .Select(v => v.ValidateAsync(context, cancellationToken));
-        
+
         // Wait for all validation tasks to complete
         var validationResults = await Task.WhenAll(validationTasks);
-        
+
         // Collect all failures
         var failures = validationResults
             .SelectMany(result => result.Errors)

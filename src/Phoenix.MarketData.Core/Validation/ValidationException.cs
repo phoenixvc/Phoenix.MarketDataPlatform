@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.Serialization;
 
-namespace Phoenix.MarketData.Core.Validation
+namespace Phoenix.MarketData.Domain.Validation
 {
     /// <summary>
     /// Exception thrown when validation fails

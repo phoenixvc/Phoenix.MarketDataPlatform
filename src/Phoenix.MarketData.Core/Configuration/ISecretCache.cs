@@ -1,6 +1,6 @@
 using System;
 
-namespace Phoenix.MarketData.Core.Configuration
+namespace Phoenix.MarketData.Domain.Configuration
 {
     public interface ISecretCache
     {

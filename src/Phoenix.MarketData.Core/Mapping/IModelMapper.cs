@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Phoenix.MarketData.Core.Mapping
+namespace Phoenix.MarketData.Domain.Mapping
 {
     /// <summary>
     /// Defines mapping capabilities between different object types

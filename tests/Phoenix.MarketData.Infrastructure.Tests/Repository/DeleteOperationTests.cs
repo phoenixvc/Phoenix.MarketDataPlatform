@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Moq;
-using Phoenix.MarketData.Core.Models;
+using Phoenix.MarketData.Domain.Models;
 using Phoenix.MarketData.Infrastructure.Tests.Repository.Base;
 using Xunit;
 

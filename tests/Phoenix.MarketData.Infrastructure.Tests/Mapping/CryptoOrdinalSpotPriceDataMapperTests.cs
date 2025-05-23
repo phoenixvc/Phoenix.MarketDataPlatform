@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Xunit;
-using Phoenix.MarketData.Core; // Add this for PriceSide enum
-using Phoenix.MarketData.Core.Models;
+using Phoenix.MarketData.Domain; // Add this for PriceSide enum
+using Phoenix.MarketData.Domain.Models;
 using Phoenix.MarketData.Domain.Models;
 using Phoenix.MarketData.Infrastructure.Mapping;
 using Phoenix.MarketData.Infrastructure.Serialization;
