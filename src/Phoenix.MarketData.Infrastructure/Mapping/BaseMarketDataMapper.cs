@@ -11,7 +11,7 @@ namespace Phoenix.MarketData.Infrastructure.Mapping
 
             return new BaseMarketDataDto(domain.Id, domain.SchemaVersion, domain.Version,
                 domain.AssetId, domain.AssetClass, domain.DataType, domain.Region, domain.DocumentType,
-                domain.CreateTimestamp, domain.AsOfDate, domain.AsOfTime, domain.Tags);
+                domain.CreateTimestamp, domain.AsOfDate, domain.AsOfTime, domain.Tags.ToList() ?? new List<string>());
         }
 
         public static void ApplyToDomain(BaseMarketDataDto dto, BaseMarketData domain)
@@ -28,8 +28,16 @@ namespace Phoenix.MarketData.Infrastructure.Mapping
             domain.DocumentType = dto.DocumentType;
             domain.AsOfDate = dto.AsOfDate;
             domain.AsOfTime = dto.AsOfTime;
-            domain.Tags = dto.Tags?.ToList() ?? new List<string>();
             domain.CreateTimestamp = dto.CreateTimestamp ?? DateTime.UtcNow;
+
+            // Add tags using the appropriate method
+            if (dto.Tags != null)
+            {
+                foreach (var tag in dto.Tags)
+                {
+                    domain.AddTag(tag);
+                }
+            }
         }
     }
 }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CoverageThreshold>
+  <Threshold>60</Threshold> <!-- Target overall coverage percentage -->
+  <ModuleThresholds>
+    <ModuleThreshold ModuleName="Phoenix.MarketData.Core">
+      <Threshold>70</Threshold>
+    </ModuleThreshold>
+    <ModuleThreshold ModuleName="Phoenix.MarketData.Infrastructure">
+      <Threshold>50</Threshold>
+    </ModuleThreshold>
+    <ModuleThreshold ModuleName="Phoenix.MarketData.Application">
+      <Threshold>60</Threshold>
+    </ModuleThreshold>
+  </ModuleThresholds>
+</CoverageThreshold>

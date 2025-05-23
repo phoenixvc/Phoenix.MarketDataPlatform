@@ -1,0 +1,52 @@
+﻿﻿﻿﻿# Market Data API Examples
+# ----------------------
+# Host configuration
+@host = localhost:7006
+
+# Date format: ISO 8601 (YYYY-MM-DD)
+ # Time format: 24-hour (HH:MM:SS)
+# Note: asOfDate should be in YYYY-MM-DD format, asOfTime in HH:MM:SS format
+
+### Save fx spot market data to cosmos db example
+POST {{host}}/api/SaveDocumentToDb?datatype=price.spot&assetClass=fx&schemaversion=1.0.0
+Content-Type: application/json
+
+{
+    "price": 1.09,
+    "side": "mid",
+    "schemaVersion": "1.0.0",
+    "assetId": "eurusd",
+    "assetClass": "fx",
+    "dataType": "price.spot",
+    "region": "ny",
+    "tags": [
+        "spot"
+    ],
+    "documentType": "official",
+  "asOfDate": "2025-05-13",
+    "asOfTime": "15:30:05"
+}
+
+### Save crypto ordinal spot price data to cosmos db example
+POST {{host}}/api/SaveDocumentToDb?datatype=price.ordinals.spot&assetClass=crypto&schemaversion=1.0.0
+Content-Type: application/json
+
+{
+  "price": 1.13,
+  "currency": "btc",
+  "side": "bid",
+  "schemaVersion": "1.0.0",
+  "assetId": "quantum_cats_1",
+  "assetClass": "crypto",
+  "dataType": "price.ordinals.spot",
+  "region": "global",
+  "tags": [
+    "spot"
+  ],
+  "documentType": "official",
+  "asOfDate": "2025-05-13",
+  "inscriptionNumber": 77777,
+  "inscriptionId": "12345",    # Unique transaction+output identifier
+  "parentInscriptionId": "1234",
+  "collectionName": "quantum cats"
+}

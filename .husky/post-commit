@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Husky v9+ format
+
+# Style terminal output
+CYAN='\033[0;36m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+echo "${CYAN}Running post-commit tests...${NC}"
+npm run postcommit || true  # Continue even if tests fail
+
+# Post-commit hooks can't stop commits that have already happened
+exit 0

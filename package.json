@@ -1,0 +1,37 @@
+{
+  "name": "phoenix-market-data",
+  "version": "1.0.0",
+  "description": "Phoenix MarketData Platform for financial market data processing and analysis",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/phoenixvc/phoenix-market-data.git"
+  },
+  "license": "UNLICENSED",
+  "scripts": {
+    "prepare": "husky",
+    "test": "node scripts/run-coverage.js",
+    "postcommit": "node scripts/coverage-report.js",
+    "lint": "prettier --write ."
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.0.0",
+    "prettier": "^3.5.3"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write --loglevel=warn"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": {
+    "name": "VeritasVault Team",
+    "email": "dev@veritasvault.net"
+  }
+}

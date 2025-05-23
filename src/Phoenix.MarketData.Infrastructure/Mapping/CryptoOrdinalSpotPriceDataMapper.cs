@@ -1,70 +1,103 @@
-﻿using Phoenix.MarketData.Domain;
+using Phoenix.MarketData.Domain;
+using Phoenix.MarketData.Domain.Models;
 using Phoenix.MarketData.Domain.Models;
 using Phoenix.MarketData.Infrastructure.Serialization;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace Phoenix.MarketData.Infrastructure.Mapping;
-
-/// <summary>
-/// Provides mapping functionality between the domain model
-/// <see cref="CryptoOrdinalSpotPriceData"/> and its corresponding DTO
-/// <see cref="CryptoOrdinalSpotPriceDataDto"/>.
-/// </summary>
-public static class CryptoOrdinalSpotPriceDataMapper
+namespace Phoenix.MarketData.Infrastructure.Mapping
 {
-    /// <summary>
-    /// Converts a <see cref="CryptoOrdinalSpotPriceData"/> domain model into a <see cref="CryptoOrdinalSpotPriceDataDto"/> data transfer object.
-    /// </summary>
-    /// <param name="domain">The domain model instance of type <see cref="CryptoOrdinalSpotPriceData"/> to be converted.</param>
-    /// <returns>A <see cref="CryptoOrdinalSpotPriceDataDto"/> representation of the provided domain model.</returns>
-    public static CryptoOrdinalSpotPriceDataDto ToDto(CryptoOrdinalSpotPriceData domain)
+    public class CryptoOrdinalSpotPriceDataMapper : IMarketDataMapper<CryptoOrdinalSpotPriceData, CryptoOrdinalSpotPriceDataDto>
     {
-        ArgumentNullException.ThrowIfNull(domain);
-        
-        var dto = new CryptoOrdinalSpotPriceDataDto(domain.Id, domain.SchemaVersion, domain.Version,
-            domain.AssetId, domain.AssetClass, domain.DataType, domain.Region, domain.DocumentType,
-            domain.CreateTimestamp, domain.AsOfDate, domain.AsOfTime, domain.Tags, domain.Price, domain.Side,
-            domain.CollectionName, domain.ParentInscriptionId, domain.InscriptionId, domain.InscriptionNumber, domain.Currency);
-
-        return dto;
-    }
-
-    /// <summary>
-    /// Converts a <see cref="CryptoOrdinalSpotPriceDataDto"/> data transfer object into a <see cref="CryptoOrdinalSpotPriceData"/> domain model.
-    /// </summary>
-    /// <param name="dto">The data transfer object instance of type <see cref="CryptoOrdinalSpotPriceDataDto"/> to be converted.</param>
-    /// <returns>A <see cref="CryptoOrdinalSpotPriceData"/> representation of the provided data transfer object.</returns>
-    public static CryptoOrdinalSpotPriceData ToDomain(CryptoOrdinalSpotPriceDataDto dto)
-    {
-        ArgumentNullException.ThrowIfNull(dto);
-
-        var domain = new CryptoOrdinalSpotPriceData
+        public CryptoOrdinalSpotPriceDataDto ToDto(CryptoOrdinalSpotPriceData domain)
         {
-            SchemaVersion = dto.SchemaVersion,
-            Version = dto.Version,
-            AssetId = dto.AssetId,
-            AssetClass = dto.AssetClass,
-            DataType = dto.DataType,
-            Region = dto.Region,
-            DocumentType = dto.DocumentType,
-            CreateTimestamp = dto.CreateTimestamp ?? DateTime.UtcNow,
-            AsOfDate = dto.AsOfDate,
-            AsOfTime = dto.AsOfTime,
-            Price = dto.Price,
-            Tags = dto.Tags?.ToList() ?? new List<string>(),
-            Side = dto.Side switch
+            ArgumentNullException.ThrowIfNull(domain);
+
+            var dto = new CryptoOrdinalSpotPriceDataDto(
+                id: domain.Id,
+                schemaVersion: domain.SchemaVersion,
+                version: domain.Version,
+                assetId: domain.DisplayAssetId, // Use DisplayAssetId to preserve original case
+                assetClass: domain.AssetClass,
+                dataType: domain.DataType,
+                region: domain.Region,
+                documentType: domain.DocumentType,
+                createTimestamp: domain.CreateTimestamp,
+                asOfDate: domain.AsOfDate,
+                asOfTime: domain.AsOfTime,
+                tags: domain.Tags?.ToList() ?? new List<string>(), // Convert IReadOnlyList to List
+                price: domain.Price,
+                side: domain.Side,
+                collectionName: domain.CollectionName ?? string.Empty,
+                parentInscriptionId: domain.ParentInscriptionId ?? string.Empty,
+                inscriptionId: domain.InscriptionId ?? string.Empty,
+                inscriptionNumber: domain.InscriptionNumber,
+                currency: domain.Currency ?? string.Empty
+            );
+
+            return dto;
+        }
+
+        public CryptoOrdinalSpotPriceData ToDomain(CryptoOrdinalSpotPriceDataDto dto)
+        {
+            ArgumentNullException.ThrowIfNull(dto);
+
+            // Create domain object with required properties
+            var domain = new CryptoOrdinalSpotPriceData
+            {
+                SchemaVersion = dto.SchemaVersion,
+                Version = dto.Version,
+                AssetId = dto.AssetId, // This will be auto-normalized to lowercase by the property setter
+                DisplayAssetId = dto.AssetId, // Add this line to preserve original case
+                AssetClass = dto.AssetClass,
+                DataType = dto.DataType,
+                Region = dto.Region,
+                DocumentType = dto.DocumentType,
+                CreateTimestamp = dto.CreateTimestamp ?? DateTimeOffset.UtcNow,
+                AsOfDate = dto.AsOfDate,
+                AsOfTime = dto.AsOfTime,
+                Price = dto.Price,
+                Side = ConvertToDomainSide(dto.Side),
+                CollectionName = dto.CollectionName ?? string.Empty,
+                ParentInscriptionId = dto.ParentInscriptionId ?? string.Empty,
+                InscriptionId = dto.InscriptionId ?? string.Empty,
+                InscriptionNumber = dto.InscriptionNumber,
+                Currency = dto.Currency ?? string.Empty
+            };
+
+            // Set tags using the SetTags method from BaseMarketData
+            if (dto.Tags != null)
+            {
+                domain.SetTags(dto.Tags);
+            }
+            else
+            {
+                domain.SetTags(new List<string>());
+            }
+
+            return domain;
+        }
+
+        private static PriceSide ConvertToDomainSide(PriceSideDto? dtoSide)
+        {
+            if (dtoSide == null)
+                return PriceSide.Mid;
+
+            return dtoSide.Value switch
             {
                 PriceSideDto.Mid => PriceSide.Mid,
                 PriceSideDto.Bid => PriceSide.Bid,
                 PriceSideDto.Ask => PriceSide.Ask,
-                _ => PriceSide.Mid,
-            },
-            CollectionName = dto.CollectionName,
-            ParentInscriptionId = dto.ParentInscriptionId,
-            InscriptionId = dto.InscriptionId,
-            InscriptionNumber = dto.InscriptionNumber,
-            Currency = dto.Currency
-        };
+                _ => PriceSide.Mid
+            };
+        }
 
-        return domain;
+        #region Static Methods
+        private static readonly CryptoOrdinalSpotPriceDataMapper _instance = new();
+        public static CryptoOrdinalSpotPriceDataDto MapToDto(CryptoOrdinalSpotPriceData domain) => _instance.ToDto(domain);
+
+        public static CryptoOrdinalSpotPriceData MapToDomain(CryptoOrdinalSpotPriceDataDto dto) => _instance.ToDomain(dto);
+        #endregion
     }
 }

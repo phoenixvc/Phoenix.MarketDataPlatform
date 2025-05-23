@@ -1,33 +1,35 @@
-﻿using Newtonsoft.Json;
-using Phoenix.MarketData.Domain;
+﻿using Phoenix.MarketData.Domain;
+using System.Text.Json.Serialization; // <- for System.Text.Json attributes
 
 namespace Phoenix.MarketData.Infrastructure.Serialization;
 
 public class FxSpotPriceDataDto : BaseMarketDataDto
 {
-    [JsonProperty("price")]
+    [JsonPropertyName("price")]
     public decimal Price { get; set; }
 
-    [JsonProperty("side", NullValueHandling = NullValueHandling.Ignore)]
-    public PriceSideDto? Side { get; set; }
+    [JsonPropertyName("side")]
+    public PriceSideDto? Side { get; set; } // nullable, defaults to Mid in constructor
 
-    public FxSpotPriceDataDto()
-    {
-    }
-    
     [JsonConstructor]
-    public FxSpotPriceDataDto(string id, string schemaVersion, int? version, string assetId, string assetClass, 
-        string dataType, string region, string documentType, DateTimeOffset createTimeStamp, DateOnly asOfDate,
-        TimeOnly? asOfTime, List<string> tags, decimal price, PriceSide side = PriceSide.Mid) : 
-            base(id, schemaVersion, version, assetId, assetClass, dataType, region, documentType, createTimeStamp, asOfDate, asOfTime, tags)
+    public FxSpotPriceDataDto(
+        string id,
+        string schemaVersion,
+        int? version,
+        string assetId,
+        string assetClass,
+        string dataType,
+        string region,
+        string documentType,
+        DateTimeOffset createTimeStamp,
+        DateOnly asOfDate,
+        TimeOnly? asOfTime,
+        List<string> tags,
+        decimal price,
+        PriceSide side = PriceSide.Mid
+    ) : base(id, schemaVersion, version, assetId, assetClass, dataType, region, documentType, createTimeStamp, asOfDate, asOfTime, tags)
     {
         Price = price;
-        Side = side switch
-        {
-            PriceSide.Mid => PriceSideDto.Mid,
-            PriceSide.Bid => PriceSideDto.Bid,
-            PriceSide.Ask => PriceSideDto.Ask,
-            _ => PriceSideDto.Mid,
-        };
+        Side = (PriceSideDto)side;
     }
 }

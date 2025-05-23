@@ -1,0 +1,30 @@
+{
+    "cSpell.words": [
+        "assetclass",
+        "buildtransitive",
+        "contentfiles",
+        "eurusd",
+        "globaltool",
+        "Intraday",
+        "irongut",
+        "Mediatr",
+        "opencover",
+        "reportgenerator",
+        "reporttypes",
+        "Rethrowing",
+        "runsettings",
+        "schemaversion",
+        "spotprice",
+        "Swashbuckle",
+        "targetdir",
+        "volatilities",
+        "xunit"
+    ],
+    "azureFunctions.deploySubpath": "src/Phoenix.MarketData.Functions/bin/Release/net9.0/publish",
+    "azureFunctions.projectLanguage": "C#",
+    "azureFunctions.projectRuntime": "~4",
+    "debug.internalConsoleOptions": "neverOpen",
+    "azureFunctions.preDeployTask": "publish (functions)",
+    "dotnet-test-explorer.testProjectPath": "tests/**/*.csproj",
+    "azureFunctions.projectSubpath": "src/Phoenix.MarketData.Functions"
+}

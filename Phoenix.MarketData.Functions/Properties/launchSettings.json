@@ -1,9 +1,0 @@
-{
-  "profiles": {
-    "Phoenix.MarketData.Functions": {
-      "commandName": "Project",
-      "commandLineArgs": "--port 7006",
-      "launchBrowser": false
-    }
-  }
-}

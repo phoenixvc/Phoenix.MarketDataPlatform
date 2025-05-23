@@ -1,16 +1,19 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{17244A6B-3950-46B7-B204-FAE878E7167C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.MarketData.Domain", "src\Phoenix.MarketData.Domain\Phoenix.MarketData.Domain.csproj", "{EFA6CAAD-0FC3-4E6E-8FC5-657F965B117C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.MarketData.Infrastructure", "src\Phoenix.MarketData.Infrastructure\Phoenix.MarketData.Infrastructure.csproj", "{8EBB4567-6F96-45D1-AC9F-F8746C507CA8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.MarketData.Functions", "Phoenix.MarketData.Functions\Phoenix.MarketData.Functions.csproj", "{F7BBBD70-BDF3-4ECA-9CA3-E50D43E1431C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.MarketData.Functions", "src\Phoenix.MarketData.Functions\Phoenix.MarketData.Functions.csproj", "{F7BBBD70-BDF3-4ECA-9CA3-E50D43E1431C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.MarketData.Core", "src\Phoenix.MarketData.Core\Phoenix.MarketData.Core.csproj", "{A2B6CD70-F823-4ECA-9CA3-E50D43E12345}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.MarketData.Application", "src\Phoenix.MarketData.Application\Phoenix.MarketData.Application.csproj", "{C7BBBD71-BDF3-4ECA-9CA3-E50D43E67890}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{8F1E38D6-FF2A-46A8-AB55-5695F0064F6E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.MarketData.Infrastructure.Tests", "Phoenix.MarketData.Infrastructure.Tests\Phoenix.MarketData.Infrastructure.Tests.csproj", "{D8199FB8-B44D-4305-9458-1F887BDD7BF0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.MarketData.Infrastructure.Tests", "tests\Phoenix.MarketData.Infrastructure.Tests\Phoenix.MarketData.Infrastructure.Tests.csproj", "{D8199FB8-B44D-4305-9458-1F887BDD7BF0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +24,8 @@ Global
 		{EFA6CAAD-0FC3-4E6E-8FC5-657F965B117C} = {17244A6B-3950-46B7-B204-FAE878E7167C}
 		{8EBB4567-6F96-45D1-AC9F-F8746C507CA8} = {17244A6B-3950-46B7-B204-FAE878E7167C}
 		{F7BBBD70-BDF3-4ECA-9CA3-E50D43E1431C} = {17244A6B-3950-46B7-B204-FAE878E7167C}
+		{A2B6CD70-F823-4ECA-9CA3-E50D43E12345} = {17244A6B-3950-46B7-B204-FAE878E7167C}
+		{C7BBBD71-BDF3-4ECA-9CA3-E50D43E67890} = {17244A6B-3950-46B7-B204-FAE878E7167C}
 		{D8199FB8-B44D-4305-9458-1F887BDD7BF0} = {8F1E38D6-FF2A-46A8-AB55-5695F0064F6E}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
@@ -36,6 +41,14 @@ Global
 		{F7BBBD70-BDF3-4ECA-9CA3-E50D43E1431C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F7BBBD70-BDF3-4ECA-9CA3-E50D43E1431C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F7BBBD70-BDF3-4ECA-9CA3-E50D43E1431C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2B6CD70-F823-4ECA-9CA3-E50D43E12345}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2B6CD70-F823-4ECA-9CA3-E50D43E12345}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2B6CD70-F823-4ECA-9CA3-E50D43E12345}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2B6CD70-F823-4ECA-9CA3-E50D43E12345}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7BBBD71-BDF3-4ECA-9CA3-E50D43E67890}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7BBBD71-BDF3-4ECA-9CA3-E50D43E67890}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7BBBD71-BDF3-4ECA-9CA3-E50D43E67890}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7BBBD71-BDF3-4ECA-9CA3-E50D43E67890}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D8199FB8-B44D-4305-9458-1F887BDD7BF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D8199FB8-B44D-4305-9458-1F887BDD7BF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8199FB8-B44D-4305-9458-1F887BDD7BF0}.Release|Any CPU.ActiveCfg = Release|Any CPU

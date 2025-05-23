@@ -1,60 +1,62 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 using Phoenix.MarketData.Infrastructure.Serialization.JsonConverters;
 
 namespace Phoenix.MarketData.Infrastructure.Serialization;
 
-/// <summary>
-/// Represents the base implementation of a market data object, providing core properties
-/// and functionality for identifying and managing market data records.
-/// </summary>
-public class BaseMarketDataDto 
+public class BaseMarketDataDto
 {
-    [JsonProperty("id")] // Ensures this property is deserialized from JSON
-    public string Id { get; set; }
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = string.Empty;
 
-    [JsonProperty("schemaVersion")]
-    public string SchemaVersion { get; set; }
+    [JsonPropertyName("schemaVersion")]
+    public string SchemaVersion { get; set; } = string.Empty;
 
-    [JsonProperty("version", NullValueHandling = NullValueHandling.Ignore)]
+    [JsonPropertyName("version")]
     public int? Version { get; set; }
 
-    [JsonProperty("assetId")]
-    public string AssetId { get; set; }
+    [JsonPropertyName("assetId")]
+    public string AssetId { get; set; } = string.Empty;
 
-    [JsonProperty("assetClass")]
-    public string AssetClass { get; set; }
+    [JsonPropertyName("assetClass")]
+    public string AssetClass { get; set; } = string.Empty;
 
-    [JsonProperty("dataType")]
-    public string DataType { get; set; }
+    [JsonPropertyName("dataType")]
+    public string DataType { get; set; } = string.Empty;
 
-    [JsonProperty("region")]
-    public string Region { get; set; }
+    [JsonPropertyName("region")]
+    public string Region { get; set; } = string.Empty;
 
-    [JsonProperty("tags", NullValueHandling = NullValueHandling.Ignore)]
-    public List<string> Tags { get; set; }
+    [JsonPropertyName("tags")]
+    public List<string> Tags { get; set; } = new();
 
-    [JsonProperty("documentType")]
-    public string DocumentType { get; set; }
+    [JsonPropertyName("documentType")]
+    public string DocumentType { get; set; } = string.Empty;
 
-    [JsonProperty("createTimestamp", NullValueHandling = NullValueHandling.Ignore)]
+    [JsonPropertyName("createTimestamp")]
     public DateTimeOffset? CreateTimestamp { get; set; }
 
-    [JsonProperty("asOfDate")]
+    [JsonPropertyName("asOfDate")]
     [JsonConverter(typeof(DateOnlyJsonConverter))]
     public DateOnly AsOfDate { get; set; }
-    
-    [JsonProperty("asOfTime")]
+
+    [JsonPropertyName("asOfTime")]
     [JsonConverter(typeof(TimeOnlyJsonConverter))]
     public TimeOnly? AsOfTime { get; set; }
 
-    public BaseMarketDataDto()
-    {
-    }
-    
     [JsonConstructor]
-    public BaseMarketDataDto(string id, string schemaVersion, int? version, string assetId, string assetClass, 
-        string dataType, string region, string documentType, DateTimeOffset createTimeStamp, DateOnly asOfDate,
-        TimeOnly? asOfTime, List<string> tags)
+    public BaseMarketDataDto(
+        string id,
+        string schemaVersion,
+        int? version,
+        string assetId,
+        string assetClass,
+        string dataType,
+        string region,
+        string documentType,
+        DateTimeOffset createTimestamp,
+        DateOnly asOfDate,
+        TimeOnly? asOfTime,
+        List<string>? tags)
     {
         Id = id;
         SchemaVersion = schemaVersion;
@@ -64,7 +66,7 @@ public class BaseMarketDataDto
         DataType = dataType;
         Region = region;
         DocumentType = documentType;
-        CreateTimestamp = createTimeStamp;
+        CreateTimestamp = createTimestamp;
         AsOfDate = asOfDate;
         AsOfTime = asOfTime;
         Tags = tags ?? [];

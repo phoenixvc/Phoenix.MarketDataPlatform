@@ -1,0 +1,10 @@
+{
+  "contextWindow": { "maxTokens": 32000 },
+  "responseFormat": { "preferCodeBlocks": true, "syntaxHighlighting": true },
+  "performance": { "cacheResponses": true, "parallelContextLoading": true },
+  "startup": {
+    "forceRepoScan": true,
+    "scanDepth": "full",
+    "scanStrategy": "smart"
+  }
+}

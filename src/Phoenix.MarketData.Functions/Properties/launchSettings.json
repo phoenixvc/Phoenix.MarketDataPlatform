@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "Phoenix.MarketData.Functions": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7006",
+      "launchBrowser": false,
+      "environmentVariables": {
+        "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+        "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated"
+      }
+    }
+  }
+}

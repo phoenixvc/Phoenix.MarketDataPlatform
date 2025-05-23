@@ -1,4 +1,3 @@
-
 # Market Data Platform
 
 A scalable, flexible platform for storing, querying, and archiving diverse market data objects, optimized for derivative pricing and market tracking.  
@@ -15,6 +14,46 @@ It follows a **phased delivery**:
 - **Phase 1:** Temporal Data (Official, Intraday) — CosmosDB storage
 - **Phase 2:** Live Data (Streaming, Latest Value Only) — CosmosDB optimized container
 - **Phase 3:** Archival to Azure Data Lake — cold storage for historical analytics
+
+---
+
+## 🧪 Testing & Code Coverage
+
+### Running Tests with Coverage
+
+Tests automatically collect coverage data when run:
+
+```bash
+dotnet test
+```
+
+### Generating Coverage Reports
+
+To generate HTML coverage reports:
+
+**Using VS Code Task:**
+
+1. Press `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (macOS)
+2. Type "Tasks: Run Task"
+3. Select "Generate Coverage Report"
+
+**Using Terminal:**
+
+- Windows: `powershell -ExecutionPolicy Bypass -File .\tests\Phoenix.MarketData.Infrastructure.Tests\Generate-CoverageReport.ps1`
+- Linux/macOS: `./tests/Phoenix.MarketData.Infrastructure.Tests/generate-coverage-report.sh`
+
+The report will be generated at `tests/Phoenix.MarketData.Infrastructure.Tests/CoverageReport/index.html` and automatically opened in your browser.
+
+### Current Coverage Status
+
+- Line coverage: 11.5% (54 of 468 lines)
+- Branch coverage: 9.2% (14 of 152 branches)
+
+#### Areas Needing Coverage Improvement:
+
+- Phoenix.MarketData.Infrastructure: 1.5% line coverage
+- Validation Components
+- Data Mapping Classes
 
 ---
 
@@ -82,12 +121,12 @@ public interface IMarketDataObject
 
 ### Concrete Market Data Classes
 
-| Class | Description |
-|:------|:------------|
-| `SpotPriceData` | Represents a spot price for an asset |
-| `ForwardPriceData` | Represents forward curve points |
-| `YieldCurveData` | Represents a yield curve (rates) |
-| `VolatilitySurfaceData` | Represents a volatility surface |
+| Class                   | Description                          |
+| :---------------------- | :----------------------------------- |
+| `SpotPriceData`         | Represents a spot price for an asset |
+| `ForwardPriceData`      | Represents forward curve points      |
+| `YieldCurveData`        | Represents a yield curve (rates)     |
+| `VolatilitySurfaceData` | Represents a volatility surface      |
 
 Each implements `IMarketDataObject` and adds **specific payload fields**.
 
@@ -97,11 +136,11 @@ Each implements `IMarketDataObject` and adds **specific payload fields**.
 
 Each market data object type has an associated **JSON Schema** to validate documents:
 
-| Schema | Purpose |
-|:-------|:--------|
-| `PriceEquitySchema.json` | Spot price schema for equities |
-| `ForwardFxSchema.json` | Forward price schema for FX pairs |
-| `YieldCurveRatesSchema.json` | Yield curve schema for interest rates |
+| Schema                        | Purpose                                |
+| :---------------------------- | :------------------------------------- |
+| `PriceEquitySchema.json`      | Spot price schema for equities         |
+| `ForwardFxSchema.json`        | Forward price schema for FX pairs      |
+| `YieldCurveRatesSchema.json`  | Yield curve schema for interest rates  |
 | `VolSurfaceEquitySchema.json` | Volatility surface schema for equities |
 
 Each schema mandates metadata + payload structure, ensuring **consistency and validation** across ingestion.
@@ -111,13 +150,13 @@ Each schema mandates metadata + payload structure, ensuring **consistency and va
 ## 🏗 Azure Cosmos DB Design (Phase 1)
 
 | Design Choice | Details                                                                     |
-|:--------------|:----------------------------------------------------------------------------|
-| Database | Azure CosmosDB (Core SQL API)                                               |
+| :------------ | :-------------------------------------------------------------------------- |
+| Database      | Azure CosmosDB (Core SQL API)                                               |
 | Partition Key | `/assetId`                                                                  |
-| Containers | `marketdata-history` (temporal), later `marketdata-live` (live)             |
-| Indexing | Composite indexes on `[assetId, timestamp]` and `[documentType, timestamp]` |
-| ID Format | `<dataType>.<assetclass>/<asset>/<date>/<documentType>/<version>`           |
-| Example ID | `price.equity/XYZ/20250427/official/1`                                      |
+| Containers    | `marketdata-history` (temporal), later `marketdata-live` (live)             |
+| Indexing      | Composite indexes on `[assetId, timestamp]` and `[documentType, timestamp]` |
+| ID Format     | `<dataType>.<assetclass>/<asset>/<date>/<documentType>/<version>`           |
+| Example ID    | `price.equity/XYZ/20250427/official/1`                                      |
 
 ---
 
