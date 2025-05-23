@@ -116,6 +116,23 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
             {
                 // Try the LINQ approach first
                 var queryable = _container.GetItemLinqQueryable<T>();
+                if (!includeSoftDeleted && typeof(ISoftDeletable).IsAssignableFrom(typeof(T)))
+                {
+                    // Compose the predicate to include soft delete filter
+                    var param = Expression.Parameter(typeof(T), "e");
+                    var cast = Expression.Convert(param, typeof(ISoftDeletable));
+                    var isDeletedProp = Expression.Property(cast, nameof(ISoftDeletable.IsDeleted));
+                    var notDeleted = Expression.IsFalse(isDeletedProp);
+                    var softDeleteLambda = Expression.Lambda<Func<T, bool>>(notDeleted, param);
+                    var combined = Expression.Lambda<Func<T, bool>>(
+                        Expression.AndAlso(
+                            Expression.Invoke(predicate, param),
+                            Expression.Invoke(softDeleteLambda, param)
+                        ),
+                        param
+                    );
+                    predicate = combined;
+                }
                 var query = queryable.Where(predicate);
 
                 using var feedIterator = query.ToFeedIterator();
@@ -123,16 +140,7 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
                 while (feedIterator.HasMoreResults)
                 {
                     var response = await feedIterator.ReadNextAsync(cancellationToken);
-
-                    // Filter out soft-deleted items if needed
-                    if (!includeSoftDeleted && typeof(ISoftDeletable).IsAssignableFrom(typeof(T)))
-                    {
-                        results.AddRange(response.Where(e => !(e as ISoftDeletable)!.IsDeleted));
-                    }
-                    else
-                    {
-                        results.AddRange(response);
-                    }
+                    results.AddRange(response);
                 }
 
                 _logger.LogDebug("QueryAsync returned {Count} results", results.Count);
@@ -150,8 +158,22 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
                 {
                     var response = await iterator.ReadNextAsync(cancellationToken);
 
-                    // Apply the predicate and filter
-                    var filtered = response.AsQueryable().Where(predicate.Compile());
+                    // Attempt to translate the predicate to Cosmos DB SQL for server-side filtering
+                    // (This is a placeholder for a real expression-to-SQL translator. In production, use a library or implement a robust translator.)
+                    bool canTranslate = false; // Assume we cannot translate for now
+                    IEnumerable<T> filtered;
+
+                    if (canTranslate)
+                    {
+                        // If translation is possible, apply server-side filtering (not implemented here)
+                        filtered = response; // Placeholder: would be filtered by Cosmos DB
+                    }
+                    else
+                    {
+                        // Fallback: filter in-memory and log a warning
+                        _logger.LogWarning("Fallback to in-memory filtering using predicate.Compile() for type {EntityType}. This may be inefficient. Optimize the query or implement a server-side translation.", typeof(T).Name);
+                        filtered = response.AsQueryable().Where(predicate.Compile());
+                    }
 
                     // Apply soft delete filtering
                     if (!includeSoftDeleted && typeof(ISoftDeletable).IsAssignableFrom(typeof(T)))

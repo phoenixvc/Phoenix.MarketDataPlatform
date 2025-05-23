@@ -53,7 +53,7 @@ namespace Phoenix.MarketData.Core.Repositories
             string dataType,
             string assetClass,
             string? assetId = null,
-            DateTime? fromDate = null,
-            DateTime? toDate = null);
+            DateOnly? fromDate = null,
+            DateOnly? toDate = null);
     }
 }

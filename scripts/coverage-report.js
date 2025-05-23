@@ -7,7 +7,9 @@ const fs = require("fs");
 try {
   // Run the tests
   console.log("Running tests on the solution...");
-  execSync("dotnet test Phoenix.MarketDataPlatform.sln", { stdio: "inherit" });
+  execSync("dotnet test " + path.join("Phoenix.MarketDataPlatform.sln"), {
+    stdio: "inherit",
+  });
   console.log("Tests completed successfully");
 
   // Generate the HTML coverage report
@@ -44,8 +46,15 @@ try {
     processAllCoverageFiles();
 
     // Run ReportGenerator on the processed files
+    const processedGlob = path.join(
+      "tests",
+      "**",
+      "TestResults",
+      "**",
+      "processed.coverage.cobertura.xml",
+    );
     execSync(
-      `reportgenerator "-reports:tests/**/TestResults/**/processed.coverage.cobertura.xml" "-targetdir:${reportDir}" "-reporttypes:Html" "-sourcedirs:${process.cwd()}" "-verbosity:Warning"`,
+      `reportgenerator "-reports:${processedGlob}" "-targetdir:${reportDir}" "-reporttypes:Html" "-sourcedirs:${process.cwd()}" "-verbosity:Warning"`,
       {
         stdio: "inherit",
         shell: true,
@@ -56,7 +65,8 @@ try {
     console.log(`Coverage report generated at: ${reportDir}`);
     console.log(`Opening report in browser...`);
 
-    execSync(`start "${reportDir}\\index.html"`, {
+    const indexPath = path.join(reportDir, "index.html");
+    execSync(`start "${indexPath}"`, {
       stdio: "inherit",
       shell: true,
     });
@@ -70,7 +80,7 @@ try {
 // Helper function to process all coverage files and remove GitHub URLs
 function processAllCoverageFiles() {
   // Find all coverage files
-  const findCoverageCmd = `dir /s /b tests\\*coverage.cobertura.xml`;
+  const findCoverageCmd = `dir /s /b ${path.join("tests", "*coverage.cobertura.xml")}`;
   const coverageFiles = execSync(findCoverageCmd, {
     encoding: "utf8",
     shell: true,
@@ -89,15 +99,14 @@ function processAllCoverageFiles() {
 
     // Replace any GitHub URLs with local paths
     const processed = content.replace(
-      /https:\/\/raw\.githubusercontent\.com\/[^"]+\/src\//g,
-      "src/",
+      /https:\/\/raw\.githubusercontent\.com\/[^\"]+\/src\//g,
+      path.join("src", "/"),
     );
 
     // Write to a new file
     const dir = path.dirname(filePath);
     const processedPath = path.join(dir, "processed.coverage.cobertura.xml");
     fs.writeFileSync(processedPath, processed);
-
     console.log(`Processed: ${filePath} → ${processedPath}`);
   });
 }

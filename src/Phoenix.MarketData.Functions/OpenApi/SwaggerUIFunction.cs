@@ -57,8 +57,9 @@ namespace Phoenix.MarketData.Functions.OpenApi
 </head>
 <body>
     <div id=""swagger-ui""></div>
-    <script src=""https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui-bundle.js""></script>
-    <script src=""https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui-standalone-preset.js""></script>
+    <script src=""https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js""></script>
+    <script src=""https://unpkg.com/swagger-ui-dist/swagger-ui-standalone-preset.js""></script>
+    <!-- Consider pinning to a vetted version and reviewing regularly for security updates -->
     <script>
         window.onload = function() {
             const ui = SwaggerUIBundle({

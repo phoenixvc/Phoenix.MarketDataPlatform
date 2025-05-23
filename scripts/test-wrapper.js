@@ -56,7 +56,19 @@ try {
     console.log(`Coverage report generated at: ${reportDir}`);
     console.log(`Opening report in browser...`);
 
-    execSync(`start "${reportDir}\\index.html"`, {
+    const platform = process.platform;
+    const indexPath = path.join(reportDir, 'index.html');
+    let openCommand;
+    
+    if (platform === 'win32') {
+      openCommand = `start "${indexPath}"`;
+    } else if (platform === 'darwin') {
+      openCommand = `open "${indexPath}"`;
+    } else {
+      openCommand = `xdg-open "${indexPath}"`;
+    }
+    
+    execSync(openCommand, {
       stdio: "inherit",
       shell: true
     });
@@ -70,10 +82,10 @@ try {
 // Helper function to process all coverage files and remove GitHub URLs
 function processAllCoverageFiles() {
   // Find all coverage files
-  const findCoverageCmd = `dir /s /b tests\\*coverage.cobertura.xml`;
-  const coverageFiles = execSync(findCoverageCmd, { encoding: 'utf8', shell: true })
-    .split('\r\n')
-    .filter(file => file.trim() !== '');
+  const glob = require('glob');
+  const coverageFiles = glob.sync('tests/**/coverage.cobertura.xml', { 
+    absolute: true 
+  });
   
   console.log(`Found ${coverageFiles.length} coverage files to process`);
   

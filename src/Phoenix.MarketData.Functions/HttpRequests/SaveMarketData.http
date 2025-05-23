@@ -1,10 +1,11 @@
-﻿# Market Data API Examples
+﻿﻿﻿﻿# Market Data API Examples
 # ----------------------
 # Host configuration
 @host = localhost:7006
 
 # Date format: ISO 8601 (YYYY-MM-DD)
-# Time format: 24-hour (HH:MM:SS)
+ # Time format: 24-hour (HH:MM:SS)
+# Note: asOfDate should be in YYYY-MM-DD format, asOfTime in HH:MM:SS format
 
 ### Save fx spot market data to cosmos db example
 POST {{host}}/api/SaveDocumentToDb?datatype=price.spot&assetClass=fx&schemaversion=1.0.0
@@ -22,8 +23,8 @@ Content-Type: application/json
         "spot"
     ],
     "documentType": "official",
-    "asOfDate": "2025-05-13",  # Format: YYYY-MM-DD
-    "asOfTime": "15:30:05"     # Format: HH:MM:SS (24-hour)
+  "asOfDate": "2025-05-13",
+    "asOfTime": "15:30:05"
 }
 
 ### Save crypto ordinal spot price data to cosmos db example
@@ -43,7 +44,7 @@ Content-Type: application/json
     "spot"
   ],
   "documentType": "official",
-  "asOfDate": "2025-05-13",    # Format: YYYY-MM-DD
+  "asOfDate": "2025-05-13",
   "inscriptionNumber": 77777,
   "inscriptionId": "12345",    # Unique transaction+output identifier
   "parentInscriptionId": "1234",

@@ -50,22 +50,22 @@ namespace Phoenix.MarketData.Application.Events
                 eventData.DataType, eventData.AssetId);
 
             // Fixed: Match parameter signature with Polly's expected delegate
-            await _retryPolicy.ExecuteAsync(async () =>
-            {
-                try
-                {
-                    // Process event
-                    _logger.LogInformation("Processing market data created event: {EventId}", eventData.Id);
-
-                    // Call the event processor to handle the event
-                    await _eventProcessor.ProcessCreatedEventAsync(eventData, cancellationToken);
-                }
-                catch (Exception ex) when (!(ex is OperationCanceledException))
-                {
-                    _logger.LogError(ex, "Error processing market data created event: {EventId}", eventData.Id);
-                    throw; // Rethrowing to trigger retry
-                }
-            });
+            await _retryPolicy.ExecuteAsync(async (ct) =>
+             {
+                 try
+                 {
+                     // Process event
+                     _logger.LogInformation("Processing market data created event: {EventId}", eventData.Id);
+ 
+                     // Call the event processor to handle the event
+                    await _eventProcessor.ProcessCreatedEventAsync(eventData, ct);
+                 }
+                 catch (Exception ex) when (!(ex is OperationCanceledException))
+                 {
+                     _logger.LogError(ex, "Error processing market data created event: {EventId}", eventData.Id);
+                     throw; // Rethrowing to trigger retry
+                 }
+            }, cancellationToken);
         }
 
         /// <summary>

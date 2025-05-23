@@ -5,12 +5,12 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourorganization/phoenix-market-data.git"
+    "url": "https://github.com/phoenixvc/phoenix-market-data.git"
   },
   "license": "UNLICENSED",
   "scripts": {
     "prepare": "husky",
-    "test": "dotnet test",
+    "test": "node scripts/run-coverage.js",
     "postcommit": "node scripts/coverage-report.js",
     "lint": "prettier --write ."
   },

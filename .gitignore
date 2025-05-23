@@ -47,7 +47,6 @@ public/dist/
 *.suo
 *.ntvs*
 *.njsproj
-*.sln
 *.sw?
 .vs/
 *.user
