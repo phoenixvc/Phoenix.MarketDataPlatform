@@ -275,5 +275,40 @@ namespace Phoenix.MarketData.Infrastructure.Tests.Mapping
             // Assert - should default to Mid
             Assert.Equal(PriceSide.Mid, result.Side);
         }
+
+        [Theory]
+        [InlineData(PriceSide.Bid)]
+        [InlineData(PriceSide.Ask)]
+        [InlineData(PriceSide.Mid)]
+        public void ToDto_MapsAllPriceSideEnumValues(PriceSide side)
+        {
+            // Arrange
+            var mapper = new CryptoOrdinalSpotPriceDataMapper();
+            var domain = new CryptoOrdinalSpotPriceData
+            {
+                AssetId = "BTC/USD",
+                AsOfDate = DateOnly.FromDateTime(DateTime.Today),
+                AsOfTime = TimeOnly.FromDateTime(DateTime.Now),
+                Price = 50000.00m,
+                Side = side,
+                SchemaVersion = "1.0",
+                AssetClass = "crypto",
+                DataType = "spotprice",
+                Region = "global",
+                DocumentType = "price",
+                CollectionName = "Bitcoin",
+                ParentInscriptionId = "12345",
+                InscriptionId = "67890",
+                InscriptionNumber = 123,
+                Currency = "USD"
+            };
+            domain.SetTags(new List<string> { "tag1", "tag2" });
+
+            // Act
+            var dto = mapper.ToDto(domain);
+
+            // Assert
+            Assert.Equal((PriceSideDto)side, dto.Side);
+        }
     }
 }

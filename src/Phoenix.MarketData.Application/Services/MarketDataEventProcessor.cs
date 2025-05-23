@@ -95,9 +95,10 @@ namespace Phoenix.MarketData.Application.Services
                     changedEvent.DataType,
                     changedEvent.AssetClass,
                     changedEvent.AssetId,
-                    defaultRegion, // Use default region instead of trying to access changedEvent.Region
+                    changedEvent.Region, // Use event's region
                     dateOnly,
-                    changedEvent.DocumentType);
+                    changedEvent.DocumentType,
+                    cancellationToken);
 
                 if (latestData != null)
                 {

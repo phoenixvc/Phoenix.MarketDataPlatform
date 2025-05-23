@@ -15,13 +15,13 @@ namespace Phoenix.MarketData.Functions.JsonConverters
         {
             // Handle null values
             if (reader.TokenType == JsonTokenType.Null)
-                return default;
+                throw new JsonException("Cannot convert null value to DateOnly.");
 
             var dateString = reader.GetString();
 
             // Handle empty strings
             if (string.IsNullOrEmpty(dateString))
-                return default;
+                throw new JsonException("Cannot convert empty string to DateOnly.");
 
             // Try to parse with proper error handling
             if (DateOnly.TryParse(dateString, out var date))
@@ -31,7 +31,7 @@ namespace Phoenix.MarketData.Functions.JsonConverters
             if (DateOnly.TryParseExact(dateString, DateFormat, null, System.Globalization.DateTimeStyles.None, out date))
                 return date;
 
-            throw new JsonException($"Unable to parse \"{dateString}\" as a valid DateOnly value.");
+            throw new JsonException($"Unable to parse '{dateString}' as a valid DateOnly value. Expected format: '{DateFormat}'.");
         }
 
         public override void Write(Utf8JsonWriter writer, DateOnly value, JsonSerializerOptions options)
@@ -49,13 +49,13 @@ namespace Phoenix.MarketData.Functions.JsonConverters
         {
             // Handle null values
             if (reader.TokenType == JsonTokenType.Null)
-                return default;
+                throw new JsonException("Cannot convert null value to TimeOnly.");
 
             var timeString = reader.GetString();
 
             // Handle empty strings
             if (string.IsNullOrEmpty(timeString))
-                return default;
+                throw new JsonException("Cannot convert empty string to TimeOnly.");
 
             // Try to parse with proper error handling
             if (TimeOnly.TryParse(timeString, out var time))
@@ -65,7 +65,7 @@ namespace Phoenix.MarketData.Functions.JsonConverters
             if (TimeOnly.TryParseExact(timeString, TimeFormat, null, System.Globalization.DateTimeStyles.None, out time))
                 return time;
 
-            throw new JsonException($"Unable to parse \"{timeString}\" as a valid TimeOnly value.");
+            throw new JsonException($"Unable to parse '{timeString}' as a valid TimeOnly value. Expected format: '{TimeFormat}'.");
         }
 
         public override void Write(Utf8JsonWriter writer, TimeOnly value, JsonSerializerOptions options)

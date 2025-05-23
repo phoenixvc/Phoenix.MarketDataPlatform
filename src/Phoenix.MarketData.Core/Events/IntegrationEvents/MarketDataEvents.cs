@@ -32,6 +32,9 @@ namespace Phoenix.MarketData.Core.Events.IntegrationEvents
 
         /// <summary>Gets the timestamp when the event occurred</summary>
         DateTimeOffset Timestamp { get; }
+
+        /// <summary>Gets the region for the event</summary>
+        string Region { get; }
     }
 
     /// <summary>
@@ -63,6 +66,9 @@ namespace Phoenix.MarketData.Core.Events.IntegrationEvents
         /// <summary>Gets the timestamp when the event occurred</summary>
         public required DateTimeOffset Timestamp { get; init; }
 
+        /// <summary>Gets the region for the event</summary>
+        public required string Region { get; init; }
+
         /// <summary>
         /// Default constructor for object initializer syntax
         /// </summary>
@@ -81,7 +87,8 @@ namespace Phoenix.MarketData.Core.Events.IntegrationEvents
             string dataType,
             string documentType,
             int? version,
-            DateTimeOffset timestamp)
+            DateTimeOffset timestamp,
+            string region)
         {
             Id = id;
             AssetId = assetId;
@@ -90,6 +97,7 @@ namespace Phoenix.MarketData.Core.Events.IntegrationEvents
             DocumentType = documentType;
             Version = version;
             Timestamp = timestamp;
+            Region = region;
         }
     }
 
@@ -120,8 +128,9 @@ namespace Phoenix.MarketData.Core.Events.IntegrationEvents
             string dataType,
             string documentType,
             int? version,
-            DateTimeOffset timestamp)
-            : base(id, assetId, assetClass, dataType, documentType, version, timestamp)
+            DateTimeOffset timestamp,
+            string region)
+            : base(id, assetId, assetClass, dataType, documentType, version, timestamp, region)
         {
         }
     }
@@ -153,8 +162,9 @@ namespace Phoenix.MarketData.Core.Events.IntegrationEvents
             string dataType,
             string documentType,
             int? version,
-            DateTimeOffset timestamp)
-            : base(id, assetId, assetClass, dataType, documentType, version, timestamp)
+            DateTimeOffset timestamp,
+            string region)
+            : base(id, assetId, assetClass, dataType, documentType, version, timestamp, region)
         {
         }
     }

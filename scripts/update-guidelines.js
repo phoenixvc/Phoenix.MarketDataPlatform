@@ -15,21 +15,15 @@ try {
   }
 
   // Read the current file content
-  let content;
-  try {
-    content = fs.readFileSync(guidelinesPath, "utf8");
-  } catch (readError) {
-    console.error(`Failed to read file: ${readError.message}`);
-    process.exit(1);
-  }
+  const content = fs.readFileSync(guidelinesPath, "utf8");
 
   // Format the current date
   const today = new Date();
   const formattedDate = today.toISOString().split("T")[0];
 
-  // Replace the last updated line
+  // Replace the first occurrence of the last updated line (no global flag)
   const updatedContent = content.replace(
-    /Last Updated: .*/g,
+    /Last Updated: .*/, // no 'g' flag
     `Last Updated: ${formattedDate}`,
   );
 
@@ -39,23 +33,9 @@ try {
   }
 
   // Write the updated content back to the file
-  try {
-    fs.writeFileSync(guidelinesPath, updatedContent);
-    console.log(`Updated timestamp to ${formattedDate}`);
-  } catch (writeError) {
-    console.error(`Failed to write updated content: ${writeError.message}`);
-    process.exit(1);
-  }
-
-  // Write the updated content back to the file
-  try {
-    fs.writeFileSync(guidelinesPath, updatedContent);
-    console.log(`Updated timestamp to ${formattedDate}`);
-  } catch (writeError) {
-    console.error(`Failed to write updated content: ${writeError.message}`);
-    process.exit(1);
-  }
+  fs.writeFileSync(guidelinesPath, updatedContent);
+  console.log(`Updated timestamp to ${formattedDate}`);
 } catch (error) {
-  console.error(`Unexpected error: ${error.message}`);
+  console.error(`Error updating guidelines: ${error.message}`);
   process.exit(1);
 }

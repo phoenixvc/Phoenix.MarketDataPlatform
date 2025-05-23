@@ -30,7 +30,23 @@ public class JsonSchemaValidator
     {
         try
         {
-            var element = JsonDocument.Parse(jsonPayload).RootElement;
+            JsonElement element;
+            try
+            {
+                element = JsonDocument.Parse(jsonPayload).RootElement;
+            }
+            catch (JsonException ex)
+            {
+                // Handle JSON parsing errors gracefully
+                return ValidationResult.Failure(new List<ValidationError>
+                {
+                    new ValidationError
+                    {
+                        ErrorMessage = $"Invalid JSON format: {ex.Message}",
+                        Source = "JsonSchema.Net"
+                    }
+                });
+            }
 
             // Run validation directly
             var results = _schema.Validate(element);
@@ -47,18 +63,6 @@ public class JsonSchemaValidator
                 .ToList();
 
             return ValidationResult.Failure(errors);
-        }
-        catch (JsonException ex)
-        {
-            // Handle JSON parsing errors gracefully
-            return ValidationResult.Failure(new List<ValidationError>
-            {
-                new ValidationError
-                {
-                    ErrorMessage = $"Invalid JSON format: {ex.Message}",
-                    Source = "JsonSchema.Net"
-                }
-            });
         }
         catch (Exception ex)
         {

@@ -81,9 +81,10 @@ namespace Phoenix.MarketData.Infrastructure.Events
             {
                 var eventType = typeof(T).Name;
                 var topicName = topic ?? DeriveTopicFromEventType(eventType);
-                var source = BuildSourceUri(topicName);
+                var source = BuildSourceUri(topicName); // Ensures a valid URI
 
-                var data = BinaryData.FromString(JsonSerializer.Serialize(eventData));
+                var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                var data = BinaryData.FromObjectAsJson(eventData, options);
                 var cloudEvent = new CloudEvent(
                     source.ToString(),
                     eventType,
@@ -136,45 +137,53 @@ namespace Phoenix.MarketData.Infrastructure.Events
                         Id = Guid.NewGuid().ToString(),
                         Time = DateTimeOffset.UtcNow
                     };
-
-                    // Add logical topic name as a custom attribute for easier filtering/routing
                     cloudEvent.ExtensionAttributes.Add("topic", topicName);
-
                     return cloudEvent;
                 }).ToList();
 
-                // Split into batches respecting Event Grid limits
-                var batches = SplitIntoBatches(allCloudEvents);
+                // Split into batches of 100 or fewer events
+                var batches = allCloudEvents
+                    .Select((ce, idx) => new { ce, idx })
+                    .GroupBy(x => x.idx / MaxEventsPerBatch)
+                    .Select(g => g.Select(x => x.ce).ToList())
+                    .ToList();
+
                 int totalSent = 0;
                 int batchNumber = 0;
-
                 foreach (var batch in batches)
                 {
                     batchNumber++;
-                    try
+                    int retryCount = 0;
+                    const int maxRetries = 3;
+                    bool sent = false;
+                    while (!sent && retryCount < maxRetries)
                     {
-                        // Pass the cancellation token to SendEventsAsync
-                        await _client.SendEventsAsync(batch, cancellationToken);
-                        totalSent += batch.Count;
-                        _logger.LogInformation("Published batch {BatchNumber}/{TotalBatches} with {Count} events of type {EventType}",
-                            batchNumber, batches.Count, batch.Count, eventType);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Failed to publish batch {BatchNumber}/{TotalBatches} with {Count} events of type {EventType}",
-                            batchNumber, batches.Count, batch.Count, eventType);
-
-                        // Continue with other batches but record the failure
-                        // Consider implementing retry logic here or raising a specific exception
-                        // that allows callers to handle partial failures
-                        // For now, we'll just continue with other batches
+                        try
+                        {
+                            await _client.SendEventsAsync(batch, cancellationToken);
+                            totalSent += batch.Count;
+                            _logger.LogInformation("Published batch {BatchNumber}/{TotalBatches} with {Count} events of type {EventType}",
+                                batchNumber, batches.Count, batch.Count, eventType);
+                            sent = true;
+                        }
+                        catch (Exception ex)
+                        {
+                            retryCount++;
+                            _logger.LogError(ex, "Failed to publish batch {BatchNumber}/{TotalBatches} (attempt {Retry}) with {Count} events of type {EventType}",
+                                batchNumber, batches.Count, retryCount, batch.Count, eventType);
+                            if (retryCount >= maxRetries)
+                            {
+                                // Continue with other batches but record the failure
+                                break;
+                            }
+                            await Task.Delay(1000 * retryCount, cancellationToken); // Exponential backoff
+                        }
                     }
                 }
 
                 _logger.LogInformation("Published {TotalSent}/{TotalEvents} events of type {EventType} in {BatchCount} batches",
                     totalSent, eventsList.Count, eventType, batches.Count);
 
-                // If we didn't send all events, throw an exception
                 if (totalSent < eventsList.Count)
                 {
                     throw new EventPublishException($"Failed to publish all events. Only {totalSent} out of {eventsList.Count} were sent.");

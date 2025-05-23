@@ -13,26 +13,19 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
     // ========== EXTENSIONS ==========
     public static class CosmosRepositoryExtensions
     {
-        public static async Task<IEnumerable<T>> QueryByPredicateAsync<T>(
-            this CosmosRepository<T> repo,
-            Func<IQueryable<T>, IQueryable<T>> predicateBuilder,
-            bool includeSoftDeleted = false,
+        private static async Task<List<T>> ExecuteCosmosQueryAsync<T>(
+            Container container,
+            FeedIterator<T> iterator,
+            bool includeSoftDeleted,
             ILogger? logger = null)
-            where T : class, IMarketDataEntity
+            where T : class
         {
             var results = new List<T>();
-
             try
             {
-                var container = repo.GetContainer();
-                var query = predicateBuilder(container.GetItemLinqQueryable<T>());
-                var iterator = query.ToFeedIterator();
-
                 while (iterator.HasMoreResults)
                 {
                     var response = await iterator.ReadNextAsync();
-
-                    // Apply soft-delete filter in memory after query execution
                     if (!includeSoftDeleted && typeof(ISoftDeletable).IsAssignableFrom(typeof(T)))
                     {
                         results.AddRange(response.Where(e => !(e as ISoftDeletable)!.IsDeleted));
@@ -42,24 +35,32 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
                         results.AddRange(response);
                     }
                 }
-
-                logger?.LogDebug("Successfully retrieved {Count} items of type {EntityType}",
-                    results.Count, typeof(T).Name);
+                logger?.LogDebug("Successfully retrieved {Count} items of type {EntityType}", results.Count, typeof(T).Name);
             }
             catch (CosmosException ce)
             {
-                logger?.LogError(ce, "Cosmos DB error occurred during query: {StatusCode}. Error: {ErrorMessage}",
-                    ce.StatusCode, ce.Message);
+                logger?.LogError(ce, "Cosmos DB error occurred during query: {StatusCode}. Error: {ErrorMessage}", ce.StatusCode, ce.Message);
                 throw;
             }
             catch (Exception ex)
             {
-                logger?.LogError(ex, "Error querying entities of type {EntityType}: {ErrorMessage}",
-                    typeof(T).Name, ex.Message);
+                logger?.LogError(ex, "Error querying entities of type {EntityType}: {ErrorMessage}", typeof(T).Name, ex.Message);
                 throw;
             }
-
             return results;
+        }
+
+        public static async Task<IEnumerable<T>> QueryByPredicateAsync<T>(
+            this CosmosRepository<T> repo,
+            Func<IQueryable<T>, IQueryable<T>> predicateBuilder,
+            bool includeSoftDeleted = false,
+            ILogger? logger = null)
+            where T : class, IMarketDataEntity
+        {
+            var container = repo.GetContainer();
+            var query = predicateBuilder(container.GetItemLinqQueryable<T>());
+            var iterator = query.ToFeedIterator();
+            return await ExecuteCosmosQueryAsync(container, iterator, includeSoftDeleted, logger);
         }
 
         public static async Task<T?> GetByVersionAsync<T>(
@@ -69,51 +70,21 @@ namespace Phoenix.MarketData.Infrastructure.Repositories
             ILogger? logger = null)
             where T : class, IEntity, IMarketDataEntity
         {
-            try
+            var container = repo.GetContainer();
+            var queryDefinition = new QueryDefinition(
+                "SELECT * FROM c WHERE c.id = @id AND c.version = @version")
+                .WithParameter("@id", id)
+                .WithParameter("@version", version);
+            var iterator = container.GetItemQueryIterator<T>(queryDefinition);
+            var results = await ExecuteCosmosQueryAsync(container, iterator, false, logger);
+            var entity = results.FirstOrDefault();
+            if (entity != null && !(entity is ISoftDeletable sd && sd.IsDeleted))
             {
-                logger?.LogDebug("Retrieving entity of type {EntityType} with id {Id} and version {Version}",
-                    typeof(T).Name, id, version);
-
-                var container = repo.GetContainer();
-
-                // Use SQL query instead of LINQ to avoid dynamic cast issues
-                var queryDefinition = new QueryDefinition(
-                    "SELECT * FROM c WHERE c.id = @id AND c.version = @version")
-                    .WithParameter("@id", id)
-                    .WithParameter("@version", version);
-
-                var iterator = container.GetItemQueryIterator<T>(queryDefinition);
-
-                while (iterator.HasMoreResults)
-                {
-                    var response = await iterator.ReadNextAsync();
-                    var entity = response.FirstOrDefault();
-
-                    // Check for soft deleted
-                    if (entity != null && !(entity is ISoftDeletable sd && sd.IsDeleted))
-                    {
-                        logger?.LogDebug("Found entity of type {EntityType} with id {Id} and version {Version}",
-                            typeof(T).Name, id, version);
-                        return entity;
-                    }
-                }
-
-                logger?.LogDebug("Entity of type {EntityType} with id {Id} and version {Version} not found or soft-deleted",
-                    typeof(T).Name, id, version);
-                return null;
+                logger?.LogDebug("Found entity of type {EntityType} with id {Id} and version {Version}", typeof(T).Name, id, version);
+                return entity;
             }
-            catch (CosmosException ce)
-            {
-                logger?.LogError(ce, "Cosmos DB error occurred while retrieving entity with id {Id} and version {Version}: {StatusCode}. Error: {ErrorMessage}",
-                    id, version, ce.StatusCode, ce.Message);
-                throw;
-            }
-            catch (Exception ex)
-            {
-                logger?.LogError(ex, "Error retrieving entity of type {EntityType} with id {Id} and version {Version}: {ErrorMessage}",
-                    typeof(T).Name, id, version, ex.Message);
-                throw;
-            }
+            logger?.LogDebug("Entity of type {EntityType} with id {Id} and version {Version} not found or soft-deleted", typeof(T).Name, id, version);
+            return null;
         }
     }
 }

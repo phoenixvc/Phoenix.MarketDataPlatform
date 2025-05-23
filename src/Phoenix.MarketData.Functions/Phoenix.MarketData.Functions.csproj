@@ -24,6 +24,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     
     <!-- OpenAPI support for isolated worker model -->
+    <!-- Microsoft.Azure.WebJobs.Extensions.OpenApi is still in preview; plan to upgrade to stable when available -->
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.OpenApi" Version="2.0.0-preview2" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.OpenApi.Core" Version="2.0.0-preview2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />

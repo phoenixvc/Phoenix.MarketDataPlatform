@@ -68,22 +68,55 @@ namespace Phoenix.MarketData.Infrastructure.Configuration
         // New methods with CancellationToken parameter to match the interface
         public Task<string> GetCosmosConnectionStringAsync(CancellationToken cancellationToken)
         {
-            return GetSecretAsync("CosmosDbConnectionString", cancellationToken);
+            try
+            {
+                return GetSecretAsync("CosmosDbConnectionString", cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Error retrieving CosmosDbConnectionString from Key Vault");
+                // Optionally, implement a fallback mechanism here (e.g., return a cached value or throw a custom exception)
+                throw new SecretProviderException("Failed to retrieve CosmosDbConnectionString from Key Vault", ex);
+            }
         }
 
         public Task<string> GetEventGridKeyAsync(CancellationToken cancellationToken)
         {
-            return GetSecretAsync("EventGridKey", cancellationToken);
+            try
+            {
+                return GetSecretAsync("EventGridKey", cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Error retrieving EventGridKey from Key Vault");
+                throw new SecretProviderException("Failed to retrieve EventGridKey from Key Vault", ex);
+            }
         }
 
         public Task<string> GetEventGridEndpointAsync(CancellationToken cancellationToken)
         {
-            return GetSecretAsync("EventGridEndpoint", cancellationToken);
+            try
+            {
+                return GetSecretAsync("EventGridEndpoint", cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Error retrieving EventGridEndpoint from Key Vault");
+                throw new SecretProviderException("Failed to retrieve EventGridEndpoint from Key Vault", ex);
+            }
         }
 
         public Task<string> GetEventHubConnectionStringAsync(CancellationToken cancellationToken)
         {
-            return GetSecretAsync("EventHubConnectionString", cancellationToken);
+            try
+            {
+                return GetSecretAsync("EventHubConnectionString", cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Error retrieving EventHubConnectionString from Key Vault");
+                throw new SecretProviderException("Failed to retrieve EventHubConnectionString from Key Vault", ex);
+            }
         }
 
         // Updated method with cancellation token
@@ -94,14 +127,10 @@ namespace Phoenix.MarketData.Infrastructure.Configuration
 
             try
             {
-                // Try to get from cache first
-                string? cachedValue;
-                bool isCacheExpired;
-
-                // Use the new TryGetSecret method instead of GetSecretWithExpiration
-                if (_secretCache.TryGetSecret(secretName, out cachedValue, out isCacheExpired))
+                // Try to get from cache first, with expiration
+                if (_secretCache.TryGetSecret(secretName, out var cachedValue, out var isExpired))
                 {
-                    if (!string.IsNullOrEmpty(cachedValue) && !isCacheExpired)
+                    if (!string.IsNullOrEmpty(cachedValue) && !isExpired)
                     {
                         _logger?.LogDebug("Retrieved secret '{SecretName}' from cache", secretName);
                         return cachedValue;
@@ -112,13 +141,12 @@ namespace Phoenix.MarketData.Infrastructure.Configuration
                     // Fallback to GetSecret if TryGetSecret returns false
                     cachedValue = _secretCache.GetSecret(secretName);
                     // Assume it's expired if we need to fall back to GetSecret
-                    isCacheExpired = true;
+                    isExpired = true;
                 }
 
                 // If cache is expired or empty, retrieve from Key Vault
                 _logger?.LogDebug("Fetching secret '{SecretName}' from Key Vault", secretName);
 
-                // Fixed: Use named parameters to ensure the correct overload is called
                 var response = await _secretClient.GetSecretAsync(
                     name: secretName,
                     version: null, // Get latest version

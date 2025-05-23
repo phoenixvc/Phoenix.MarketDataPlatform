@@ -17,6 +17,11 @@ cd "$SCRIPT_DIR"
 # Run the tests with coverage
 echo "Running tests with coverage collection..."
 dotnet test . --collect:"XPlat Code Coverage"
+TEST_EXIT_CODE=$?
+if [ $TEST_EXIT_CODE -ne 0 ]; then
+    echo "Error: Tests failed with exit code $TEST_EXIT_CODE. Aborting coverage report generation."
+    exit $TEST_EXIT_CODE
+fi
 
 # Generate HTML report
 echo "Generating HTML coverage report..."
@@ -33,33 +38,23 @@ fi
 # Create the report directory if it doesn't exist
 mkdir -p "$REPORT_DIR"
 
-# Find the most recent coverage file
-echo "Searching for coverage files..."
-LATEST_COVERAGE_FILE=""
-LATEST_TIMESTAMP=0
+# Find all coverage files
+COVERAGE_FILES=( $(find "$TEST_RESULTS_DIR" -name "coverage.cobertura.xml" 2>/dev/null) )
 
-# Find the most recent coverage file
-for file in $(find "$TEST_RESULTS_DIR" -name "coverage.cobertura.xml" 2>/dev/null); do
-    if [ -f "$file" ]; then
-        FILE_TIMESTAMP=$(stat -c %Y "$file" 2>/dev/null || stat -f %m "$file" 2>/dev/null)
-        if [ -n "$FILE_TIMESTAMP" ] && [ "$FILE_TIMESTAMP" -gt "$LATEST_TIMESTAMP" ]; then
-            LATEST_TIMESTAMP=$FILE_TIMESTAMP
-            LATEST_COVERAGE_FILE=$file
-        fi
-    fi
-done
-
-# Check if any coverage files were found
-if [ -z "$LATEST_COVERAGE_FILE" ]; then
+if [ ${#COVERAGE_FILES[@]} -eq 0 ]; then
     echo "Error: No coverage files found at $TEST_RESULTS_DIR"
     exit 1
+elif [ ${#COVERAGE_FILES[@]} -eq 1 ]; then
+    LATEST_COVERAGE_FILE="${COVERAGE_FILES[0]}"
+    echo "Using coverage file: $LATEST_COVERAGE_FILE"
+    reportgenerator "-reports:$LATEST_COVERAGE_FILE" "-targetdir:$REPORT_DIR" -reporttypes:Html
+    REPORT_EXIT_CODE=$?
+else
+    echo "Multiple coverage files found. Generating merged report."
+    REPORTS_ARG="-reports:$(IFS=','; echo "${COVERAGE_FILES[*]}")"
+    reportgenerator "$REPORTS_ARG" "-targetdir:$REPORT_DIR" -reporttypes:Html
+    REPORT_EXIT_CODE=$?
 fi
-
-echo "Using coverage file: $LATEST_COVERAGE_FILE"
-
-# Generate the report using the specific file
-reportgenerator "-reports:$LATEST_COVERAGE_FILE" "-targetdir:$REPORT_DIR" -reporttypes:Html
-REPORT_EXIT_CODE=$?
 
 # Check if report generation was successful
 if [ $REPORT_EXIT_CODE -ne 0 ]; then

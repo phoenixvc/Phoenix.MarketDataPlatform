@@ -43,7 +43,8 @@ namespace Phoenix.MarketData.Infrastructure.Tests.Events
                 DataType = "price.spot",
                 DocumentType = "official",
                 Version = 1,
-                Timestamp = DateTimeOffset.UtcNow
+                Timestamp = DateTimeOffset.UtcNow,
+                Region = "GLOBAL" // Added missing required property
             };
 
             // Set up expectations
@@ -95,7 +96,8 @@ namespace Phoenix.MarketData.Infrastructure.Tests.Events
                 DataType = "price.spot",
                 DocumentType = "official",
                 Version = 2,
-                Timestamp = DateTimeOffset.UtcNow
+                Timestamp = DateTimeOffset.UtcNow,
+                Region = "GLOBAL" // Added missing required property
             };
 
             // Set up expectations
